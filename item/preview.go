@@ -22,23 +22,25 @@ var (
 )
 
 // https://allaclone.wayfarershaven.com/?a=item&id=1004
-func init() {
+func previewInit() error {
 	var err error
 	previewTemplate = template.New("preview")
 	previewTemplate, err = previewTemplate.ParseFS(site.TemplateFS(),
-		"template/item/preview.go.tpl",   // preview
-		"template/layout/preview.go.tpl", // layout (requires preview)
+		"item/preview.go.tpl",   // preview
+		"layout/preview.go.tpl", // layout (requires preview)
 	)
 	if err != nil {
-		tlog.Fatalf("template.ParseFS: %v", err)
-		return
+		return fmt.Errorf("template.ParseFS: %w", err)
 	}
+	return nil
 }
 
 // Preview handles item preview requests
 func Preview(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var id int
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	tlog.Debugf("preview: %s", r.URL.String())
 

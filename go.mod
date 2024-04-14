@@ -10,8 +10,11 @@ require (
 	go.uber.org/zap v1.27.0
 )
 
+require golang.org/x/image v0.15.0
+
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	go.uber.org/multierr v1.10.0 // indirect

@@ -34,14 +34,14 @@ type Database struct {
 
 type FileCache struct {
 	IsEnabled        bool `toml:"is_file_cache_enabled" desc:"If true, file cache is enabled, default true"`
-	Max              int  `toml:"max" desc:"Maximum number of files to keep in cache, default 1000"`
+	MaxFiles         int  `toml:"max_files" desc:"Maximum number of files to keep in cache, default 1000"`
 	TruncateSchedule int  `toml:"truncate_schedule" desc:"How often to truncate file cache in seconds, default 25200 seconds (7 hours)"`
 	Expiration       int  `toml:"expiration" desc:"How long to keep file cache in seconds, default 21600 seconds (6 hours) "`
 }
 
 type MemCache struct {
 	IsEnabled        bool `toml:"is_mem_cache_enabled" desc:"If true, memory cache is enabled, default true"`
-	Max              int  `toml:"max" desc:"Maximum size of memory cache in bytes, default 150000000 (150 MB)"`
+	MaxMemory        int  `toml:"max_memory" desc:"Maximum size of memory cache in bytes, default 150000000 (150 MB)"`
 	TruncateSchedule int  `toml:"truncate_schedule" desc:"How often to truncate memory cache in seconds, default 600 seconds (10 minutes)"`
 	Expiration       int  `toml:"expiration" desc:"How long to keep memory cache in seconds, default 300 seconds (5 minutes)"`
 }
@@ -124,13 +124,13 @@ func defaultLabel() Config {
 		DiscoverCacheReload: 640,
 		MemCache: MemCache{
 			IsEnabled:        true,
-			Max:              150000000,
+			MaxMemory:        150000000,
 			TruncateSchedule: 600,
 			Expiration:       300,
 		},
 		FileCache: FileCache{
 			IsEnabled:        true,
-			Max:              1000,
+			MaxFiles:         1000,
 			TruncateSchedule: 25200,
 			Expiration:       21600,
 		},
@@ -139,7 +139,7 @@ func defaultLabel() Config {
 			Port:     3306,
 			Username: "peq",
 			Name:     "peq",
-			Password: "peq",
+			Password: "peqpass",
 		},
 	}
 

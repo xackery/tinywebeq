@@ -14,6 +14,7 @@ import (
 
 var (
 	mu            sync.RWMutex
+	isInitialized bool
 	memCache      map[string]*cacheEntry = make(map[string]*cacheEntry)
 	memCacheSize  int
 	fileCache     map[string]int = make(map[string]int)
@@ -25,9 +26,14 @@ type cacheEntry struct {
 	data       []byte
 }
 
-func init() {
+func Init() error {
+	if isInitialized {
+		return nil
+	}
+	isInitialized = true
 	readFileCacheIndex()
 	go maintain()
+	return nil
 }
 
 // Write writes data to cache
@@ -65,7 +71,7 @@ func writeMemoryCache(path string, data []byte) error {
 		return nil
 	}
 
-	if memCacheSize+len(data) > config.Get().MemCache.Max {
+	if memCacheSize+len(data) > config.Get().MemCache.MaxMemory {
 		tlog.Debugf("memcache full, skipping: %s", path)
 		return nil
 	}
@@ -84,7 +90,7 @@ func writeFileCache(path string, data []byte) error {
 		return nil
 	}
 
-	if fileCacheSize+len(data) > config.Get().FileCache.Max {
+	if fileCacheSize+len(data) > config.Get().FileCache.MaxFiles {
 		tlog.Debugf("filecache full, skipping: %s", path)
 		return nil
 	}
@@ -98,12 +104,12 @@ func writeFileCache(path string, data []byte) error {
 	}
 
 	basePath := filepath.Dir(path)
-	err = os.MkdirAll(basePath, 0755)
+	err = os.MkdirAll("cache/"+basePath, 0755)
 	if err != nil {
 		return fmt.Errorf("make %s: %w", basePath, err)
 	}
 
-	cw, err := os.Create(path)
+	cw, err := os.Create("cache/" + path)
 	if err != nil {
 		return fmt.Errorf("create %s: %w", path, err)
 	}
@@ -127,7 +133,7 @@ func Read(path string) (bool, []byte) {
 		entry, ok := memCache[path]
 		if ok {
 			if entry.expiration > time.Now().Unix() {
-				tlog.Debugf("memcache read: %s, expiration: %s", path, entry.expiration)
+				tlog.Debugf("memcache read: %s, expiration: %d", path, entry.expiration)
 				return true, entry.data
 			}
 			tlog.Debugf("memcache expired: %s", path)

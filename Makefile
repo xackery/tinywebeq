@@ -6,9 +6,9 @@ run: sanitize
 	@echo "run: building"
 	mkdir -p bin
 	go build -o bin/${NAME} main.go
-ifeq (,$(wildcard bin/template))
-	cd bin && ln -s ../template template
-endif
+# ifeq (,$(wildcard bin/template))
+# 	cd bin && ln -s ../template template
+# endif
 	cd bin && ./${NAME}
 
 # clean up and check for errors

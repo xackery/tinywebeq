@@ -17,23 +17,28 @@ import (
 )
 
 var (
-	viewTemplate *template.Template
+	viewTemplate  *template.Template
+	isInitialized bool
 )
 
-func init() {
+func Init() error {
+	if isInitialized {
+		return nil
+	}
+	isInitialized = true
 	var err error
 	viewTemplate = template.New("view")
 	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
-		"template/player/view.go.tpl",    // data
-		"template/head.go.tpl",           // head
-		"template/header.go.tpl",         // header
-		"template/footer.go.tpl",         // footer
-		"template/layout/content.go.tpl", // layout (requires footer, header, head, data)
+		"player/view.go.tpl",    // data
+		"head.go.tpl",           // head
+		"header.go.tpl",         // header
+		"footer.go.tpl",         // footer
+		"layout/content.go.tpl", // layout (requires footer, header, head, data)
 	)
 	if err != nil {
-		tlog.Fatalf("template.ParseFS: %v", err)
-		return
+		return fmt.Errorf("template.ParseFS: %w", err)
 	}
+	return nil
 }
 
 // View handles player view requests
