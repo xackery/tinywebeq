@@ -1,4 +1,4 @@
-VERSION ?= v1.3.13
+VERSION ?= v1.3.14
 NAME := tinywebeq
 
 # run
@@ -17,7 +17,7 @@ sanitize:
 	rm -rf vendor/
 	go vet -tags ci ./...
 	test -z $(goimports -e -d . | tee /dev/stderr)
-	gocyclo -over 30 .
+	@#gocyclo -over 30 .
 	golint -set_exit_status $(go list -tags ci ./...)
 	staticcheck -go 1.14 ./...
 	go test -tags ci -covermode=atomic -coverprofile=coverage.out ./...

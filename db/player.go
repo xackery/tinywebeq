@@ -1,11 +1,11 @@
-package player
+package db
 
 import (
 	"database/sql"
 	"strings"
 )
 
-type Table struct {
+type Player struct {
 	ID                    int          `db:"id"`                      //	int(11) unsigned
 	AccountID             int          `db:"account_id"`              //	int(11)
 	Name                  string       `db:"name"`                    //	varchar(64)
@@ -111,7 +111,11 @@ type Table struct {
 	DeletedAt             sql.NullTime `db:"deleted_at"`              //	datetime
 }
 
-func (t *Table) ClassStr() string {
+func (t *Player) Identifier() string {
+	return "Player"
+}
+
+func (t *Player) ClassStr() string {
 	out := "Unknown"
 
 	if t.Class == 1 {
@@ -131,13 +135,13 @@ func (t *Table) ClassStr() string {
 	return out
 }
 
-func (t *Table) RaceStr() string {
+func (t *Player) RaceStr() string {
 	out := ""
 
 	out = strings.TrimSuffix(out, " ")
 	return out
 }
 
-func (t *Table) IconUrl() string {
+func (t *Player) IconUrl() string {
 	return "https://www.eqitems.com/item_images/"
 }

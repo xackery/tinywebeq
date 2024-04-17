@@ -1,7 +1,6 @@
 package item
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -9,8 +8,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/xackery/tinywebeq/cache"
-	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/tlog"
 
 	"github.com/xackery/tinywebeq/db"
@@ -73,66 +70,24 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		return fmt.Errorf("id too low")
 	}
 
-	path := fmt.Sprintf("item/view_%d.html", id)
-
-	ok, cacheData := cache.Read(path)
-	if ok {
-		_, err := w.Write(cacheData)
-		if err != nil {
-			return fmt.Errorf("from cache write: %w", err)
-		}
-		return nil
-	}
-
-	query := "SELECT * FROM items WHERE id=:id LIMIT 1"
-	if config.Get().IsDiscoveredOnly {
-		query += "SELECT * FROM items, discovered items WHERE items.id=:id AND discovered_items.item_id=:id LIMIT 1"
-	}
-
-	rows, err := db.Query(ctx,
-		query,
-		map[string]interface{}{
-			"id": id,
-		})
+	item, err := fetchItem(ctx, id)
 	if err != nil {
-		return fmt.Errorf("query items: %w", err)
+		return fmt.Errorf("fetchItem: %w", err)
 	}
-	defer rows.Close()
 
 	type TemplateData struct {
 		Site site.BaseData
-		Item *Table
+		Item *db.Item
 	}
 
-	data := TemplateData{Site: site.BaseDataInit("Item View")}
-	item := &Table{}
-
-	if !rows.Next() {
-		http.Error(w, "Not Found", http.StatusNotFound)
-		return nil
+	data := TemplateData{
+		Site: site.BaseDataInit("Item View"),
+		Item: item,
 	}
 
-	err = rows.StructScan(item)
-	if err != nil {
-		return fmt.Errorf("rows.StructScan: %w", err)
-	}
-	data.Item = item
-
-	buf := &bytes.Buffer{}
-
-	err = viewTemplate.ExecuteTemplate(buf, "content.go.tpl", data)
+	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)
 	if err != nil {
 		return fmt.Errorf("viewTemplate.Execute: %w", err)
-	}
-
-	err = cache.Write(path, buf.Bytes())
-	if err != nil {
-		return fmt.Errorf("cache.Write: %w", err)
-	}
-
-	_, err = w.Write(buf.Bytes())
-	if err != nil {
-		return fmt.Errorf("w.Write: %w", err)
 	}
 
 	return nil

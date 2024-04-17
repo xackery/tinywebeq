@@ -1,15 +1,17 @@
 package cache
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/xackery/tinywebeq/config"
+	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/tlog"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -18,12 +20,11 @@ var (
 	memCache      map[string]*cacheEntry = make(map[string]*cacheEntry)
 	memCacheSize  int
 	fileCache     map[string]int = make(map[string]int)
-	fileCacheSize int
 )
 
 type cacheEntry struct {
 	expiration int64
-	data       []byte
+	data       db.CacheIdentifier
 }
 
 func Init() error {
@@ -37,7 +38,7 @@ func Init() error {
 }
 
 // Write writes data to cache
-func Write(path string, data []byte) error {
+func Write(path string, data db.CacheIdentifier) error {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -54,24 +55,25 @@ func Write(path string, data []byte) error {
 	return nil
 }
 
-func writeMemoryCache(path string, data []byte) error {
+func writeMemoryCache(path string, data db.CacheIdentifier) error {
 	if !config.Get().MemCache.IsEnabled {
 		return nil
 	}
 
-	oldCache, ok := memCache[path]
+	size := 4000
+	_, ok := memCache[path]
 	if ok {
-		memCacheSize -= len(oldCache.data)
+		memCacheSize -= size
 		memCache[path] = &cacheEntry{
 			expiration: time.Now().Add(time.Minute * time.Duration(config.Get().MemCache.Expiration)).Unix(),
 			data:       data,
 		}
-		memCacheSize += len(data)
+		memCacheSize += size
 		tlog.Debugf("memcache overwrite: %s, expiration: %d", path, memCache[path].expiration)
 		return nil
 	}
 
-	if memCacheSize+len(data) > config.Get().MemCache.MaxMemory {
+	if memCacheSize+size > config.Get().MemCache.MaxMemory {
 		tlog.Debugf("memcache full, skipping: %s", path)
 		return nil
 	}
@@ -80,23 +82,22 @@ func writeMemoryCache(path string, data []byte) error {
 		expiration: time.Now().Add(time.Minute * time.Duration(config.Get().MemCache.Expiration)).Unix(),
 		data:       data,
 	}
-	memCacheSize += len(data)
+	memCacheSize += size
 	tlog.Debugf("memcache write: %s, expiration: %d (%d total size)", path, memCache[path].expiration, memCacheSize)
 	return nil
 }
 
-func writeFileCache(path string, data []byte) error {
+func writeFileCache(path string, data db.CacheIdentifier) error {
 	if !config.Get().FileCache.IsEnabled {
 		return nil
 	}
 
-	if fileCacheSize+len(data) > config.Get().FileCache.MaxFiles {
+	if len(fileCache) > config.Get().FileCache.MaxFiles {
 		tlog.Debugf("filecache full, skipping: %s", path)
 		return nil
 	}
 
 	fileCache[path] = int(time.Now().Add(time.Minute * time.Duration(config.Get().FileCache.Expiration)).Unix())
-	fileCacheSize += len(data)
 
 	err := writeFileCacheIndex()
 	if err != nil {
@@ -114,7 +115,8 @@ func writeFileCache(path string, data []byte) error {
 		return fmt.Errorf("create %s: %w", path, err)
 	}
 	defer cw.Close()
-	_, err = cw.Write(data)
+
+	err = yaml.NewEncoder(cw).Encode(data)
 	if err != nil {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
@@ -123,9 +125,10 @@ func writeFileCache(path string, data []byte) error {
 }
 
 // Read reads data from cache
-func Read(path string) (bool, []byte) {
+func Read(path string) (bool, db.CacheIdentifier) {
 	mu.Lock()
 	defer mu.Unlock()
+	size := 4000
 	if !config.Get().FileCache.IsEnabled && !config.Get().MemCache.IsEnabled {
 		return false, nil
 	}
@@ -138,7 +141,7 @@ func Read(path string) (bool, []byte) {
 			}
 			tlog.Debugf("memcache expired: %s", path)
 			delete(memCache, path)
-			memCacheSize -= len(entry.data)
+			memCacheSize -= size
 		}
 	}
 
@@ -150,27 +153,39 @@ func Read(path string) (bool, []byte) {
 				delete(fileCache, path)
 				err := os.Remove("cache/" + path)
 				if err != nil {
-					tlog.Errorf("remove file: %v", err)
+					tlog.Warnf("remove file (skipping cache): %v", err)
 				}
 				err = writeFileCacheIndex()
 				if err != nil {
-					tlog.Errorf("write file cache index: %v", err)
+					tlog.Warnf("write file cache index (skipping cache): %v", err)
 				}
 				return false, nil
 			}
 
 			tlog.Debugf("filecache read: %s, expiration: %d", path, expiration)
-			data, err := os.ReadFile("cache/" + path)
+			r, err := os.Open("cache/" + path)
 			if err != nil {
-				tlog.Errorf("read file: %v", err)
+				tlog.Warnf("open file (skipping cache): %v", err)
+				return false, nil
+			}
+			defer r.Close()
+
+			var cacheData db.CacheIdentifier
+			err = nil
+			if strings.HasPrefix(path, "item/") {
+				cacheData = &db.Item{}
+				err = yaml.NewDecoder(r).Decode(cacheData)
+			}
+			if err != nil {
+				tlog.Warnf("decode (skipping cache): %v", err)
 				return false, nil
 			}
 
-			err = writeMemoryCache(path, data)
+			err = writeMemoryCache(path, cacheData)
 			if err != nil {
-				tlog.Errorf("write memory cache: %v", err)
+				tlog.Warnf("write memory cache: %v", err)
 			}
-			return true, data
+			return true, cacheData
 		}
 	}
 
@@ -202,8 +217,9 @@ func truncateMemCache() {
 		return
 	}
 
+	size := 4000
 	time.Sleep(time.Duration(config.Get().MemCache.TruncateSchedule))
-	tlog.Debug("memcache truncate schedule running...")
+	tlog.Debugf("memcache truncate schedule running...")
 	start := time.Now()
 	mu.Lock()
 	for path, entry := range memCache {
@@ -211,7 +227,7 @@ func truncateMemCache() {
 			continue
 		}
 		tlog.Debugf("memcache expired: %s", path)
-		memCacheSize -= len(entry.data)
+		memCacheSize -= size
 		delete(memCache, path)
 	}
 	mu.Unlock()
@@ -223,7 +239,7 @@ func truncateFileCache() {
 		return
 	}
 	time.Sleep(time.Duration(config.Get().FileCache.TruncateSchedule))
-	tlog.Debug("filecache truncate schedule running...")
+	tlog.Debugf("filecache truncate schedule running...")
 	start := time.Now()
 	mu.Lock()
 	for path, expiration := range fileCache {
@@ -231,7 +247,6 @@ func truncateFileCache() {
 			continue
 		}
 		tlog.Debugf("filecache expired: %s", path)
-		fileCacheSize -= 0
 		delete(fileCache, path)
 		err := os.Remove("cache/" + path)
 		if err != nil {
@@ -252,13 +267,13 @@ func writeFileCacheIndex() error {
 	if err != nil {
 		return fmt.Errorf("make cache: %w", err)
 	}
-	w, err := os.Create("cache/index.json")
+	w, err := os.Create("cache/index.yaml")
 	if err != nil {
 		return fmt.Errorf("write cache index: %w", err)
 	}
 	defer w.Close()
 
-	err = json.NewEncoder(w).Encode(fileCache)
+	err = yaml.NewEncoder(w).Encode(fileCache)
 	if err != nil {
 		return fmt.Errorf("encode cache index: %w", err)
 	}
@@ -266,13 +281,13 @@ func writeFileCacheIndex() error {
 }
 
 func readFileCacheIndex() error {
-	r, err := os.Open("cache/index.json")
+	r, err := os.Open("cache/index.yaml")
 	if err != nil {
 		return fmt.Errorf("read cache index: %w", err)
 	}
 	defer r.Close()
 
-	err = json.NewDecoder(r).Decode(&fileCache)
+	err = yaml.NewDecoder(r).Decode(&fileCache)
 	if err != nil {
 		return fmt.Errorf("decode cache index: %w", err)
 	}

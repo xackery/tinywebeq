@@ -1,7 +1,6 @@
 package player
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -9,7 +8,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/xackery/tinywebeq/cache"
 	"github.com/xackery/tinywebeq/tlog"
 
 	"github.com/xackery/tinywebeq/db"
@@ -72,63 +70,28 @@ func View(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
-
-	path := fmt.Sprintf("player/view_%d.html", id)
-
-	ok, cacheData := cache.Read(path)
-	if ok {
-		_, err := w.Write(cacheData)
-		if err != nil {
-			return fmt.Errorf("from cache write: %w", err)
-		}
-		return nil
+	if id < 1 {
+		return fmt.Errorf("id too low")
 	}
 
-	query := "SELECT * FROM character_data WHERE id=:id LIMIT 1"
-	rows, err := db.Query(ctx,
-		query,
-		map[string]interface{}{
-			"id": id,
-		})
+	player, err := fetchPlayer(ctx, id)
 	if err != nil {
-		return fmt.Errorf("query players: %w", err)
+		return fmt.Errorf("fetchPlayer: %w", err)
 	}
-	defer rows.Close()
 
 	type TemplateData struct {
 		Site   site.BaseData
-		Player *Table
+		Player *db.Player
 	}
 
-	data := TemplateData{Site: site.BaseDataInit("Player View")}
-	player := &Table{}
-
-	if !rows.Next() {
-		http.Error(w, "Not Found", http.StatusNotFound)
-		return nil
+	data := TemplateData{
+		Site:   site.BaseDataInit("Player View"),
+		Player: player,
 	}
 
-	err = rows.StructScan(player)
-	if err != nil {
-		return fmt.Errorf("rows.StructScan: %w", err)
-	}
-	data.Player = player
-
-	buf := &bytes.Buffer{}
-
-	err = viewTemplate.ExecuteTemplate(buf, "content.go.tpl", data)
+	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)
 	if err != nil {
 		return fmt.Errorf("viewTemplate.Execute: %w", err)
-	}
-
-	err = cache.Write(path, buf.Bytes())
-	if err != nil {
-		return fmt.Errorf("cache.Write: %w", err)
-	}
-
-	_, err = w.Write(buf.Bytes())
-	if err != nil {
-		return fmt.Errorf("w.Write: %w", err)
 	}
 
 	return nil

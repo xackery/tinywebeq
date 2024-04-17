@@ -14,6 +14,7 @@ import (
 	"github.com/xackery/tinywebeq/player"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/tlog"
+	"github.com/xackery/tinywebeq/util"
 )
 
 func main() {
@@ -62,6 +63,10 @@ func run() error {
 		return fmt.Errorf("db.Init: %w", err)
 	}
 
+	err = util.Init()
+	if err != nil {
+		return fmt.Errorf("util.Init: %w", err)
+	}
 	err = os.MkdirAll("cache", 0755)
 	if err != nil {
 		return fmt.Errorf("make cache: %w", err)
@@ -72,7 +77,7 @@ func run() error {
 		w.Write([]byte("Hello, world!"))
 	})
 	mux.HandleFunc("/item/view/", item.View)
-	mux.HandleFunc("/item/preview/", item.Preview)
+	mux.HandleFunc("/item/preview.png", item.PreviewImage)
 	mux.HandleFunc("/player/view/", player.View)
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))).ServeHTTP(w, r)
