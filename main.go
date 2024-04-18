@@ -18,6 +18,9 @@ import (
 	"github.com/xackery/tinywebeq/util"
 )
 
+// Version is the build version
+var Version string
+
 func main() {
 	err := run()
 	if err != nil {
@@ -35,6 +38,11 @@ func run() error {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 	var err error
+
+	if Version == "" {
+		Version = "1.x.x EXPERIMENTAL"
+	}
+	tlog.Infof("starting tinywebeq %s", Version)
 
 	err = site.Init()
 	if err != nil {

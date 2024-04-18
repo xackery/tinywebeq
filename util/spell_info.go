@@ -87,7 +87,7 @@ func spellEffect(se *Spell, index int) string {
 	level := 60
 	minSpellLvl := 1 // calcMinSpellLevel(se)
 	maxSpellLvl := calcMaxSpellLevel(calc, base, max, ticks, minSpellLvl, level)
-
+	extra := 999
 	tlog.Debugf("spellEffect(%d, %d)", index+1, spa)
 
 	switch spa {
@@ -193,7 +193,7 @@ func spellEffect(se *Spell, index int) string {
 		out += spellEffectName
 	case SPA_STUN:
 		if base2 != 0 && base != base2 {
-			out += fmt.Sprintf(" NPC for %1.fs (PC for %1.fs)%s", float64(base/1000.0), float64(base2/1000.0), maxLevel)
+			out += fmt.Sprintf("%s NPC for %1.fs (PC for %1.fs)%s", spellEffectName, float64(base/1000.0), float64(base2/1000.0), maxLevel)
 		} else {
 			out += fmt.Sprintf(" for %1.fs%s", float64(base/1000.0), maxLevel)
 		}
@@ -244,6 +244,52 @@ func spellEffect(se *Spell, index int) string {
 		out += fmt.Sprintf("%s %s%s", spellEffectName, maxLevel, maxTargets) //FormatString
 	case SPA_CREATE_ITEM:
 		out += fmt.Sprintf("%s %d (Qty: %d)", spellEffectName, base, calc) //FormatString
+	case SPA_SUMMON_PET:
+		out += fmt.Sprintf("%s %d", spellEffectName, extra)
+	case SPA_CONFUSE:
+		out += spellEffectName
+	case SPA_DISEASE, SPA_POISON:
+		out += fmt.Sprintf("%s %s%s", spellEffectName, maxLevel, spellRange) //FormatString
+	case SPA_DETECT_HOSTILE, SPA_DETECT_MAGIC, SPA_NO_TWINCAST, SPA_INVULNERABILITY, SPA_BANISH, SPA_SHADOW_STEP, SPA_BERSERK, SPA_LYCANTHROPY, SPA_VAMPIRISM:
+		out += spellEffectName
+	case SPA_RESIST_FIRE, SPA_RESIST_COLD, SPA_RESIST_POISON, SPA_RESIST_DISEASE, SPA_RESIST_MAGIC:
+		out += fmt.Sprintf("%s %s%s", spellEffectName, maxLevel, spellRange) //FormatString
+
+		if maxTargets != "" {
+			out += maxTargets
+		}
+	case SPA_DETECT_TRAPS, SPA_DETECT_UNDEAD, SPA_DETECT_SUMMONED, SPA_DETECT_ANIMALS:
+		out += spellEffectName
+	case SPA_STONESKIN:
+		out += fmt.Sprintf("%s %s%s", spellEffectName, maxLevel, spellRange) //FormatString
+
+	case SPA_TRUE_NORTH:
+		out += spellEffectName
+	case SPA_LEVITATION:
+		out += fmt.Sprintf("%s (%d)", spellEffectName, base)
+	case SPA_CHANGE_FORM:
+		out += fmt.Sprintf("%s RaceID %d", spellEffectName, base)
+	case SPA_DAMAGE_SHIELD:
+		out += fmt.Sprintf("%s %s%s", spellEffectName, maxLevel, spellRange) //FormatString
+	case SPA_TRANSFER_ITEM, SPA_ITEM_LORE, SPA_ITEM_IDENTIFY:
+		out += spellEffectName
+	case SPA_NPC_WIPE_HATE_LIST:
+		tmp = "Increase"
+		if value < 0 {
+			tmp = "Decrease"
+		}
+		out += fmt.Sprintf("%s %s (%d Chance)", tmp, spellEffectName, value+40)
+	case SPA_SPIN_STUN, SPA_INFRAVISION, SPA_ULTRAVISION, SPA_EYE_OF_ZOMM, SPA_RECLAIM_ENERGY:
+		out += spellEffectName
+	case SPA_MAX_HP:
+		tmp = "Increase"
+		if value < 0 {
+			tmp = "Decrease"
+		}
+		out += fmt.Sprintf("%s %s %s", tmp, spellEffectName, extendedRange) // formatRange
+	case SPA_CORPSE_BOMB:
+		out += spellEffectName
+
 	default:
 		out += fmt.Sprintf("%s (id=%d, base=%d, base2=%d, max=%d, calc=%d, value=%d)", spellEffectName, spa, base, base2, max, calc, value)
 	}
