@@ -19,7 +19,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-type ImagePreview struct {
+type ItemPreview struct {
 	c           *freetype.Context
 	cb          *freetype.Context
 	cbFont      *truetype.Font
@@ -33,7 +33,7 @@ type ImagePreview struct {
 	maxHeight   int
 }
 
-func (e *ImagePreview) write(field string, value string) {
+func (e *ItemPreview) write(field string, value string) {
 	e.cb.DrawString(field, e.pt)
 	if len(value) > 0 {
 		baseX := e.pt.X
@@ -57,7 +57,7 @@ func (e *ImagePreview) write(field string, value string) {
 	}
 }
 
-func (e *ImagePreview) writeNoAlign(field string, value string) {
+func (e *ItemPreview) writeNoAlign(field string, value string) {
 	if len(field) == 0 { // non-bold value only
 		e.c.DrawString(value, e.pt)
 		return
@@ -68,7 +68,7 @@ func (e *ImagePreview) writeNoAlign(field string, value string) {
 	}
 }
 
-func (e *ImagePreview) writeNoAlignLn(field string, value string) {
+func (e *ItemPreview) writeNoAlignLn(field string, value string) {
 	e.writeNoAlign(field, value)
 	e.newLine(1)
 }
@@ -117,7 +117,7 @@ func GenerateItemPreview(item *db.Item) ([]byte, error) {
 	cTitle.SetDst(rgba)
 	cTitle.SetSrc(fg)
 
-	e := &ImagePreview{
+	e := &ItemPreview{
 		c:        c,
 		cb:       cb,
 		cbFont:   fontBold,
@@ -148,15 +148,26 @@ func GenerateItemPreview(item *db.Item) ([]byte, error) {
 	e.lineStart = e.lineMax + 1
 	e.render4Left()
 
-	maxHeight := 600
 	//resize rgba image to maxHeight
 
 	//rgba2 := image.NewRGBA(image.Rect(0, 0, 700, maxHeight))
 	//draw.Draw(rgba2, rgba2.Bounds(), bg, image.Pt(0, 0), draw.Src)
 	//draw.Draw(rgba2, rgba2.Bounds(), rgba, image.Pt(0, 0), draw.Src)
-	ratio := float64(maxHeight) / 600 / 1.5
-	rgba2 := resize.Resize(uint(ratio*700), uint(ratio*600), rgba, resize.Lanczos3)
+	//ratio := float64(maxHeight) / 600 / 1.5
+	//rgba2 := resize.Resize(uint(ratio*700), uint(ratio*600), rgba, resize.Lanczos3)
 	//resize image to half
+
+	e.maxHeight -= int(e.fontSize * 1)
+
+	if e.maxHeight != 600 {
+		rgba2 := image.NewRGBA(image.Rect(0, 0, 700, e.maxHeight))
+		draw.Draw(rgba2, rgba2.Bounds(), bg, image.Pt(0, 0), draw.Src)
+		draw.Draw(rgba2, rgba2.Bounds(), rgba, image.Pt(0, 0), draw.Src)
+		rgba = rgba2
+	}
+
+	ratio := 0.60
+	rgba2 := resize.Resize(uint(ratio*700), uint(ratio*float64(e.maxHeight)), rgba, resize.Bicubic)
 
 	b := new(bytes.Buffer)
 
@@ -168,12 +179,12 @@ func GenerateItemPreview(item *db.Item) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func (e *ImagePreview) newLine(lineCount int) {
+func (e *ItemPreview) newLine(lineCount int) {
 	e.lineCurrent += lineCount
 	e.shiftLn(lineCount)
 }
 
-func (e *ImagePreview) shiftLn(lineCount int) {
+func (e *ItemPreview) shiftLn(lineCount int) {
 	e.pt.Y += e.c.PointToFixed(float64(lineCount) * e.fontSize * 1.5)
 	if e.pt.Y.Ceil() > e.maxHeight {
 		e.maxHeight = e.pt.Y.Ceil()
@@ -181,16 +192,16 @@ func (e *ImagePreview) shiftLn(lineCount int) {
 
 }
 
-func (e *ImagePreview) writeLn(field string, value string) {
+func (e *ItemPreview) writeLn(field string, value string) {
 	e.write(field, value)
 	e.newLine(1)
 }
 
-func (e *ImagePreview) setCursor(x int, y int) {
+func (e *ItemPreview) setCursor(x int, y int) {
 	e.pt = freetype.Pt(x, y)
 }
 
-func (e *ImagePreview) render1Left() {
+func (e *ItemPreview) render1Left() {
 	item := e.item
 	e.setCursor(10, 20)
 	e.shiftLn(e.lineStart)
@@ -230,7 +241,7 @@ func (e *ImagePreview) render1Left() {
 	}
 }
 
-func (e *ImagePreview) render2Left() {
+func (e *ItemPreview) render2Left() {
 	item := e.item
 	e.setCursor(10, 20)
 	e.shiftLn(e.lineStart)
@@ -257,7 +268,7 @@ func (e *ImagePreview) render2Left() {
 	}
 }
 
-func (e *ImagePreview) render3Left() {
+func (e *ItemPreview) render3Left() {
 	item := e.item
 	e.setCursor(10, 20)
 	e.shiftLn(e.lineStart)
@@ -289,7 +300,7 @@ func (e *ImagePreview) render3Left() {
 	}
 }
 
-func (e *ImagePreview) render4Left() {
+func (e *ItemPreview) render4Left() {
 	item := e.item
 	e.setCursor(10, 20)
 	e.shiftLn(e.lineStart)
@@ -320,33 +331,37 @@ func (e *ImagePreview) render4Left() {
 
 	util := &util.Util{}
 	if item.Proceffect > 0 && item.Proceffect != 65535 {
-		e.writeNoAlignLn("Combat Effects:", util.SpellName(item.Proceffect))
+		e.writeNoAlignLn("Combat Effects:", fmt.Sprintf("%s (%d)", util.SpellName(item.Proceffect), item.Proceffect))
 		if item.Proclevel2 > 0 {
 			e.writeNoAlignLn("Level for effect:", fmt.Sprintf("%d", item.Proclevel2))
 		}
 		e.writeNoAlignLn("Effect chance modifier:", fmt.Sprintf("%d%%", item.Procrate+100))
+		e.renderSpellInfo(item.Proceffect)
 	}
 
 	if item.Worneffect > 0 && item.Worneffect != 65535 {
-		e.writeNoAlignLn("Worn Effect:", util.SpellName(item.Worneffect))
+		e.writeNoAlignLn("Worn Effect:", fmt.Sprintf("%s (%d)", util.SpellName(item.Worneffect), item.Worneffect))
+		e.renderSpellInfo(item.Worneffect)
 	}
 	if item.Wornlevel > 0 {
 		e.writeNoAlignLn("Level for effect:", fmt.Sprintf("%d", item.Wornlevel))
+		e.renderSpellInfo(item.Worneffect)
 	}
 	if item.Focuseffect > 0 && item.Focuseffect != 65535 {
-		e.writeNoAlignLn("Focus Effect:", util.SpellName(item.Focuseffect))
+		e.writeNoAlignLn("Focus Effect:", fmt.Sprintf("%s (%d)", util.SpellName(item.Focuseffect), item.Focuseffect))
+		e.renderSpellInfo(item.Focuseffect)
 	}
 	if item.Focuslevel > 0 {
 		e.writeNoAlignLn("Level for effect:", fmt.Sprintf("%d", item.Focuslevel))
 	}
 
 	if item.Clickeffect > 0 && item.Clickeffect != 65535 {
-		details := util.SpellName(item.Clickeffect) + " ("
+		details := util.SpellName(item.Clickeffect) + fmt.Sprintf(" (%d)", item.Clickeffect) + " ("
 		if item.Clicktype == 4 {
 			details += "Must Equip. "
 		}
 		if item.Casttime > 0 {
-			details += fmt.Sprintf("Casting Time: %d sec", item.Casttime/1000)
+			details += fmt.Sprintf("Casting Time: %0.1f sec", float64(item.Casttime/1000))
 		} else {
 			details += "Casting Time: Instant"
 		}
@@ -362,10 +377,12 @@ func (e *ImagePreview) render4Left() {
 		} else {
 			e.writeNoAlignLn("Charges:", "None")
 		}
+		e.renderSpellInfo(item.Clickeffect)
 	}
 
 	if item.Scrolleffect > 0 && item.Scrolleffect != 65535 {
-		e.writeNoAlignLn("Spell Scroll Effect:", util.SpellName(item.Scrolleffect))
+		e.writeNoAlignLn("Spell Scroll Effect:", fmt.Sprintf("%s (%d)", util.SpellName(item.Scrolleffect), item.Scrolleffect))
+		e.renderSpellInfo(item.Scrolleffect)
 	}
 
 	if item.Bardtype > 22 && item.Bardtype < 65535 {
@@ -427,7 +444,7 @@ func (e *ImagePreview) render4Left() {
 	}
 }
 
-func (e *ImagePreview) render2Center() {
+func (e *ItemPreview) render2Center() {
 	item := e.item
 	e.setCursor(200, 20)
 	e.shiftLn(e.lineStart)
@@ -453,7 +470,7 @@ func (e *ImagePreview) render2Center() {
 	}
 }
 
-func (e *ImagePreview) render3Center() {
+func (e *ItemPreview) render3Center() {
 	item := e.item
 	e.setCursor(200, 20)
 	e.shiftLn(e.lineStart)
@@ -481,7 +498,7 @@ func (e *ImagePreview) render3Center() {
 
 }
 
-func (e *ImagePreview) render2Right() {
+func (e *ItemPreview) render2Right() {
 	item := e.item
 	e.setCursor(400, 20)
 	e.shiftLn(e.lineStart)
@@ -505,7 +522,7 @@ func (e *ImagePreview) render2Right() {
 	}
 }
 
-func (e *ImagePreview) render3Right() {
+func (e *ItemPreview) render3Right() {
 	item := e.item
 	e.setCursor(400, 20)
 	e.shiftLn(e.lineStart)
@@ -547,5 +564,13 @@ func (e *ImagePreview) render3Right() {
 
 	if e.lineCurrent > e.lineMax {
 		e.lineMax = e.lineCurrent
+	}
+}
+
+func (e *ItemPreview) renderSpellInfo(id int) {
+	util := &util.Util{}
+	info := util.SpellInfo(id)
+	for _, line := range info {
+		e.writeNoAlignLn("", line)
 	}
 }

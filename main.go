@@ -13,6 +13,7 @@ import (
 	"github.com/xackery/tinywebeq/item"
 	"github.com/xackery/tinywebeq/player"
 	"github.com/xackery/tinywebeq/site"
+	"github.com/xackery/tinywebeq/spell"
 	"github.com/xackery/tinywebeq/tlog"
 	"github.com/xackery/tinywebeq/util"
 )
@@ -52,6 +53,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("player.Init: %w", err)
 	}
+	err = spell.Init()
+	if err != nil {
+		return fmt.Errorf("spell.Init: %w", err)
+	}
 
 	_, err = config.NewConfig(ctx)
 	if err != nil {
@@ -79,6 +84,8 @@ func run() error {
 	mux.HandleFunc("/item/view/", item.View)
 	mux.HandleFunc("/item/preview.png", item.PreviewImage)
 	mux.HandleFunc("/player/view/", player.View)
+	mux.HandleFunc("/spell/view", spell.View)
+	mux.HandleFunc("/spell/preview.png", spell.PreviewImage)
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))).ServeHTTP(w, r)
 	})

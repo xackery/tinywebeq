@@ -2,14 +2,12 @@ package util
 
 import (
 	"fmt"
-
-	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/tlog"
+	"sync"
 )
 
 var (
 	isInitialized bool
-	spellNames    = map[int]string{}
+	mu            = sync.RWMutex{}
 )
 
 func Init() error {
@@ -18,23 +16,10 @@ func Init() error {
 	}
 	isInitialized = true
 
-	query := "SELECT id, name FROM spells_new"
-	rows, err := db.Instance.Query(query)
+	err := initSpells()
 	if err != nil {
-		return fmt.Errorf("query spells: %w", err)
+		return fmt.Errorf("initSpells: %w", err)
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var id int
-		var name string
-		err = rows.Scan(&id, &name)
-		if err != nil {
-			return fmt.Errorf("rows.Scan: %w", err)
-		}
-		spellNames[id] = name
-	}
-	tlog.Debugf("Loaded %d spells", len(spellNames))
 	return nil
 }
 

@@ -22,6 +22,7 @@ type Config struct {
 	Database            Database  `toml:"database" desc:"Database configuration"`
 	MemCache            MemCache  `toml:"mem_cache" desc:"Memory cache configuration"`
 	FileCache           FileCache `toml:"file_cache" desc:"File cache configuration"`
+	IsSpellInfoEnabled  bool      `toml:"is_spell_info_enabled" desc:"If true, spell info is enabled (similar to mq spell details), default true"`
 }
 
 type Database struct {
@@ -141,6 +142,7 @@ func defaultLabel() Config {
 			Name:     "peq",
 			Password: "peqpass",
 		},
+		IsSpellInfoEnabled: true,
 	}
 
 	return cfg
