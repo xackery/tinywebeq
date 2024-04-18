@@ -90,6 +90,6 @@ func run() error {
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))).ServeHTTP(w, r)
 	})
 
-	tlog.Infof("Listening on http://127.0.0.1:8080")
-	return http.ListenAndServe(":8080", mux)
+	tlog.Infof("Listening on http://%s:%d", config.Get().Server.Host, config.Get().Server.Port)
+	return http.ListenAndServe(fmt.Sprintf("%s:%d", config.Get().Server.Host, config.Get().Server.Port), mux)
 }

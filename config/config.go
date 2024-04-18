@@ -19,10 +19,16 @@ type Config struct {
 	Debug               bool      `toml:"debug" desc:"tinywebeq Configuration\n\n# Debug messages are displayed. This will cause console to be more verbose, but also more informative"`
 	IsDiscoveredOnly    bool      `toml:"is_discovered_only" desc:"If true, only discovered items are viewable, default false"`
 	DiscoverCacheReload int       `toml:"discover_cache_reload" desc:"How long before trying to refresh a non-discovered item as discovered, lowering this value can cause a bigger tax on sql. default 640 seconds"`
+	Server              Server    `toml:"server" desc:"Server configuration"`
 	Database            Database  `toml:"database" desc:"Database configuration"`
 	MemCache            MemCache  `toml:"mem_cache" desc:"Memory cache configuration"`
 	FileCache           FileCache `toml:"file_cache" desc:"File cache configuration"`
 	IsSpellInfoEnabled  bool      `toml:"is_spell_info_enabled" desc:"If true, spell info is enabled (similar to mq spell details), default true"`
+}
+
+type Server struct {
+	Host string `toml:"host" desc:"Server host"`
+	Port int    `toml:"port" desc:"Server port"`
 }
 
 type Database struct {
@@ -123,6 +129,10 @@ func defaultLabel() Config {
 		Debug:               true,
 		IsDiscoveredOnly:    false,
 		DiscoverCacheReload: 640,
+		Server: Server{
+			Host: "localhost",
+			Port: 8080,
+		},
 		MemCache: MemCache{
 			IsEnabled:        true,
 			MaxMemory:        150000000,
