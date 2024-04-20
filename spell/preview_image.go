@@ -9,7 +9,8 @@ import (
 
 	"github.com/xackery/tinywebeq/image"
 	"github.com/xackery/tinywebeq/tlog"
-	"github.com/xackery/tinywebeq/util"
+
+	"github.com/xackery/tinywebeq/library"
 )
 
 // Preview handles spell preview requests
@@ -46,8 +47,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 
 func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
 
-	util := &util.Util{}
-	lines := util.SpellInfo(id)
+	lines := library.SpellInfo(id)
 
 	data, err := image.GenerateSpellPreview(lines)
 	if err != nil {

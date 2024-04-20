@@ -1,0 +1,63 @@
+package library
+
+import (
+	"fmt"
+
+	"github.com/xackery/tinywebeq/db"
+	"github.com/xackery/tinywebeq/tlog"
+)
+
+var (
+	zones = map[int]*Zone{}
+)
+
+type Zone struct {
+	ID           int    `db:"id"`
+	ZoneIDNumber int    `db:"zoneidnumber"`
+	ShortName    string `db:"short_name"`
+	LongName     string `db:"long_name"`
+}
+
+func initZones() error {
+	zones = map[int]*Zone{}
+
+	query := "SELECT id, zoneidnumber, short_name, long_name FROM zone"
+
+	rows, err := db.Instance.Query(query)
+	if err != nil {
+		return fmt.Errorf("query spells: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		ze := &Zone{}
+		err = rows.Scan(&ze.ID, &ze.ZoneIDNumber, &ze.ShortName, &ze.LongName)
+		if err != nil {
+			return fmt.Errorf("rows.Scan: %w", err)
+		}
+		zones[ze.ID] = ze
+	}
+	tlog.Debugf("Loaded %d zones", len(zones))
+	return nil
+}
+
+func ZoneLongNameByID(id int) string {
+	mu.RLock()
+	defer mu.RUnlock()
+
+	if zone, ok := zones[id]; ok {
+		return zone.LongName
+	}
+	return fmt.Sprintf("Unknown Zone %d", id)
+}
+
+func ZoneLongNameByShortName(shortName string) string {
+	mu.RLock()
+	defer mu.RUnlock()
+	for _, zone := range zones {
+		if zone.ShortName == shortName {
+			return zone.LongName
+		}
+	}
+	return fmt.Sprintf("Unknown Zone %s", shortName)
+}

@@ -2,15 +2,27 @@ VERSION ?= v1.3.14
 NAME := tinywebeq
 
 # run
-run: sanitize
+run:
 	@echo "run: building"
 	mkdir -p bin
 	go build -o bin/${NAME} main.go
 # ifeq (,$(wildcard bin/template))
 # 	cd bin && ln -s ../template template
 # endif
-	cd bin && ./${NAME}
+	cd bin && ./${NAME} server
 
+letsencrypt: sanitize
+	@echo "letsencrypt: building"
+	mkdir -p bin
+	go build -o bin/${NAME} main.go
+	cd bin && ./${NAME} letsencrypt
+
+flush:
+	@echo "flush: building"
+	mkdir -p bin
+	go build -o bin/${NAME} main.go
+	cd bin && ./${NAME} flush
+	
 # clean up and check for errors
 sanitize:
 	@echo "sanitize: checking for errors"

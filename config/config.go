@@ -27,8 +27,17 @@ type Config struct {
 }
 
 type Server struct {
-	Host string `toml:"host" desc:"Server host"`
-	Port int    `toml:"port" desc:"Server port"`
+	Host        string      `toml:"host" desc:"Server host"`
+	Port        int         `toml:"port" desc:"Server port"`
+	LetsEncrypt LetsEncrypt `toml:"lets_encrypt" desc:"LetsEncrypt configuration"`
+}
+
+type LetsEncrypt struct {
+	IsEnabled bool     `toml:"is_enabled" desc:"If true, letsencrypt is enabled, default false\n#WARNING: To use LetsEncrypt, you need to expose ports 5001 and 5002 for challenge requests. You also need to not use wildcard domains"`
+	Email     string   `toml:"email" desc:"Email address for letsencrypt"`
+	CertPath  string   `toml:"cert" desc:"Cert Path for letsencrypt. If not provided, will be generated during 'letsencrypt' argument, defaults certs/"`
+	Domains   []string `toml:"domains" desc:"Domains to allow with cert"`
+	IsProd    bool     `toml:"is_prod" desc:"If true, use production letsencrypt, default false"`
 }
 
 type Database struct {
@@ -132,6 +141,13 @@ func defaultLabel() Config {
 		Server: Server{
 			Host: "localhost",
 			Port: 8080,
+			LetsEncrypt: LetsEncrypt{
+				IsEnabled: false,
+				Email:     "",
+				CertPath:  "./certs",
+				Domains:   []string{"example.com", "www.example.com"},
+				IsProd:    false,
+			},
 		},
 		MemCache: MemCache{
 			IsEnabled:        true,

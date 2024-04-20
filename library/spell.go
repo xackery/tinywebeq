@@ -1,4 +1,4 @@
-package util
+package library
 
 import (
 	"fmt"
@@ -29,6 +29,8 @@ type Spell struct {
 	RecoveryTime int
 	RecastTime   int
 	Pushback     int
+	TeleportZone string
+	Mana         int
 }
 
 func initSpells() error {
@@ -53,7 +55,7 @@ func initSpells() error {
 	for i := 1; i < 17; i++ {
 		query += fmt.Sprintf("classes%d, ", i)
 	}
-	query += "`range`, recovery_time, recast_time, buffduration, pushback"
+	query += "`range`, recovery_time, recast_time, buffduration, pushback, teleport_zone, mana"
 
 	query += " FROM spells_new"
 
@@ -81,7 +83,7 @@ func initSpells() error {
 			&se.Maxes[0], &se.Maxes[1], &se.Maxes[2], &se.Maxes[3], &se.Maxes[4], &se.Maxes[5], &se.Maxes[6], &se.Maxes[7], &se.Maxes[8], &se.Maxes[9], &se.Maxes[10], &se.Maxes[11],
 			&se.Calcs[0], &se.Calcs[1], &se.Calcs[2], &se.Calcs[3], &se.Calcs[4], &se.Calcs[5], &se.Calcs[6], &se.Calcs[7], &se.Calcs[8], &se.Calcs[9], &se.Calcs[10], &se.Calcs[11],
 			&se.Classes[0], &se.Classes[1], &se.Classes[2], &se.Classes[3], &se.Classes[4], &se.Classes[5], &se.Classes[6], &se.Classes[7], &se.Classes[8], &se.Classes[9], &se.Classes[10], &se.Classes[11], &se.Classes[12], &se.Classes[13], &se.Classes[14], &se.Classes[15],
-			&se.Range, &se.RecoveryTime, &se.RecastTime, &se.DurationCalc, &se.Pushback,
+			&se.Range, &se.RecoveryTime, &se.RecastTime, &se.DurationCalc, &se.Pushback, &se.TeleportZone, &se.Mana,
 		)
 		if err != nil {
 			return fmt.Errorf("rows.Scan: %w", err)
@@ -92,7 +94,7 @@ func initSpells() error {
 	return nil
 }
 
-func (e *Util) SpellName(id int) string {
+func SpellName(id int) string {
 	mu.Lock()
 	defer mu.Unlock()
 	se, ok := spells[id]

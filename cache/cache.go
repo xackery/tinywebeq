@@ -27,11 +27,20 @@ type cacheEntry struct {
 	data       db.CacheIdentifier
 }
 
-func Init() error {
+func Init(isCacheFlush bool) error {
 	if isInitialized {
 		return nil
 	}
 	isInitialized = true
+	if isCacheFlush {
+		tlog.Debugf("flushing cache...")
+		err := os.RemoveAll("cache")
+		if err != nil {
+			return fmt.Errorf("remove cache: %w", err)
+		}
+		go maintain()
+		return nil
+	}
 	readFileCacheIndex()
 	go maintain()
 	return nil

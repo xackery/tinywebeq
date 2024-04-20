@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -13,6 +14,7 @@ import (
 
 var (
 	Instance *sqlx.DB
+	mu       sync.RWMutex
 )
 
 // Init initializes the database
@@ -33,11 +35,18 @@ func Query(ctx context.Context, query string, args map[string]interface{}) (*sql
 func connect() error {
 	var err error
 	var db *sqlx.DB
-	db, err = sqlx.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true", config.Get().Database.Username, config.Get().Database.Password, config.Get().Database.Host, config.Get().Database.Port, config.Get().Database.Name))
+	tlog.Debugf("Connecting to database %s:%d", config.Get().Database.Host, config.Get().Database.Port)
+
+	db, err = sqlx.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&timeout=5s", config.Get().Database.Username, config.Get().Database.Password, config.Get().Database.Host, config.Get().Database.Port, config.Get().Database.Name))
 	if err != nil {
 		return fmt.Errorf("sql.Open: %w", err)
 	}
 	Instance = db
+	// ping instance
+	err = Instance.Ping()
+	if err != nil {
+		return fmt.Errorf("ping: %w", err)
+	}
 	return nil
 }
 

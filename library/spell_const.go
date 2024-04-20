@@ -1,4 +1,4 @@
-package util
+package library
 
 const (
 	SPA_HP                                 = 0

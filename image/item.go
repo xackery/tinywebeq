@@ -13,7 +13,7 @@ import (
 	"github.com/golang/freetype/truetype"
 	"github.com/nfnt/resize"
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/util"
+	"github.com/xackery/tinywebeq/library"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
@@ -329,9 +329,8 @@ func (e *ItemPreview) render4Left() {
 
 	e.newLine(1)
 
-	util := &util.Util{}
 	if item.Proceffect > 0 && item.Proceffect != 65535 {
-		e.writeNoAlignLn("Combat Effects:", fmt.Sprintf("%s (%d)", util.SpellName(item.Proceffect), item.Proceffect))
+		e.writeNoAlignLn("Combat Effects:", fmt.Sprintf("%s (%d)", library.SpellName(item.Proceffect), item.Proceffect))
 		if item.Proclevel2 > 0 {
 			e.writeNoAlignLn("Level for effect:", fmt.Sprintf("%d", item.Proclevel2))
 		}
@@ -340,7 +339,7 @@ func (e *ItemPreview) render4Left() {
 	}
 
 	if item.Worneffect > 0 && item.Worneffect != 65535 {
-		e.writeNoAlignLn("Worn Effect:", fmt.Sprintf("%s (%d)", util.SpellName(item.Worneffect), item.Worneffect))
+		e.writeNoAlignLn("Worn Effect:", fmt.Sprintf("%s (%d)", library.SpellName(item.Worneffect), item.Worneffect))
 		e.renderSpellInfo(item.Worneffect)
 	}
 	if item.Wornlevel > 0 {
@@ -348,7 +347,7 @@ func (e *ItemPreview) render4Left() {
 		e.renderSpellInfo(item.Worneffect)
 	}
 	if item.Focuseffect > 0 && item.Focuseffect != 65535 {
-		e.writeNoAlignLn("Focus Effect:", fmt.Sprintf("%s (%d)", util.SpellName(item.Focuseffect), item.Focuseffect))
+		e.writeNoAlignLn("Focus Effect:", fmt.Sprintf("%s (%d)", library.SpellName(item.Focuseffect), item.Focuseffect))
 		e.renderSpellInfo(item.Focuseffect)
 	}
 	if item.Focuslevel > 0 {
@@ -356,7 +355,7 @@ func (e *ItemPreview) render4Left() {
 	}
 
 	if item.Clickeffect > 0 && item.Clickeffect != 65535 {
-		details := util.SpellName(item.Clickeffect) + fmt.Sprintf(" (%d)", item.Clickeffect) + " ("
+		details := library.SpellName(item.Clickeffect) + fmt.Sprintf(" (%d)", item.Clickeffect) + " ("
 		if item.Clicktype == 4 {
 			details += "Must Equip. "
 		}
@@ -381,7 +380,7 @@ func (e *ItemPreview) render4Left() {
 	}
 
 	if item.Scrolleffect > 0 && item.Scrolleffect != 65535 {
-		e.writeNoAlignLn("Spell Scroll Effect:", fmt.Sprintf("%s (%d)", util.SpellName(item.Scrolleffect), item.Scrolleffect))
+		e.writeNoAlignLn("Spell Scroll Effect:", fmt.Sprintf("%s (%d)", library.SpellName(item.Scrolleffect), item.Scrolleffect))
 		e.renderSpellInfo(item.Scrolleffect)
 	}
 
@@ -568,8 +567,7 @@ func (e *ItemPreview) render3Right() {
 }
 
 func (e *ItemPreview) renderSpellInfo(id int) {
-	util := &util.Util{}
-	info := util.SpellInfo(id)
+	info := library.SpellInfo(id)
 	for _, line := range info {
 		e.writeNoAlignLn("", line)
 	}

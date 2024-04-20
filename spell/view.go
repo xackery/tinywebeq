@@ -8,8 +8,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/tlog"
-	"github.com/xackery/tinywebeq/util"
 
 	"github.com/xackery/tinywebeq/site"
 )
@@ -74,22 +74,21 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		return fmt.Errorf("id too low")
 	}
 
-	se := util.SpellByID(id)
+	se := library.SpellByID(id)
 	if se == nil {
 		return fmt.Errorf("spell not found")
 	}
 
 	type TemplateData struct {
 		Site      site.BaseData
-		Spell     *util.Spell
+		Spell     *library.Spell
 		SpellInfo []string
 	}
 
-	util := &util.Util{}
 	data := TemplateData{
 		Site:      site.BaseDataInit("Spell View"),
 		Spell:     se,
-		SpellInfo: util.SpellInfo(id),
+		SpellInfo: library.SpellInfo(id),
 	}
 
 	err := viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

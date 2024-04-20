@@ -101,7 +101,7 @@
     <td><td>&nbsp;</td><td></tr>
     {{ if and (gt .Item.Proceffect 0) (ne .Item.Proceffect 65535) }}
         <tr><td colspan="2" nowrap="1">
-        <b>Combat Effects: </b>{{ .Util.SpellName .Item.Proceffect }}
+        <b>Combat Effects: </b>{{ .Library.SpellName .Item.Proceffect }}
         {{ if (gt .Item.Proclevel2 0)}}<br><b>Level for effect: </b>{{ .Item.Proclevel2 }}{{ end }}
         <br><b>Effect chance modifier: {{ .Util.Add 100 .Item.Procrate }}%</b>
         </td></tr>
