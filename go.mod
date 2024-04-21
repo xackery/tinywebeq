@@ -18,14 +18,36 @@ require (
 )
 
 require (
+	github.com/RoaringBitmap/roaring v0.4.23 // indirect
+	github.com/blevesearch/bleve v1.0.14 // indirect
+	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
+	github.com/blevesearch/mmap-go v1.0.2 // indirect
+	github.com/blevesearch/segment v0.9.0 // indirect
+	github.com/blevesearch/snowballstem v0.9.0 // indirect
+	github.com/blevesearch/zap/v11 v11.0.14 // indirect
+	github.com/blevesearch/zap/v12 v12.0.14 // indirect
+	github.com/blevesearch/zap/v13 v13.0.6 // indirect
+	github.com/blevesearch/zap/v14 v14.0.5 // indirect
+	github.com/blevesearch/zap/v15 v15.0.3 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
+	github.com/couchbase/vellum v1.0.2 // indirect
+	github.com/glycerine/go-unsnap-stream v0.0.0-20181221182339-f9677308dec2 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/snappy v0.0.1 // indirect
 	github.com/miekg/dns v1.1.58 // indirect
+	github.com/mschoch/smat v0.2.0 // indirect
+	github.com/philhofer/fwd v1.0.0 // indirect
+	github.com/steveyen/gtreap v0.1.0 // indirect
+	github.com/tinylib/msgp v1.1.0 // indirect
+	github.com/willf/bitset v1.1.10 // indirect
+	go.etcd.io/bbolt v1.3.5 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
 

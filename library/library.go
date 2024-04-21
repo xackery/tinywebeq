@@ -19,16 +19,22 @@ func Init() error {
 	}
 	isInitialized = true
 
-	tlog.Debugf("Loading spells")
+	tlog.Debugf("Loading library spells")
 	err := initSpells()
 	if err != nil {
 		return fmt.Errorf("initSpells: %w", err)
 	}
 
-	tlog.Debugf("Loading zones")
+	tlog.Debugf("Loading library zones")
 	err = initZones()
 	if err != nil {
 		return fmt.Errorf("initZones: %w", err)
+	}
+
+	tlog.Debugf("Loading library items")
+	err = initItems()
+	if err != nil {
+		return fmt.Errorf("initItems: %w", err)
 	}
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/tlog"
 
@@ -15,15 +16,10 @@ import (
 )
 
 var (
-	viewTemplate  *template.Template
-	isInitialized bool
+	viewTemplate *template.Template
 )
 
-func Init() error {
-	if isInitialized {
-		return nil
-	}
-	isInitialized = true
+func viewInit() error {
 	var err error
 	viewTemplate = template.New("view")
 	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
@@ -80,15 +76,17 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 	}
 
 	type TemplateData struct {
-		Site      site.BaseData
-		Spell     *library.Spell
-		SpellInfo []string
+		Site                 site.BaseData
+		Spell                *library.Spell
+		SpellInfo            []string
+		IsSpellSearchEnabled bool
 	}
 
 	data := TemplateData{
-		Site:      site.BaseDataInit("Spell View"),
-		Spell:     se,
-		SpellInfo: library.SpellInfo(id),
+		Site:                 site.BaseDataInit("Spell View"),
+		Spell:                se,
+		SpellInfo:            library.SpellInfo(id),
+		IsSpellSearchEnabled: config.Get().Spell.IsSearchEnabled,
 	}
 
 	err := viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

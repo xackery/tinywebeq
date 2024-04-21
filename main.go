@@ -83,7 +83,7 @@ func run() error {
 	if Version == "" {
 		Version = "1.x.x EXPERIMENTAL"
 	}
-	tlog.Infof("starting tinywebeq %s", Version)
+	tlog.Infof("Starting tinywebeq %s", Version)
 
 	err = site.Init()
 	if err != nil {
@@ -94,8 +94,12 @@ func run() error {
 		return fmt.Errorf("cache.Init: %w", err)
 	}
 	if isCacheFlush {
-		tlog.Infof("cache flushed")
+		tlog.Infof("Cache flushed")
 		return nil
+	}
+	err = os.MkdirAll("cache", 0755)
+	if err != nil {
+		return fmt.Errorf("make cache: %w", err)
 	}
 
 	err = db.Init(ctx)
@@ -119,10 +123,6 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("library.Init: %w", err)
 	}
-	err = os.MkdirAll("cache", 0755)
-	if err != nil {
-		return fmt.Errorf("make cache: %w", err)
-	}
 
 	certPath := config.Get().Server.LetsEncrypt.CertPath
 	server := &http.Server{
@@ -131,7 +131,7 @@ func run() error {
 		IdleTimeout:  60 * time.Second,
 	}
 	if config.Get().Server.LetsEncrypt.IsEnabled {
-		tlog.Debugf("letsencrypt enabled")
+		tlog.Debugf("Letsencrypt enabled")
 		server.Addr = fmt.Sprintf(":%d", 443)
 		m := &autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
@@ -148,9 +148,11 @@ func run() error {
 		w.Write([]byte("Hello, world!"))
 	})
 	mux.HandleFunc("/item/view/", item.View)
+	mux.HandleFunc("/item/search", item.Search)
 	mux.HandleFunc("/item/preview.png", item.PreviewImage)
 	mux.HandleFunc("/player/view/", player.View)
 	mux.HandleFunc("/spell/view", spell.View)
+	mux.HandleFunc("/spell/search", spell.Search)
 	mux.HandleFunc("/spell/preview.png", spell.PreviewImage)
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))).ServeHTTP(w, r)
@@ -317,7 +319,7 @@ func letsencrypt() error {
 		return fmt.Errorf("write csr.pem: %w", err)
 	}
 
-	tlog.Infof("letsencrypt done!")
+	tlog.Infof("Letsencrypt done!")
 	return nil
 }
 

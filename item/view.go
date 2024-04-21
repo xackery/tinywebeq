@@ -8,6 +8,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/tlog"
 
@@ -77,15 +78,17 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 	}
 
 	type TemplateData struct {
-		Site    site.BaseData
-		Item    *db.Item
-		Library *library.Library
+		Site                site.BaseData
+		Item                *db.Item
+		Library             *library.Library
+		IsItemSearchEnabled bool
 	}
 
 	data := TemplateData{
-		Site:    site.BaseDataInit("Item View"),
-		Item:    item,
-		Library: library.Instance(),
+		Site:                site.BaseDataInit("Item View"),
+		Item:                item,
+		Library:             library.Instance(),
+		IsItemSearchEnabled: config.Get().Item.IsSearchEnabled,
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

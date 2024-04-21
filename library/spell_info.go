@@ -9,7 +9,7 @@ import (
 
 func SpellInfo(id int) []string {
 	lines := []string{}
-	if !config.Get().IsSpellInfoEnabled {
+	if !config.Get().Spell.IsSpellInfoEnabled {
 		return lines
 	}
 

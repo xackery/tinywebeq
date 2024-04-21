@@ -22,6 +22,10 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("viewInit: %w", err)
 	}
+	err = searchInit()
+	if err != nil {
+		return fmt.Errorf("searchInit: %w", err)
+	}
 	return nil
 }
 
@@ -36,7 +40,7 @@ func fetchItem(ctx context.Context, id int) (*db.Item, error) {
 	}
 
 	query := "SELECT * FROM items WHERE id=:id LIMIT 1"
-	if config.Get().IsDiscoveredOnly {
+	if config.Get().Item.IsDiscoveredOnly {
 		query += "SELECT * FROM items, discovered items WHERE items.id=:id AND discovered_items.item_id=:id LIMIT 1"
 	}
 

@@ -28,7 +28,7 @@ func Init(ctx context.Context) error {
 }
 
 func Query(ctx context.Context, query string, args map[string]interface{}) (*sqlx.Rows, error) {
-	tlog.Debugf("querying `%s`, args: %v", query, args)
+	tlog.Debugf("Querying `%s`, args: %v", query, args)
 	return Instance.NamedQueryContext(ctx, query, args)
 }
 

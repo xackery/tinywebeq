@@ -33,7 +33,7 @@ func Init(isCacheFlush bool) error {
 	}
 	isInitialized = true
 	if isCacheFlush {
-		tlog.Debugf("flushing cache...")
+		tlog.Debugf("Flushing cache...")
 		err := os.RemoveAll("cache")
 		if err != nil {
 			return fmt.Errorf("remove cache: %w", err)
@@ -78,12 +78,12 @@ func writeMemoryCache(path string, data db.CacheIdentifier) error {
 			data:       data,
 		}
 		memCacheSize += size
-		tlog.Debugf("memcache overwrite: %s, expiration: %d", path, memCache[path].expiration)
+		tlog.Debugf("Memcache overwrite: %s, expiration: %d", path, memCache[path].expiration)
 		return nil
 	}
 
 	if memCacheSize+size > config.Get().MemCache.MaxMemory {
-		tlog.Debugf("memcache full, skipping: %s", path)
+		tlog.Debugf("Memcache full, skipping: %s", path)
 		return nil
 	}
 
@@ -92,7 +92,7 @@ func writeMemoryCache(path string, data db.CacheIdentifier) error {
 		data:       data,
 	}
 	memCacheSize += size
-	tlog.Debugf("memcache write: %s, expiration: %d (%d total size)", path, memCache[path].expiration, memCacheSize)
+	tlog.Debugf("Memcache write: %s, expiration: %d (%d total size)", path, memCache[path].expiration, memCacheSize)
 	return nil
 }
 
@@ -102,7 +102,7 @@ func writeFileCache(path string, data db.CacheIdentifier) error {
 	}
 
 	if len(fileCache) > config.Get().FileCache.MaxFiles {
-		tlog.Debugf("filecache full, skipping: %s", path)
+		tlog.Debugf("Filecache full, skipping: %s", path)
 		return nil
 	}
 
@@ -110,7 +110,7 @@ func writeFileCache(path string, data db.CacheIdentifier) error {
 
 	err := writeFileCacheIndex()
 	if err != nil {
-		tlog.Errorf("write file cache index: %v", err)
+		tlog.Errorf("Write file cache index: %v", err)
 	}
 
 	basePath := filepath.Dir(path)
@@ -129,7 +129,7 @@ func writeFileCache(path string, data db.CacheIdentifier) error {
 	if err != nil {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
-	tlog.Debugf("filecache write: %s", path)
+	tlog.Debugf("Filecache write: %s", path)
 	return nil
 }
 
@@ -145,10 +145,10 @@ func Read(path string) (bool, db.CacheIdentifier) {
 		entry, ok := memCache[path]
 		if ok {
 			if entry.expiration > time.Now().Unix() {
-				tlog.Debugf("memcache read: %s, expiration: %d", path, entry.expiration)
+				tlog.Debugf("Memcache read: %s, expiration: %d", path, entry.expiration)
 				return true, entry.data
 			}
-			tlog.Debugf("memcache expired: %s", path)
+			tlog.Debugf("Memcache expired: %s", path)
 			delete(memCache, path)
 			memCacheSize -= size
 		}
@@ -158,23 +158,23 @@ func Read(path string) (bool, db.CacheIdentifier) {
 		expiration, ok := fileCache[path]
 		if ok {
 			if expiration < int(time.Now().Unix()) {
-				tlog.Debugf("filecache expired: %s", path)
+				tlog.Debugf("Filecache expired: %s", path)
 				delete(fileCache, path)
 				err := os.Remove("cache/" + path)
 				if err != nil {
-					tlog.Warnf("remove file (skipping cache): %v", err)
+					tlog.Warnf("Remove file (skipping cache): %v", err)
 				}
 				err = writeFileCacheIndex()
 				if err != nil {
-					tlog.Warnf("write file cache index (skipping cache): %v", err)
+					tlog.Warnf("Write file cache index (skipping cache): %v", err)
 				}
 				return false, nil
 			}
 
-			tlog.Debugf("filecache read: %s, expiration: %d", path, expiration)
+			tlog.Debugf("Filecache read: %s, expiration: %d", path, expiration)
 			r, err := os.Open("cache/" + path)
 			if err != nil {
-				tlog.Warnf("open file (skipping cache): %v", err)
+				tlog.Warnf("Open file (skipping cache): %v", err)
 				return false, nil
 			}
 			defer r.Close()
@@ -186,19 +186,19 @@ func Read(path string) (bool, db.CacheIdentifier) {
 				err = yaml.NewDecoder(r).Decode(cacheData)
 			}
 			if err != nil {
-				tlog.Warnf("decode (skipping cache): %v", err)
+				tlog.Warnf("Decode (skipping cache): %v", err)
 				return false, nil
 			}
 
 			err = writeMemoryCache(path, cacheData)
 			if err != nil {
-				tlog.Warnf("write memory cache: %v", err)
+				tlog.Warnf("Write memory cache: %v", err)
 			}
 			return true, cacheData
 		}
 	}
 
-	tlog.Debugf("cache miss: %s", path)
+	tlog.Debugf("Cache miss: %s", path)
 	return false, nil
 }
 
@@ -228,19 +228,19 @@ func truncateMemCache() {
 
 	size := 4000
 	time.Sleep(time.Duration(config.Get().MemCache.TruncateSchedule))
-	tlog.Debugf("memcache truncate schedule running...")
+	tlog.Debugf("Memcache truncate schedule running...")
 	start := time.Now()
 	mu.Lock()
 	for path, entry := range memCache {
 		if entry.expiration > time.Now().Unix() {
 			continue
 		}
-		tlog.Debugf("memcache expired: %s", path)
+		tlog.Debugf("Memcache expired: %s", path)
 		memCacheSize -= size
 		delete(memCache, path)
 	}
 	mu.Unlock()
-	tlog.Debugf("memcache truncate schedule complete in %s", time.Since(start))
+	tlog.Debugf("Memcache truncate schedule complete in %s", time.Since(start))
 }
 
 func truncateFileCache() {
@@ -248,27 +248,27 @@ func truncateFileCache() {
 		return
 	}
 	time.Sleep(time.Duration(config.Get().FileCache.TruncateSchedule))
-	tlog.Debugf("filecache truncate schedule running...")
+	tlog.Debugf("Filecache truncate schedule running...")
 	start := time.Now()
 	mu.Lock()
 	for path, expiration := range fileCache {
 		if expiration > int(time.Now().Unix()) {
 			continue
 		}
-		tlog.Debugf("filecache expired: %s", path)
+		tlog.Debugf("Filecache expired: %s", path)
 		delete(fileCache, path)
 		err := os.Remove("cache/" + path)
 		if err != nil {
-			tlog.Errorf("remove file: %v", err)
+			tlog.Errorf("Remove file: %v", err)
 		}
 	}
 	err := writeFileCacheIndex()
 	if err != nil {
-		tlog.Errorf("write file cache index: %v", err)
+		tlog.Errorf("Write file cache index: %v", err)
 	}
 
 	mu.Unlock()
-	tlog.Debugf("filecache truncate schedule complete in %s", time.Since(start))
+	tlog.Debugf("Filecache truncate schedule complete in %s", time.Since(start))
 }
 
 func writeFileCacheIndex() error {

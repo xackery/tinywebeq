@@ -3,13 +3,9 @@
 <meta name="robots" content="index, follow">
 <title>{{ .Site.Title }}</title>
 
-<link rel="stylesheet" href="/css/tpe-scss.css" rel="stylesheet">
-<script src="/sorttable.js"></script>
-
 <meta name="description" content="thj-wiki.web.app">
 <meta name="author" content="Xackery">
 <link rel="canonical" href="https://thj-wiki.web.app/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.3dd8781e0bf18964ae678b74cbbc45db287f30d53eab596ee0e9a60921bb8c8c.css" integrity="sha256-Pdh4HgvxiWSuZ4t0y7xF2yh/MNU&#43;q1lu4OmmCSG7jIw=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://thj-wiki.web.app/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://thj-wiki.web.app/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://thj-wiki.web.app/favicon-32x32.png">

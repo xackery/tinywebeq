@@ -1,14 +1,26 @@
 package library
 
 import (
+	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
 
+	"github.com/blevesearch/bleve"
+	"github.com/blevesearch/bleve/analysis/lang/en"
+	"github.com/blevesearch/bleve/analysis/token/lowercase"
+	"github.com/blevesearch/bleve/analysis/token/porter"
+	"github.com/blevesearch/bleve/mapping"
+	"github.com/blevesearch/bleve/search/query"
+	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
 var (
-	spells = map[int]*Spell{}
+	spells     = map[int]*Spell{}
+	spellIndex bleve.Index
 )
 
 type Spell struct {
@@ -33,7 +45,61 @@ type Spell struct {
 	Mana         int
 }
 
+type SpellIndexData struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Level int    `json:"level"`
+}
+
 func initSpells() error {
+	var err error
+	start := time.Now()
+
+	isSearchEnabled := config.Get().Spell.IsSearchEnabled
+
+	if !isSearchEnabled {
+		return nil
+	}
+
+	totalCount := 0
+	isNewIndex := false
+
+	spellIndex, err = bleve.Open("cache/spell.bleve")
+	if err != nil {
+		if err != bleve.ErrorIndexPathDoesNotExist {
+			return fmt.Errorf("bleve.Open: %w", err)
+		}
+		tlog.Infof("No cache/spell.bleve found, creating new index")
+
+		englishTextFieldMapping := bleve.NewTextFieldMapping()
+		englishTextFieldMapping.Analyzer = en.AnalyzerName
+
+		spellMapping := bleve.NewDocumentMapping()
+		spellMapping.AddFieldMappingsAt("name", englishTextFieldMapping)
+		spellMapping.AddFieldMappingsAt("level", mapping.NewNumericFieldMapping())
+
+		index := bleve.NewIndexMapping()
+		index.AddDocumentMapping("spell", spellMapping)
+		index.TypeField = "type"
+		index.DefaultAnalyzer = "en"
+		index.AddCustomAnalyzer("en", map[string]interface{}{
+			"type":      "standard",
+			"tokenizer": "whitespace",
+			"token_filters": []string{
+				en.PossessiveName,
+				lowercase.Name,
+				en.StopName,
+				porter.Name,
+			},
+		})
+
+		spellIndex, err = bleve.New("cache/spell.bleve", index)
+		if err != nil {
+			return fmt.Errorf("bleve.New: %w", err)
+		}
+		isNewIndex = true
+	}
+
 	spells = map[int]*Spell{}
 
 	query := "SELECT id, name, TargetType, maxtargets, buffduration, skill, "
@@ -66,7 +132,10 @@ func initSpells() error {
 	}
 	defer rows.Close()
 
+	batch := spellIndex.NewBatch()
+
 	for rows.Next() {
+		totalCount++
 		se := &Spell{
 			Attribs: make([]int, 12),
 			Bases:   make([]int, 12),
@@ -89,6 +158,55 @@ func initSpells() error {
 			return fmt.Errorf("rows.Scan: %w", err)
 		}
 		spells[se.ID] = se
+		if isNewIndex {
+			if totalCount%1000 == 0 {
+				if totalCount%10000 == 0 {
+					tlog.Infof("Indexed %d out of ~40000 spells", totalCount)
+				}
+				err = spellIndex.Batch(batch)
+				if err != nil {
+					return fmt.Errorf("spellIndex.Batch: %w", err)
+				}
+				batch = spellIndex.NewBatch()
+			}
+
+			spellData := SpellIndexData{
+				Name:  se.Name,
+				Level: 255,
+			}
+			for i := 0; i < 16; i++ {
+				if se.Classes[i] > 0 && se.Classes[i] < 255 {
+					newLevel := se.Classes[i]
+					if newLevel >= spellData.Level {
+						continue
+					}
+					spellData.Level = newLevel
+				}
+			}
+
+			if config.Get().Spell.IsSearchOnlyPlayerSpells {
+				if spellData.Level == 255 {
+					continue
+				}
+				if spellData.Level > config.Get().MaxLevel {
+					continue
+				}
+			}
+
+			err = batch.Index(fmt.Sprintf("%d", se.ID), spellData)
+			if err != nil {
+				return fmt.Errorf("spellIndex.Index: %w", err)
+			}
+		}
+	}
+
+	if isNewIndex {
+		err = spellIndex.Batch(batch)
+		if err != nil {
+			return fmt.Errorf("spellIndex.Batch: %w", err)
+		}
+		tlog.Debugf("Loaded %d spells in %s", totalCount, time.Since(start).String())
+		return nil
 	}
 	tlog.Debugf("Loaded %d spells", len(spells))
 	return nil
@@ -112,4 +230,55 @@ func SpellByID(id int) *Spell {
 		return nil
 	}
 	return se
+}
+
+func SpellSearchByName(ctx context.Context, name string) ([]SpellIndexData, error) {
+
+	searches := []query.Query{}
+
+	terms := strings.Split(name, " ")
+	for _, term := range terms {
+		search := bleve.NewFuzzyQuery(term)
+		search.SetField("name")
+		search.SetFuzziness(1)
+		searches = append(searches, search)
+	}
+	multiQuery := bleve.NewConjunctionQuery(searches...)
+
+	searchRequest := bleve.NewSearchRequestOptions(multiQuery, 10, 0, true)
+	searchRequest.Fields = []string{"name", "level"}
+	searchRequest.SortBy([]string{"level"})
+
+	searchResults, err := spellIndex.SearchInContext(ctx, searchRequest)
+	if err != nil {
+		return nil, fmt.Errorf("spellIndex.Search: %w", err)
+	}
+	results := []SpellIndexData{}
+
+	for _, hit := range searchResults.Hits {
+		id, err := strconv.Atoi(hit.ID)
+		if err != nil {
+			return nil, fmt.Errorf("strconv.Atoi: %w", err)
+		}
+		name, ok := hit.Fields["name"].(string)
+		if !ok {
+			name = fmt.Sprintf("Unknown Spell (%d)", id)
+		}
+		level := 255
+		levelField, ok := hit.Fields["level"].(float64)
+		if !ok {
+			tlog.Warnf("spell %d has no level", id)
+			level = 255
+		} else {
+			level = int(levelField)
+		}
+		results = append(results,
+			SpellIndexData{
+				ID:    id,
+				Name:  name,
+				Level: level,
+			})
+	}
+	tlog.Debugf("Search found %d results, %d hits", len(results), len(searchResults.Hits))
+	return results, nil
 }

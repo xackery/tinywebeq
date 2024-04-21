@@ -16,14 +16,15 @@ var (
 
 // Config represents a configuration parse
 type Config struct {
-	Debug               bool      `toml:"debug" desc:"tinywebeq Configuration\n\n# Debug messages are displayed. This will cause console to be more verbose, but also more informative"`
-	IsDiscoveredOnly    bool      `toml:"is_discovered_only" desc:"If true, only discovered items are viewable, default false"`
-	DiscoverCacheReload int       `toml:"discover_cache_reload" desc:"How long before trying to refresh a non-discovered item as discovered, lowering this value can cause a bigger tax on sql. default 640 seconds"`
-	Server              Server    `toml:"server" desc:"Server configuration"`
-	Database            Database  `toml:"database" desc:"Database configuration"`
-	MemCache            MemCache  `toml:"mem_cache" desc:"Memory cache configuration"`
-	FileCache           FileCache `toml:"file_cache" desc:"File cache configuration"`
-	IsSpellInfoEnabled  bool      `toml:"is_spell_info_enabled" desc:"If true, spell info is enabled (similar to mq spell details), default true"`
+	Debug            bool      `toml:"debug" desc:"tinywebeq Configuration\n\n# Debug messages are displayed. This will cause console to be more verbose, but also more informative"`
+	MaxLevel         int       `toml:"max_level" desc:"Maximum level a character can obtain. Useful for filtering out spells that are not available to players. Default 65"`
+	CurrentExpansion int       `toml:"current_expansion" desc:"Default 0 (Classic), Current expansion for the server. Filters out spells that are not available to players."`
+	Server           Server    `toml:"server" desc:"Web Server configuration"`
+	Database         Database  `toml:"database" desc:"Database configuration"`
+	Item             Item      `toml:"item" desc:"Item configuration"`
+	Spell            Spell     `toml:"spell" desc:"Spell configuration"`
+	MemCache         MemCache  `toml:"mem_cache" desc:"Memory cache configuration"`
+	FileCache        FileCache `toml:"file_cache" desc:"File cache configuration"`
 }
 
 type Server struct {
@@ -48,15 +49,31 @@ type Database struct {
 	Password string `toml:"password" desc:"Database password"`
 }
 
+type Item struct {
+	IsEnabled           bool `toml:"is_enabled" desc:"If true, item endpoints are enabled, default true"`
+	IsCacheEnabled      bool `toml:"is_cache_enabled" desc:"If true, item cache is enabled, default true"`
+	IsSearchEnabled     bool `toml:"is_search_enabled" desc:"Defaults to false, searching increases memory cost of tinywebeq"`
+	IsDiscoveredOnly    bool `toml:"is_discovered_only" desc:"If true, only discovered items are viewable, default false"`
+	DiscoverCacheReload int  `toml:"discover_cache_reload" desc:"How long before trying to refresh a non-discovered item as discovered, lowering this value can cause a bigger tax on sql. default 640 seconds"`
+}
+
+type Spell struct {
+	IsEnabled                bool `toml:"is_enabled" desc:"If true, spell endpoints are enabled, default true"`
+	IsCacheEnabled           bool `toml:"is_cache_enabled" desc:"If true, spell cache is enabled, default true"`
+	IsSearchEnabled          bool `toml:"is_search_enabled" desc:"Defaults to false, searching increases memory cost of tinywebeq"`
+	IsSearchOnlyPlayerSpells bool `toml:"is_search_only_player_spells" desc:"If true, only player spells are searchable, default false"`
+	IsSpellInfoEnabled       bool `toml:"is_spell_info_enabled" desc:"If true, spell info is enabled (similar to mq spell details), default true"`
+}
+
 type FileCache struct {
-	IsEnabled        bool `toml:"is_file_cache_enabled" desc:"If true, file cache is enabled, default true"`
+	IsEnabled        bool `toml:"is_enabled" desc:"If true, file cache is enabled, default true"`
 	MaxFiles         int  `toml:"max_files" desc:"Maximum number of files to keep in cache, default 1000"`
 	TruncateSchedule int  `toml:"truncate_schedule" desc:"How often to truncate file cache in seconds, default 25200 seconds (7 hours)"`
 	Expiration       int  `toml:"expiration" desc:"How long to keep file cache in seconds, default 21600 seconds (6 hours) "`
 }
 
 type MemCache struct {
-	IsEnabled        bool `toml:"is_mem_cache_enabled" desc:"If true, memory cache is enabled, default true"`
+	IsEnabled        bool `toml:"is_enabled" desc:"If true, memory cache is enabled, default true"`
 	MaxMemory        int  `toml:"max_memory" desc:"Maximum size of memory cache in bytes, default 150000000 (150 MB)"`
 	TruncateSchedule int  `toml:"truncate_schedule" desc:"How often to truncate memory cache in seconds, default 600 seconds (10 minutes)"`
 	Expiration       int  `toml:"expiration" desc:"How long to keep memory cache in seconds, default 300 seconds (5 minutes)"`
@@ -135,9 +152,8 @@ func (c *Config) Verify() error {
 
 func defaultLabel() Config {
 	cfg := Config{
-		Debug:               true,
-		IsDiscoveredOnly:    false,
-		DiscoverCacheReload: 640,
+		Debug:    true,
+		MaxLevel: 65,
 		Server: Server{
 			Host: "localhost",
 			Port: 8080,
@@ -161,6 +177,20 @@ func defaultLabel() Config {
 			TruncateSchedule: 25200,
 			Expiration:       21600,
 		},
+		Item: Item{
+			IsEnabled:           true,
+			IsCacheEnabled:      true,
+			IsSearchEnabled:     false,
+			IsDiscoveredOnly:    false,
+			DiscoverCacheReload: 640,
+		},
+		Spell: Spell{
+			IsEnabled:                true,
+			IsCacheEnabled:           true,
+			IsSearchEnabled:          false,
+			IsSpellInfoEnabled:       true,
+			IsSearchOnlyPlayerSpells: false,
+		},
 		Database: Database{
 			Host:     "localhost",
 			Port:     3306,
@@ -168,7 +198,6 @@ func defaultLabel() Config {
 			Name:     "peq",
 			Password: "peqpass",
 		},
-		IsSpellInfoEnabled: true,
 	}
 
 	return cfg
