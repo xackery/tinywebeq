@@ -14,6 +14,7 @@ require golang.org/x/image v0.15.0
 
 require (
 	github.com/blevesearch/bleve v1.0.14
+	github.com/ftrvxmtrx/tga v0.0.0-20150524081124-bd8e8d5be13a
 	github.com/go-jose/go-jose/v4 v4.0.1
 	golang.org/x/crypto v0.19.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -21,8 +22,6 @@ require (
 
 require (
 	github.com/RoaringBitmap/roaring v0.4.23 // indirect
-	github.com/adrg/xdg v0.4.0 // indirect
-	github.com/andygrunwald/vdf v1.1.0 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
 	github.com/blevesearch/mmap-go v1.0.2 // indirect
 	github.com/blevesearch/segment v0.9.0 // indirect
@@ -35,21 +34,12 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/couchbase/vellum v1.0.2 // indirect
-	github.com/ftrvxmtrx/tga v0.0.0-20150524081124-bd8e8d5be13a // indirect
 	github.com/glycerine/go-unsnap-stream v0.0.0-20181221182339-f9677308dec2 // indirect
-	github.com/go-audio/audio v1.0.0 // indirect
-	github.com/go-audio/riff v1.0.0 // indirect
-	github.com/go-audio/wav v1.1.0 // indirect
-	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/hellflame/argparse v1.12.0 // indirect
-	github.com/jfreymuth/vorbis v1.0.2 // indirect
-	github.com/jwalton/go-supportscolor v1.2.0 // indirect
 	github.com/miekg/dns v1.1.58 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/philhofer/fwd v1.0.0 // indirect
-	github.com/qmuntal/gltf v0.24.3 // indirect
 	github.com/steveyen/gtreap v0.1.0 // indirect
 	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/willf/bitset v1.1.10 // indirect
@@ -57,7 +47,6 @@ require (
 	go.etcd.io/bbolt v1.3.5 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/term v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
@@ -69,11 +58,8 @@ require (
 	github.com/go-acme/lego v2.7.2+incompatible
 	github.com/go-acme/lego/v4 v4.16.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
-	github.com/lukegb/dds v0.0.0-20190402175749-8b7170e64003
-	github.com/malashin/dds v0.0.0-20190511100755-ab62708f5fe5
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/xypwn/filediver v0.3.0
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
