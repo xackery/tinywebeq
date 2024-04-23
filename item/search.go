@@ -24,7 +24,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if !config.Get().Item.IsSearchEnabled {
+	if !config.Get().Item.Search.IsEnabled {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}

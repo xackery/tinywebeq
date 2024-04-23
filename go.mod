@@ -13,13 +13,14 @@ require (
 require golang.org/x/image v0.15.0
 
 require (
+	github.com/blevesearch/bleve v1.0.14
+	github.com/go-jose/go-jose/v4 v4.0.1
 	golang.org/x/crypto v0.19.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	github.com/RoaringBitmap/roaring v0.4.23 // indirect
-	github.com/blevesearch/bleve v1.0.14 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
 	github.com/blevesearch/mmap-go v1.0.2 // indirect
 	github.com/blevesearch/segment v0.9.0 // indirect
@@ -33,7 +34,6 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/couchbase/vellum v1.0.2 // indirect
 	github.com/glycerine/go-unsnap-stream v0.0.0-20181221182339-f9677308dec2 // indirect
-	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/miekg/dns v1.1.58 // indirect

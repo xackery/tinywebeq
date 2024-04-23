@@ -16,8 +16,8 @@ var (
 
 // Config represents a configuration parse
 type Config struct {
-	Debug            bool      `toml:"debug" desc:"tinywebeq Configuration\n\n# Debug messages are displayed. This will cause console to be more verbose, but also more informative"`
-	MaxLevel         int       `toml:"max_level" desc:"Maximum level a character can obtain. Useful for filtering out spells that are not available to players. Default 65"`
+	IsDebugEnabled   bool      `toml:"is_debug_enabled" desc:"Default true, enables verbose logging"`
+	MaxLevel         int       `toml:"max_level" desc:"Default 65, Maximum level a character can obtain. Used by spell.playeronlyspells, spell.info, item.is_search_only_player_obtainable"`
 	CurrentExpansion int       `toml:"current_expansion" desc:"Default 0 (Classic), Current expansion for the server. Filters out spells that are not available to players."`
 	Server           Server    `toml:"server" desc:"Web Server configuration"`
 	Database         Database  `toml:"database" desc:"Database configuration"`
@@ -28,54 +28,81 @@ type Config struct {
 }
 
 type Server struct {
-	Host        string      `toml:"host" desc:"Server host"`
-	Port        int         `toml:"port" desc:"Server port"`
+	Host        string      `toml:"host" desc:"Default localhost, what IP to bind to, can also have it empty to bind all"`
+	Port        int         `toml:"port" desc:"Default 8080, what port to bind to, if you're not using a proxy and use TLS set to 443"`
 	LetsEncrypt LetsEncrypt `toml:"lets_encrypt" desc:"LetsEncrypt configuration"`
 }
 
 type LetsEncrypt struct {
-	IsEnabled bool     `toml:"is_enabled" desc:"If true, letsencrypt is enabled, default false\n#WARNING: To use LetsEncrypt, you need to expose ports 5001 and 5002 for challenge requests. You also need to not use wildcard domains"`
-	Email     string   `toml:"email" desc:"Email address for letsencrypt"`
-	CertPath  string   `toml:"cert" desc:"Cert Path for letsencrypt. If not provided, will be generated during 'letsencrypt' argument, defaults certs/"`
-	Domains   []string `toml:"domains" desc:"Domains to allow with cert"`
-	IsProd    bool     `toml:"is_prod" desc:"If true, use production letsencrypt, default false"`
+	IsEnabled bool     `toml:"is_enabled" desc:"Default false, WARNING: To use LetsEncrypt, you need to expose ports 5001 and 5002 for challenge requests. You also need to not use wildcard domains"`
+	Email     string   `toml:"email" desc:"Default example@email.com, what email to register for lets encrypt"`
+	CertPath  string   `toml:"cert" desc:"Default certs/, where to store letsencrypt certs"`
+	Domains   []string `toml:"domains" desc:"Default example.com,list of domains to register for letsencrypt, do not use wildcard domains"`
+	IsProd    bool     `toml:"is_prod" desc:"Default false, uses staging to ensure letsencrypt settings are good. Once you succeed, flip to true to use production certs"`
 }
 
 type Database struct {
-	Host     string `toml:"host" desc:"Database host"`
-	Port     int    `toml:"port" desc:"Database port"`
-	Username string `toml:"username" desc:"Database username"`
-	Name     string `toml:"name" desc:"Database name"`
-	Password string `toml:"password" desc:"Database password"`
+	Host     string `toml:"host" desc:"Default localhost, where to connect for database"`
+	Port     int    `toml:"port" desc:"Default 3306, what port to connect to for database"`
+	Username string `toml:"username" desc:"Default peq, Database username"`
+	Name     string `toml:"name" desc:"Default peq, Database name"`
+	Password string `toml:"password" desc:"Default peqpass, Database password"`
 }
 
 type Item struct {
-	IsEnabled           bool `toml:"is_enabled" desc:"If true, item endpoints are enabled, default true"`
-	IsCacheEnabled      bool `toml:"is_cache_enabled" desc:"If true, item cache is enabled, default true"`
-	IsSearchEnabled     bool `toml:"is_search_enabled" desc:"Defaults to false, searching increases memory cost of tinywebeq"`
-	IsDiscoveredOnly    bool `toml:"is_discovered_only" desc:"If true, only discovered items are viewable, default false"`
-	DiscoverCacheReload int  `toml:"discover_cache_reload" desc:"How long before trying to refresh a non-discovered item as discovered, lowering this value can cause a bigger tax on sql. default 640 seconds"`
+	IsEnabled           bool        `toml:"is_enabled" desc:"Default true, enables item endpoints"`
+	IsCacheEnabled      bool        `toml:"is_cache_enabled" desc:"Default true, enables item caching"`
+	IsDiscoveredOnly    bool        `toml:"is_discovered_only" desc:"Default false, only allow discovered items to be viewed"`
+	DiscoverCacheReload int         `toml:"discover_cache_reload" desc:"Default 640, in seconds how long before trying to refresh a cached non-discovered item as discovered, lowering this value can cause a bigger tax on sql"`
+	Search              ItemSearch  `toml:"search" desc:"Item search configuration"`
+	Preview             ItemPreview `toml:"preview" desc:"Item preview configuration"`
+}
+
+type ItemSearch struct {
+	IsEnabled                bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the item view for finding other items"`
+	IsBleveEnabled           bool `toml:"is_bleve_enabled" desc:"Default false, costs ~200MB of memory to do names searches in memory with bleve indexing"`
+	IsOnlyPlayableObtainable bool `toml:"is_only_player_obtainable" desc:"Default false, only items determined player obtainable come up in search"`
+}
+
+type ItemPreview struct {
+	BGColor    string `toml:"bg_color" desc:"Default #303030, background color for item preview"`
+	FGColor    string `toml:"fg_color" desc:"Default #FFFFFF, foreground text color for item preview"`
+	FontNormal string `toml:"font" desc:"Default goregular, if changed place a .ttf file same path as binary"`
+	FontBold   string `toml:"font_bold" desc:"Default gobold, if changed place a .ttf file same path as binary"`
 }
 
 type Spell struct {
-	IsEnabled                bool `toml:"is_enabled" desc:"If true, spell endpoints are enabled, default true"`
-	IsCacheEnabled           bool `toml:"is_cache_enabled" desc:"If true, spell cache is enabled, default true"`
-	IsSearchEnabled          bool `toml:"is_search_enabled" desc:"Defaults to false, searching increases memory cost of tinywebeq"`
-	IsSearchOnlyPlayerSpells bool `toml:"is_search_only_player_spells" desc:"If true, only player spells are searchable, default false"`
-	IsSpellInfoEnabled       bool `toml:"is_spell_info_enabled" desc:"If true, spell info is enabled (similar to mq spell details), default true"`
+	IsEnabled          bool         `toml:"is_enabled" desc:"Default true, spell endpoints are enabled"`
+	IsCacheEnabled     bool         `toml:"is_cache_enabled" desc:"Default true, spell caching is enabled"`
+	IsSpellInfoEnabled bool         `toml:"is_spell_info_enabled" desc:"Default true, gives spell effect detailed info (based to mq spell details)"`
+	Search             SpellSearch  `toml:"search" desc:"Spell search configuration"`
+	Preview            SpellPreview `toml:"preview" desc:"Spell preview configuration"`
+}
+
+type SpellSearch struct {
+	IsEnabled          bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the spell view for finding other spells"`
+	IsBleveEnabled     bool `toml:"is_bleve_enabled" desc:"Default false, when enabled it costs ~200MB of memory to do names searches with no DB hit"`
+	IsOnlyPlayerSpells bool `toml:"is_only_player_spells" desc:"Default false, only spells determined player obtainable come up in search"`
+}
+
+type SpellPreview struct {
+	BGColor    string `toml:"bg_color" desc:"Default #303030, background color for spell preview"`
+	FGColor    string `toml:"fg_color" desc:"Default #FFFFFF, foreground text color for spell preview"`
+	FontNormal string `toml:"font" desc:"Default goregular, if changed place a .ttf file same path as binary"`
+	FontBold   string `toml:"font_bold" desc:"Default gobold, if changed place a .ttf file same path as binary"`
 }
 
 type FileCache struct {
-	IsEnabled        bool `toml:"is_enabled" desc:"If true, file cache is enabled, default true"`
-	MaxFiles         int  `toml:"max_files" desc:"Maximum number of files to keep in cache, default 1000"`
-	TruncateSchedule int  `toml:"truncate_schedule" desc:"How often to truncate file cache in seconds, default 25200 seconds (7 hours)"`
+	IsEnabled        bool `toml:"is_enabled" desc:"Default true, when a page is requested it's data is cached to the cache subfolder"`
+	MaxFiles         int  `toml:"max_files" desc:"Default 1000, maximum number of files to keep in cache"`
+	TruncateSchedule int  `toml:"truncate_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews file cache and truncates expired items, freeing up memory"`
 	Expiration       int  `toml:"expiration" desc:"How long to keep file cache in seconds, default 21600 seconds (6 hours) "`
 }
 
 type MemCache struct {
 	IsEnabled        bool `toml:"is_enabled" desc:"If true, memory cache is enabled, default true"`
-	MaxMemory        int  `toml:"max_memory" desc:"Maximum size of memory cache in bytes, default 150000000 (150 MB)"`
-	TruncateSchedule int  `toml:"truncate_schedule" desc:"How often to truncate memory cache in seconds, default 600 seconds (10 minutes)"`
+	MaxMemory        int  `toml:"max_memory" desc:"Default 150000000, (150000000 bytes = 150 MB) how much maximum memory should be used for caching page data (this does not include bleve search memory)"`
+	TruncateSchedule int  `toml:"truncate_schedule" desc:"Default 600, (600s = 10 minutes), when this hits a scheduler fires that reviews memory cache and truncates expired items, freeing up memory"`
 	Expiration       int  `toml:"expiration" desc:"How long to keep memory cache in seconds, default 300 seconds (5 minutes)"`
 }
 
@@ -132,7 +159,7 @@ func NewConfig(ctx context.Context) (*Config, error) {
 	}
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if cfg.Debug {
+	if cfg.IsDebugEnabled {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
@@ -152,14 +179,14 @@ func (c *Config) Verify() error {
 
 func defaultLabel() Config {
 	cfg := Config{
-		Debug:    true,
-		MaxLevel: 65,
+		IsDebugEnabled: true,
+		MaxLevel:       65,
 		Server: Server{
 			Host: "localhost",
 			Port: 8080,
 			LetsEncrypt: LetsEncrypt{
 				IsEnabled: false,
-				Email:     "",
+				Email:     "example@email.com",
 				CertPath:  "./certs",
 				Domains:   []string{"example.com", "www.example.com"},
 				IsProd:    false,
@@ -180,16 +207,35 @@ func defaultLabel() Config {
 		Item: Item{
 			IsEnabled:           true,
 			IsCacheEnabled:      true,
-			IsSearchEnabled:     false,
 			IsDiscoveredOnly:    false,
 			DiscoverCacheReload: 640,
+			Search: ItemSearch{
+				IsEnabled:                false,
+				IsBleveEnabled:           false,
+				IsOnlyPlayableObtainable: false,
+			},
+			Preview: ItemPreview{
+				BGColor:    "#303030",
+				FGColor:    "#FFFFFF",
+				FontNormal: "goregular",
+				FontBold:   "gobold",
+			},
 		},
 		Spell: Spell{
-			IsEnabled:                true,
-			IsCacheEnabled:           true,
-			IsSearchEnabled:          false,
-			IsSpellInfoEnabled:       true,
-			IsSearchOnlyPlayerSpells: false,
+			IsEnabled:          true,
+			IsCacheEnabled:     true,
+			IsSpellInfoEnabled: true,
+			Search: SpellSearch{
+				IsEnabled:          false,
+				IsBleveEnabled:     false,
+				IsOnlyPlayerSpells: false,
+			},
+			Preview: SpellPreview{
+				BGColor:    "#303030",
+				FGColor:    "#FFFFFF",
+				FontNormal: "goregular",
+				FontBold:   "gobold",
+			},
 		},
 		Database: Database{
 			Host:     "localhost",

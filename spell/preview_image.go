@@ -27,7 +27,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 		id, err = strconv.Atoi(strID)
 		if err != nil {
 			tlog.Errorf("strconv.Atoi: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "Not Found", http.StatusNotFound)
 			return
 		}
 	}
@@ -39,7 +39,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	err = previewImageRender(ctx, id, w)
 	if err != nil {
 		tlog.Errorf("previewImageRender: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 	tlog.Debugf("previewImageRender: id: %d done", id)
@@ -48,6 +48,9 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
 
 	lines := library.SpellInfo(id)
+	if len(lines) == 0 {
+		return fmt.Errorf("no spell info found")
+	}
 
 	data, err := image.GenerateSpellPreview(lines)
 	if err != nil {

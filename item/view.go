@@ -88,7 +88,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		Site:                site.BaseDataInit("Item View"),
 		Item:                item,
 		Library:             library.Instance(),
-		IsItemSearchEnabled: config.Get().Item.IsSearchEnabled,
+		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

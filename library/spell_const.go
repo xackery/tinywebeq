@@ -867,7 +867,6 @@ const (
 
 const (
 	MAX_SPELLEFFECTS = 999
-	MaxPCLevel       = 115
 )
 
 var szSPATypes = []string{

@@ -43,6 +43,7 @@ type Spell struct {
 	Pushback     int
 	TeleportZone string
 	Mana         int
+	SpellGroup   int
 }
 
 type SpellIndexData struct {
@@ -55,49 +56,50 @@ func initSpells() error {
 	var err error
 	start := time.Now()
 
-	isSearchEnabled := config.Get().Spell.IsSearchEnabled
-
-	if !isSearchEnabled {
+	if !config.Get().Spell.IsEnabled {
 		return nil
 	}
+	isSearchEnabled := config.Get().Spell.Search.IsEnabled
 
 	totalCount := 0
 	isNewIndex := false
 
-	spellIndex, err = bleve.Open("cache/spell.bleve")
-	if err != nil {
-		if err != bleve.ErrorIndexPathDoesNotExist {
-			return fmt.Errorf("bleve.Open: %w", err)
-		}
-		tlog.Infof("No cache/spell.bleve found, creating new index")
-
-		englishTextFieldMapping := bleve.NewTextFieldMapping()
-		englishTextFieldMapping.Analyzer = en.AnalyzerName
-
-		spellMapping := bleve.NewDocumentMapping()
-		spellMapping.AddFieldMappingsAt("name", englishTextFieldMapping)
-		spellMapping.AddFieldMappingsAt("level", mapping.NewNumericFieldMapping())
-
-		index := bleve.NewIndexMapping()
-		index.AddDocumentMapping("spell", spellMapping)
-		index.TypeField = "type"
-		index.DefaultAnalyzer = "en"
-		index.AddCustomAnalyzer("en", map[string]interface{}{
-			"type":      "standard",
-			"tokenizer": "whitespace",
-			"token_filters": []string{
-				en.PossessiveName,
-				lowercase.Name,
-				en.StopName,
-				porter.Name,
-			},
-		})
-
-		spellIndex, err = bleve.New("cache/spell.bleve", index)
+	if isSearchEnabled {
+		spellIndex, err = bleve.Open("cache/spell.bleve")
 		if err != nil {
-			return fmt.Errorf("bleve.New: %w", err)
+			if err != bleve.ErrorIndexPathDoesNotExist {
+				return fmt.Errorf("bleve.Open: %w", err)
+			}
+			tlog.Infof("No cache/spell.bleve found, creating new index")
+
+			englishTextFieldMapping := bleve.NewTextFieldMapping()
+			englishTextFieldMapping.Analyzer = en.AnalyzerName
+
+			spellMapping := bleve.NewDocumentMapping()
+			spellMapping.AddFieldMappingsAt("name", englishTextFieldMapping)
+			spellMapping.AddFieldMappingsAt("level", mapping.NewNumericFieldMapping())
+
+			index := bleve.NewIndexMapping()
+			index.AddDocumentMapping("spell", spellMapping)
+			index.TypeField = "type"
+			index.DefaultAnalyzer = "en"
+			index.AddCustomAnalyzer("en", map[string]interface{}{
+				"type":      "standard",
+				"tokenizer": "whitespace",
+				"token_filters": []string{
+					en.PossessiveName,
+					lowercase.Name,
+					en.StopName,
+					porter.Name,
+				},
+			})
+
+			spellIndex, err = bleve.New("cache/spell.bleve", index)
+			if err != nil {
+				return fmt.Errorf("bleve.New: %w", err)
+			}
+			isNewIndex = true
 		}
-		isNewIndex = true
 	}
 
 	spells = map[int]*Spell{}
@@ -121,7 +123,7 @@ func initSpells() error {
 	for i := 1; i < 17; i++ {
 		query += fmt.Sprintf("classes%d, ", i)
 	}
-	query += "`range`, recovery_time, recast_time, buffduration, pushback, teleport_zone, mana"
+	query += "`range`, recovery_time, recast_time, buffduration, pushback, teleport_zone, mana, spellgroup"
 
 	query += " FROM spells_new"
 
@@ -132,7 +134,10 @@ func initSpells() error {
 	}
 	defer rows.Close()
 
-	batch := spellIndex.NewBatch()
+	var batch *bleve.Batch
+	if isSearchEnabled {
+		batch = spellIndex.NewBatch()
+	}
 
 	for rows.Next() {
 		totalCount++
@@ -152,13 +157,13 @@ func initSpells() error {
 			&se.Maxes[0], &se.Maxes[1], &se.Maxes[2], &se.Maxes[3], &se.Maxes[4], &se.Maxes[5], &se.Maxes[6], &se.Maxes[7], &se.Maxes[8], &se.Maxes[9], &se.Maxes[10], &se.Maxes[11],
 			&se.Calcs[0], &se.Calcs[1], &se.Calcs[2], &se.Calcs[3], &se.Calcs[4], &se.Calcs[5], &se.Calcs[6], &se.Calcs[7], &se.Calcs[8], &se.Calcs[9], &se.Calcs[10], &se.Calcs[11],
 			&se.Classes[0], &se.Classes[1], &se.Classes[2], &se.Classes[3], &se.Classes[4], &se.Classes[5], &se.Classes[6], &se.Classes[7], &se.Classes[8], &se.Classes[9], &se.Classes[10], &se.Classes[11], &se.Classes[12], &se.Classes[13], &se.Classes[14], &se.Classes[15],
-			&se.Range, &se.RecoveryTime, &se.RecastTime, &se.DurationCalc, &se.Pushback, &se.TeleportZone, &se.Mana,
+			&se.Range, &se.RecoveryTime, &se.RecastTime, &se.DurationCalc, &se.Pushback, &se.TeleportZone, &se.Mana, &se.SpellGroup,
 		)
 		if err != nil {
 			return fmt.Errorf("rows.Scan: %w", err)
 		}
 		spells[se.ID] = se
-		if isNewIndex {
+		if isSearchEnabled && isNewIndex {
 			if totalCount%1000 == 0 {
 				if totalCount%10000 == 0 {
 					tlog.Infof("Indexed %d out of ~40000 spells", totalCount)
@@ -184,7 +189,7 @@ func initSpells() error {
 				}
 			}
 
-			if config.Get().Spell.IsSearchOnlyPlayerSpells {
+			if config.Get().Spell.Search.IsOnlyPlayerSpells {
 				if spellData.Level == 255 {
 					continue
 				}
@@ -200,7 +205,7 @@ func initSpells() error {
 		}
 	}
 
-	if isNewIndex {
+	if isSearchEnabled && isNewIndex {
 		err = spellIndex.Batch(batch)
 		if err != nil {
 			return fmt.Errorf("spellIndex.Batch: %w", err)

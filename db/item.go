@@ -299,58 +299,7 @@ func (t *Item) Identifier() string {
 }
 
 func (t *Item) ClassStr() string {
-	out := ""
-	if t.Classes == 65535 {
-		return "ALL"
-	}
-	if t.Classes&16384 != 0 {
-		out += "BST "
-	}
-	if t.Classes&8192 != 0 {
-		out += "ENC "
-	}
-	if t.Classes&4096 != 0 {
-		out += "MAG "
-	}
-	if t.Classes&2048 != 0 {
-		out += "WIZ "
-	}
-	if t.Classes&1024 != 0 {
-		out += "NEC "
-	}
-	if t.Classes&512 != 0 {
-		out += "SHM "
-	}
-	if t.Classes&256 != 0 {
-		out += "ROG "
-	}
-	if t.Classes&128 != 0 {
-		out += "BRD "
-	}
-	if t.Classes&64 != 0 {
-		out += "MNK "
-	}
-	if t.Classes&32 != 0 {
-		out += "DRU "
-	}
-	if t.Classes&16 != 0 {
-		out += "SHD "
-	}
-	if t.Classes&8 != 0 {
-		out += "RNG "
-	}
-	if t.Classes&4 != 0 {
-		out += "PAL "
-	}
-	if t.Classes&2 != 0 {
-		out += "CLR "
-	}
-	if t.Classes&1 != 0 {
-		out += "WAR "
-	}
-
-	out = strings.TrimSuffix(out, " ")
-	return out
+	return ClassesFromMask(t.Classes)
 }
 
 func (t *Item) RaceStr() string {

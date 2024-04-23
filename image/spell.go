@@ -18,6 +18,15 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+var (
+	spellBGColor  = color.RGBA{0x30, 0x30, 0x30, 0xff}
+	spellFGColor  = color.RGBA{0xff, 0xff, 0xff, 0xff}
+	spellFGImage  = image.NewUniform(spellFGColor)
+	spellBGImage  = image.NewUniform(spellBGColor)
+	spellFont     = goregular.TTF
+	spellFontBold = gobold.TTF
+)
+
 type SpellPreview struct {
 	c           *freetype.Context
 	cb          *freetype.Context
@@ -46,32 +55,30 @@ func (e *SpellPreview) writeNoAlignLn(field string, value string) {
 }
 
 func GenerateSpellPreview(lines []string) ([]byte, error) {
-	fgColor := color.RGBA{0xff, 0xff, 0xff, 0xff}
+	mu.RLock()
+	defer mu.RUnlock()
 
-	bgColor := color.RGBA{0x30, 0x30, 0x30, 0xff}
-	font, err := truetype.Parse(goregular.TTF)
+	font, err := truetype.Parse(spellFont)
 	if err != nil {
 		return nil, fmt.Errorf("parse font: %w", err)
 	}
 
 	fontSize := float64(16)
 
-	fontBold, err := truetype.Parse(gobold.TTF)
+	fontBold, err := truetype.Parse(spellFontBold)
 	if err != nil {
 		return nil, fmt.Errorf("parse fontBold: %w", err)
 	}
 
-	fg := image.NewUniform(fgColor)
-	bg := image.NewUniform(bgColor)
 	rgba := image.NewRGBA(image.Rect(0, 0, 700, 600))
-	draw.Draw(rgba, rgba.Bounds(), bg, image.Pt(0, 0), draw.Src)
+	draw.Draw(rgba, rgba.Bounds(), spellBGImage, image.Pt(0, 0), draw.Src)
 	c := freetype.NewContext()
 	c.SetDPI(72)
 	c.SetFont(font)
 	c.SetFontSize(fontSize)
 	c.SetClip(rgba.Bounds())
 	c.SetDst(rgba)
-	c.SetSrc(fg)
+	c.SetSrc(spellFGImage)
 
 	cb := freetype.NewContext()
 	cb.SetDPI(72)
@@ -79,7 +86,7 @@ func GenerateSpellPreview(lines []string) ([]byte, error) {
 	cb.SetFontSize(fontSize)
 	cb.SetClip(rgba.Bounds())
 	cb.SetDst(rgba)
-	cb.SetSrc(fg)
+	cb.SetSrc(spellFGImage)
 
 	cTitle := freetype.NewContext()
 	cTitle.SetDPI(72)
@@ -87,7 +94,7 @@ func GenerateSpellPreview(lines []string) ([]byte, error) {
 	cTitle.SetFontSize(fontSize * 2)
 	cTitle.SetClip(rgba.Bounds())
 	cTitle.SetDst(rgba)
-	cTitle.SetSrc(fg)
+	cTitle.SetSrc(spellFGImage)
 
 	e := &SpellPreview{
 		c:        c,
@@ -123,7 +130,7 @@ func GenerateSpellPreview(lines []string) ([]byte, error) {
 
 	if e.maxHeight != 600 {
 		rgba2 := image.NewRGBA(image.Rect(0, 0, 700, e.maxHeight))
-		draw.Draw(rgba2, rgba2.Bounds(), bg, image.Pt(0, 0), draw.Src)
+		draw.Draw(rgba2, rgba2.Bounds(), spellBGImage, image.Pt(0, 0), draw.Src)
 		draw.Draw(rgba2, rgba2.Bounds(), rgba, image.Pt(0, 0), draw.Src)
 		rgba = rgba2
 	}

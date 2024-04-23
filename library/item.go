@@ -31,7 +31,7 @@ func initItems() error {
 	var err error
 	start := time.Now()
 
-	isSearchEnabled := config.Get().Item.IsSearchEnabled
+	isSearchEnabled := config.Get().Item.Search.IsEnabled
 
 	if !isSearchEnabled {
 		return nil

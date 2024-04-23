@@ -58,6 +58,10 @@ func View(w http.ResponseWriter, r *http.Request) {
 
 	err = viewRender(ctx, id, w)
 	if err != nil {
+		if err.Error() == "spell not found" {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
 		tlog.Errorf("viewRender: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -86,7 +90,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		Site:                 site.BaseDataInit("Spell View"),
 		Spell:                se,
 		SpellInfo:            library.SpellInfo(id),
-		IsSpellSearchEnabled: config.Get().Spell.IsSearchEnabled,
+		IsSpellSearchEnabled: config.Get().Spell.Search.IsEnabled,
 	}
 
 	err := viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

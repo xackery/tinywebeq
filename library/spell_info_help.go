@@ -254,7 +254,7 @@ func calcExtendedRange(calc int, start int, finish int, minLevel int, maxLevel i
 
 func calcMaxSpellLevel(calc int, base int, max int, tick int, minLevel int, level int) int {
 	if abs(max) < 1 {
-		return MaxPCLevel
+		return level
 	}
 	for maxLevel := 1; maxLevel < level; maxLevel++ {
 		val := calcValue(calc, base, max, tick, minLevel, maxLevel)
@@ -562,4 +562,140 @@ func formatStatsCapRange(spellEffectName string, value int, stat string, spellRa
 
 func formatTimer(spellEffectName string, value float64) string {
 	return fmt.Sprintf("%s by %.2f sec", spellEffectName, value)
+}
+
+func ResistTypeName(in int) string {
+	switch in {
+	case 0:
+		return "Magic"
+	case 1:
+		return "Fire"
+	case 2:
+		return "Cold"
+	case 3:
+		return "Poison"
+	case 4:
+		return "Disease"
+	case 5:
+		return "Chromatic"
+	case 6:
+		return "Prismatic"
+	case 7:
+		return "Physical"
+	case 8:
+		return "Corruption"
+	}
+	return fmt.Sprintf("Unknown Resist Type %d", in)
+}
+
+func TargetTypeLimitsName(in int) string {
+	switch in {
+	case 1:
+		return "Line of Sight"
+	case 2:
+		return "AE PC v1"
+	case 3:
+		return "Group v1"
+	case 4:
+		return "PB AE"
+	case 5:
+		return "Single"
+	case 6:
+		return "Self"
+	case 8:
+		return "Targeted AE"
+	case 9:
+		return "Animal"
+	case 10:
+		return "Undead"
+	case 11:
+		return "Summoned"
+	case 13:
+		return "LifeTap"
+	case 14:
+		return "Pet"
+	case 15:
+		return "Corpse"
+	case 16:
+		return "Plant"
+	case 17:
+		return "Uber Giants"
+	case 18:
+		return "Uber Dragons"
+	case 20:
+		return "Targeted AE Tap"
+	case 24:
+		return "AE Undead"
+	case 25:
+		return "AE Summoned"
+	case 32:
+		return "Hatelist"
+	case 33:
+		return "Hatelist2"
+	case 34:
+		return "Chest"
+	case 35:
+		return "Special Muramites"
+	case 36:
+		return "Caster PB PC"
+	case 37:
+		return "Caster PB NPC"
+	case 38:
+		return "Pet2"
+	case 39:
+		return "No Pets"
+	case 40:
+		return "AE PC v2"
+	case 41:
+		return "Group v2"
+	case 42:
+		return "Directional AE"
+	case 43:
+		return "Single in Group"
+	case 44:
+		return "Beam"
+	case 45:
+		return "Free Target"
+	case 46:
+		return "Target of Target"
+	case 47:
+		return "Pet Owner"
+	case 52:
+		return "Single Friendly (or Target's Target)"
+	case 50:
+		return "Target AE No Players Pets"
+	}
+	return fmt.Sprintf("Unknown Target Type %d", in)
+}
+
+func StatShortName(in int) string {
+	switch in {
+	case 0:
+		return "STR"
+	case 1:
+		return "STA"
+	case 2:
+		return "AGI"
+	case 3:
+		return "DEX"
+	case 4:
+		return "WIS"
+	case 5:
+
+		return "INT"
+	case 6:
+		return "CHA"
+	case 7:
+		return "MR"
+	case 8:
+		return "CR"
+	case 9:
+		return "FR"
+	case 10:
+		return "PR"
+	case 11:
+		return "DR"
+	}
+
+	return fmt.Sprintf("Unknown Stat %d", in)
 }

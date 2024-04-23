@@ -13,6 +13,7 @@ import (
 	"github.com/xackery/tinywebeq/cache"
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
+	"github.com/xackery/tinywebeq/image"
 	"github.com/xackery/tinywebeq/item"
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/player"
@@ -46,7 +47,7 @@ func run() error {
 	defer cancel()
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if config.Get().Debug {
+	if config.Get().IsDebugEnabled {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 	var err error
@@ -100,6 +101,11 @@ func run() error {
 	err = os.MkdirAll("cache", 0755)
 	if err != nil {
 		return fmt.Errorf("make cache: %w", err)
+	}
+
+	err = image.Init(ctx)
+	if err != nil {
+		return fmt.Errorf("image.Init: %w", err)
 	}
 
 	err = db.Init(ctx)
