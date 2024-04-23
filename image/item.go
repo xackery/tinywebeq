@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	itemBGColor  = color.RGBA{0x30, 0x30, 0x30, 0xff}
-	itemFGColor  = color.RGBA{0xff, 0xff, 0xff, 0xff}
+	itemFGColor  = color.RGBA{0xdb, 0xde, 0xe1, 0xff}
+	itemBGColor  = color.RGBA{0x31, 0x33, 0x38, 0xff}
 	itemFGImage  = image.NewUniform(itemFGColor)
 	itemBGImage  = image.NewUniform(itemBGColor)
 	itemFont     = goregular.TTF
