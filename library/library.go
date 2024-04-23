@@ -49,7 +49,7 @@ func Instance() *Library {
 	return instance
 }
 
-func (l *Library) SpellInfo(id int) []string {
+func (l *Library) SpellInfo(id int) (int, []string) {
 	return SpellInfo(id)
 }
 

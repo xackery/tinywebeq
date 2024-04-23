@@ -307,53 +307,53 @@ func (t *Item) RaceStr() string {
 	if t.Races == 65535 {
 		return "ALL"
 	}
-	if t.Races&32768 != 0 {
-		out += "DRK "
-	}
-	if t.Races&16384 != 0 {
-		out += "FRG "
-	}
-	if t.Races&8192 != 0 {
-		out += "VAH "
-	}
-	if t.Races&4096 != 0 {
-		out += "IKS "
-	}
-	if t.Races&2048 != 0 {
-		out += "GNM "
-	}
-	if t.Races&1024 != 0 {
-		out += "HFL "
-	}
-	if t.Races&512 != 0 {
-		out += "OGR "
-	}
-	if t.Races&256 != 0 {
-		out += "TRL "
-	}
-	if t.Races&128 != 0 {
-		out += "DWF "
-	}
-	if t.Races&64 != 0 {
-		out += "HLF "
-	}
-	if t.Races&32 != 0 {
-		out += "DKE "
-	}
-	if t.Races&16 != 0 {
-		out += "HEF "
-	}
-	if t.Races&8 != 0 {
-		out += "WLF "
-	}
-	if t.Races&4 != 0 {
-		out += "ERU "
+	if t.Races&1 != 0 {
+		out += "HUM "
 	}
 	if t.Races&2 != 0 {
 		out += "BAR "
 	}
-	if t.Races&1 != 0 {
-		out += "HUM "
+	if t.Races&4 != 0 {
+		out += "ERU "
+	}
+	if t.Races&8 != 0 {
+		out += "WLF "
+	}
+	if t.Races&16 != 0 {
+		out += "HEF "
+	}
+	if t.Races&32 != 0 {
+		out += "DKE "
+	}
+	if t.Races&64 != 0 {
+		out += "HLF "
+	}
+	if t.Races&128 != 0 {
+		out += "DWF "
+	}
+	if t.Races&256 != 0 {
+		out += "TRL "
+	}
+	if t.Races&512 != 0 {
+		out += "OGR "
+	}
+	if t.Races&1024 != 0 {
+		out += "HFL "
+	}
+	if t.Races&2048 != 0 {
+		out += "GNM "
+	}
+	if t.Races&4096 != 0 {
+		out += "IKS "
+	}
+	if t.Races&8192 != 0 {
+		out += "VAH "
+	}
+	if t.Races&16384 != 0 {
+		out += "FRG "
+	}
+	if t.Races&32768 != 0 {
+		out += "DRK "
 	}
 	out = strings.TrimSuffix(out, " ")
 	return out

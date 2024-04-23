@@ -3,6 +3,9 @@ package library
 import (
 	"context"
 	"fmt"
+	"image"
+	"image/draw"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +16,7 @@ import (
 	"github.com/blevesearch/bleve/analysis/token/porter"
 	"github.com/blevesearch/bleve/mapping"
 	"github.com/blevesearch/bleve/search/query"
+	"github.com/ftrvxmtrx/tga"
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/tlog"
@@ -21,6 +25,7 @@ import (
 var (
 	spells     = map[int]*Spell{}
 	spellIndex bleve.Index
+	spellIcons = make(map[int]image.Image)
 )
 
 type Spell struct {
@@ -44,6 +49,7 @@ type Spell struct {
 	TeleportZone string
 	Mana         int
 	SpellGroup   int
+	SpellIcon    int
 }
 
 type SpellIndexData struct {
@@ -55,6 +61,19 @@ type SpellIndexData struct {
 func initSpells() error {
 	var err error
 	start := time.Now()
+
+	err = os.MkdirAll("assets", os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("os.MkdirAll: %w", err)
+	}
+
+	err = initSpellIcons()
+	if err != nil {
+		if os.IsNotExist(err) {
+			tlog.Warnf("initSpellIcons: %v", err)
+		}
+		tlog.Infof("To add spell icons, copy uifiles/default/spells0*.tga to the assets folder")
+	}
 
 	if !config.Get().Spell.IsEnabled {
 		return nil
@@ -123,7 +142,7 @@ func initSpells() error {
 	for i := 1; i < 17; i++ {
 		query += fmt.Sprintf("classes%d, ", i)
 	}
-	query += "`range`, recovery_time, recast_time, buffduration, pushback, teleport_zone, mana, spellgroup"
+	query += "`range`, recovery_time, recast_time, buffduration, pushback, teleport_zone, mana, spellgroup, new_icon"
 
 	query += " FROM spells_new"
 
@@ -157,7 +176,7 @@ func initSpells() error {
 			&se.Maxes[0], &se.Maxes[1], &se.Maxes[2], &se.Maxes[3], &se.Maxes[4], &se.Maxes[5], &se.Maxes[6], &se.Maxes[7], &se.Maxes[8], &se.Maxes[9], &se.Maxes[10], &se.Maxes[11],
 			&se.Calcs[0], &se.Calcs[1], &se.Calcs[2], &se.Calcs[3], &se.Calcs[4], &se.Calcs[5], &se.Calcs[6], &se.Calcs[7], &se.Calcs[8], &se.Calcs[9], &se.Calcs[10], &se.Calcs[11],
 			&se.Classes[0], &se.Classes[1], &se.Classes[2], &se.Classes[3], &se.Classes[4], &se.Classes[5], &se.Classes[6], &se.Classes[7], &se.Classes[8], &se.Classes[9], &se.Classes[10], &se.Classes[11], &se.Classes[12], &se.Classes[13], &se.Classes[14], &se.Classes[15],
-			&se.Range, &se.RecoveryTime, &se.RecastTime, &se.DurationCalc, &se.Pushback, &se.TeleportZone, &se.Mana, &se.SpellGroup,
+			&se.Range, &se.RecoveryTime, &se.RecastTime, &se.DurationCalc, &se.Pushback, &se.TeleportZone, &se.Mana, &se.SpellGroup, &se.SpellIcon,
 		)
 		if err != nil {
 			return fmt.Errorf("rows.Scan: %w", err)
@@ -286,4 +305,79 @@ func SpellSearchByName(ctx context.Context, name string) ([]SpellIndexData, erro
 	}
 	tlog.Debugf("Search found %d results, %d hits", len(results), len(searchResults.Hits))
 	return results, nil
+}
+
+func initSpellIcons() error {
+	files := []string{
+		"assets/spells01.tga",
+		"assets/spells02.tga",
+		"assets/spells03.tga",
+		"assets/spells04.tga",
+		"assets/spells05.tga",
+		"assets/spells06.tga",
+		"assets/spells07.tga",
+	}
+
+	index := 0
+	isLoaded := false
+	for _, file := range files {
+		img, err := fetchTGA(file)
+		if err != nil {
+			if isLoaded {
+				return nil
+			}
+			return fmt.Errorf("fetchTGA: %w", err)
+		}
+
+		isEmpty := false
+		for i := 0; i < 6; i++ {
+			if isEmpty {
+				break
+			}
+			for j := 0; j < 6; j++ {
+				//subImg := img.(*image.NRGBA).SubImage(image.Rect(j*40, i*41, j*40+40, i*41+41))
+				// move subimg pixels to 0,0
+				iconImg := image.NewNRGBA(image.Rect(0, 0, 40, 40))
+				//draw.Draw(iconImg, iconImg.Bounds(), subImg, image.Pt(0, 0), draw.Src)
+				draw.Draw(iconImg, iconImg.Bounds(), img, image.Pt(j*40, i*40), draw.Src)
+
+				if iconImg.At(0, 0) == image.Transparent {
+					isEmpty = true
+					break
+				}
+
+				spellIcons[index] = iconImg
+				index++
+			}
+		}
+		isLoaded = true
+	}
+
+	tlog.Debugf("Loaded %d spell icons", len(spellIcons))
+
+	return nil
+}
+
+func fetchTGA(path string) (image.Image, error) {
+	r, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("os.Open: %w", err)
+	}
+	defer r.Close()
+	img, err := tga.Decode(r)
+	if err != nil {
+		return nil, fmt.Errorf("tga.Decode: %w", err)
+	}
+
+	return img, nil
+}
+
+func SpellIcon(id int) image.Image {
+	mu.RLock()
+	defer mu.RUnlock()
+	img, ok := spellIcons[id]
+	if !ok {
+		return nil
+	}
+	return img
 }

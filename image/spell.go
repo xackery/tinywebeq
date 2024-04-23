@@ -12,7 +12,7 @@ import (
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/nfnt/resize"
+	"github.com/xackery/tinywebeq/library"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
@@ -36,16 +36,27 @@ type SpellPreview struct {
 	pt          fixed.Point26_6
 	lineCurrent int
 	maxHeight   int
+	maxWidth    int
 }
 
 func (e *SpellPreview) writeNoAlign(field string, value string) {
+	var newPos fixed.Point26_6
 	if len(field) == 0 { // non-bold value only
-		e.c.DrawString(value, e.pt)
+		newPos, _ = e.c.DrawString(value, e.pt)
+		if newPos.X.Ceil() > e.maxWidth {
+			e.maxWidth = newPos.X.Ceil()
+		}
 		return
 	}
-	newPos, _ := e.cb.DrawString(field, e.pt) // field key
-	if len(value) > 0 {                       // if field/value pairing non-bold value
-		e.c.DrawString(" "+value, newPos)
+	newPos, _ = e.cb.DrawString(field, e.pt) // field key
+	if newPos.X.Ceil() > e.maxWidth {
+		e.maxWidth = newPos.X.Ceil()
+	}
+	if len(value) > 0 { // if field/value pairing non-bold value
+		newPos, _ = e.c.DrawString(" "+value, newPos)
+		if newPos.X.Ceil() > e.maxWidth {
+			e.maxWidth = newPos.X.Ceil()
+		}
 	}
 }
 
@@ -54,16 +65,18 @@ func (e *SpellPreview) writeNoAlignLn(field string, value string) {
 	e.newLine(1)
 }
 
-func GenerateSpellPreview(lines []string) ([]byte, error) {
+func GenerateSpellPreview(spellIcon int, lines []string) ([]byte, error) {
 	mu.RLock()
 	defer mu.RUnlock()
+
+	var newPos fixed.Point26_6
 
 	font, err := truetype.Parse(spellFont)
 	if err != nil {
 		return nil, fmt.Errorf("parse font: %w", err)
 	}
 
-	fontSize := float64(16)
+	fontSize := float64(14)
 
 	fontBold, err := truetype.Parse(spellFontBold)
 	if err != nil {
@@ -112,9 +125,20 @@ func GenerateSpellPreview(lines []string) ([]byte, error) {
 	for i, line := range lines {
 		if i == 0 {
 			line = strings.ReplaceAll(line, "Spell Info for Effect: ", "")
-			e.setCursor(10, 30)
-			e.cTitle.DrawString(line, e.pt)
-			e.setCursor(10, 60)
+			iconImg := library.SpellIcon(spellIcon)
+			titleOffset := 10
+			// draw a 40x41 image
+			if iconImg != nil {
+				draw.Draw(rgba, image.Rect(10, 10, 700, 600), iconImg, image.Pt(0, 0), draw.Src)
+				titleOffset = 60
+			}
+			e.setCursor(titleOffset, 40)
+			newPos, _ = e.cTitle.DrawString(line, e.pt)
+			if newPos.X.Ceil() > e.maxWidth {
+				e.maxWidth = newPos.X.Ceil()
+			}
+
+			e.setCursor(10, 80)
 			continue
 		}
 		if strings.HasPrefix(line, "Slot") {
@@ -126,22 +150,23 @@ func GenerateSpellPreview(lines []string) ([]byte, error) {
 		e.writeNoAlignLn("", line)
 	}
 
-	e.maxHeight -= int(e.fontSize * 1)
+	//e.maxHeight -= int(e.fontSize * 1)
+	e.maxWidth += 10
 
-	if e.maxHeight != 600 {
-		rgba2 := image.NewRGBA(image.Rect(0, 0, 700, e.maxHeight))
+	if e.maxWidth != 700 || e.maxHeight != 600 {
+		rgba2 := image.NewRGBA(image.Rect(0, 0, e.maxWidth, e.maxHeight))
 		draw.Draw(rgba2, rgba2.Bounds(), spellBGImage, image.Pt(0, 0), draw.Src)
+
 		draw.Draw(rgba2, rgba2.Bounds(), rgba, image.Pt(0, 0), draw.Src)
 		rgba = rgba2
 	}
 
-	ratio := 0.60
-	rgba2 := resize.Resize(uint(ratio*700), uint(ratio*float64(e.maxHeight)), rgba, resize.Bicubic)
-	//resize image to half
+	// ratio := 0.60
+	// rgba2 := resize.Resize(uint(ratio*700), uint(ratio*float64(e.maxHeight)), rgba, resize.Lanczos3)
 
 	b := new(bytes.Buffer)
 
-	err = png.Encode(b, rgba2) //&jpeg.Options{Quality: 100});
+	err = png.Encode(b, rgba) //&jpeg.Options{Quality: 100});
 	if err != nil {
 		log.Println("unable to encode image.")
 		return nil, err

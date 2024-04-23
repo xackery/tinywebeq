@@ -46,13 +46,12 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
-
-	lines := library.SpellInfo(id)
+	spellIcon, lines := library.SpellInfo(id)
 	if len(lines) == 0 {
 		return fmt.Errorf("no spell info found")
 	}
 
-	data, err := image.GenerateSpellPreview(lines)
+	data, err := image.GenerateSpellPreview(spellIcon, lines)
 	if err != nil {
 		return fmt.Errorf("GenerateSpellPreview: %w", err)
 	}

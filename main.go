@@ -66,7 +66,7 @@ func run() error {
 	switch args[1] {
 	case "version":
 		fmt.Println(Version)
-		os.Exit(0)
+		return nil
 	case "help":
 		usage()
 	case "flush":

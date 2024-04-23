@@ -11,7 +11,6 @@ import (
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/nfnt/resize"
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/library"
 	"golang.org/x/image/font/gofont/gobold"
@@ -40,10 +39,17 @@ type ItemPreview struct {
 	lineCurrent int
 	lineMax     int
 	maxHeight   int
+	maxWidth    int
 }
 
 func (e *ItemPreview) write(field string, value string) {
-	e.cb.DrawString(field, e.pt)
+	var newPos fixed.Point26_6
+
+	newPos, _ = e.cb.DrawString(field, e.pt)
+	if newPos.X.Ceil() > e.maxWidth {
+		e.maxWidth = newPos.X.Ceil()
+	}
+
 	if len(value) > 0 {
 		baseX := e.pt.X
 		textWidth := 0
@@ -61,19 +67,33 @@ func (e *ItemPreview) write(field string, value string) {
 
 		// Update position to right-aligned position
 		e.pt.X = rightAlignX
-		e.c.DrawString(value, e.pt)
+		newPos, _ = e.c.DrawString(value, e.pt)
+		if newPos.X.Ceil() > e.maxWidth {
+			e.maxWidth = newPos.X.Ceil()
+		}
+
 		e.pt.X = baseX
 	}
 }
 
 func (e *ItemPreview) writeNoAlign(field string, value string) {
+	var newPos fixed.Point26_6
 	if len(field) == 0 { // non-bold value only
-		e.c.DrawString(value, e.pt)
+		newPos, _ = e.c.DrawString(value, e.pt)
+		if newPos.X.Ceil() > e.maxWidth {
+			e.maxWidth = newPos.X.Ceil()
+		}
 		return
 	}
-	newPos, _ := e.cb.DrawString(field, e.pt) // field key
-	if len(value) > 0 {                       // if field/value pairing non-bold value
-		e.c.DrawString(" "+value, newPos)
+	newPos, _ = e.cb.DrawString(field, e.pt) // field key
+	if newPos.X.Ceil() > e.maxWidth {
+		e.maxWidth = newPos.X.Ceil()
+	}
+	if len(value) > 0 { // if field/value pairing non-bold value
+		newPos, _ = e.c.DrawString(" "+value, newPos)
+		if newPos.X.Ceil() > e.maxWidth {
+			e.maxWidth = newPos.X.Ceil()
+		}
 	}
 }
 
@@ -85,6 +105,8 @@ func (e *ItemPreview) writeNoAlignLn(field string, value string) {
 func GenerateItemPreview(item *db.Item) ([]byte, error) {
 	mu.RLock()
 	defer mu.RUnlock()
+	var newPos fixed.Point26_6
+
 	font, err := truetype.Parse(itemFont)
 	if err != nil {
 		return nil, fmt.Errorf("parse font: %w", err)
@@ -135,12 +157,19 @@ func GenerateItemPreview(item *db.Item) ([]byte, error) {
 	//c.SetHinting(font.H)
 
 	// title
-	e.setCursor(10, 30)
-	e.cTitle.DrawString(item.Name, e.pt)
+	titleOffset := 10
+	iconImg := library.ItemIcon(item.Icon)
+	if iconImg != nil {
+		draw.Draw(rgba, image.Rect(10, 10, 700, 600), iconImg, image.Pt(0, 0), draw.Over)
+		titleOffset = 60
+	}
 
-	// image
-	e.setCursor(400, 20)
-	e.writeLn("Image Goes Here", "")
+	e.setCursor(titleOffset, 40)
+	newPos, _ = e.cTitle.DrawString(item.Name, e.pt)
+	if newPos.X.Ceil() > e.maxWidth {
+		e.maxWidth = newPos.X.Ceil()
+	}
+
 	e.lineStart = 2
 	e.render1Left()
 	e.lineStart = e.lineMax + 1
@@ -163,21 +192,22 @@ func GenerateItemPreview(item *db.Item) ([]byte, error) {
 	//rgba2 := resize.Resize(uint(ratio*700), uint(ratio*600), rgba, resize.Lanczos3)
 	//resize image to half
 
-	e.maxHeight -= int(e.fontSize * 1)
+	//e.maxHeight -= int(e.fontSize * 1)
+	e.maxWidth += 10
 
-	if e.maxHeight != 600 {
-		rgba2 := image.NewRGBA(image.Rect(0, 0, 700, e.maxHeight))
+	if e.maxHeight != 600 || e.maxWidth != 700 {
+		rgba2 := image.NewRGBA(image.Rect(0, 0, e.maxWidth, e.maxHeight))
 		draw.Draw(rgba2, rgba2.Bounds(), itemBGImage, image.Pt(0, 0), draw.Src)
 		draw.Draw(rgba2, rgba2.Bounds(), rgba, image.Pt(0, 0), draw.Src)
 		rgba = rgba2
 	}
 
-	ratio := 0.60
-	rgba2 := resize.Resize(uint(ratio*700), uint(ratio*float64(e.maxHeight)), rgba, resize.Bicubic)
+	// ratio := 0.60
+	// rgba2 := resize.Resize(uint(ratio*700), uint(ratio*float64(e.maxHeight)), rgba, resize.Lanczos3)
 
 	b := new(bytes.Buffer)
 
-	err = png.Encode(b, rgba2) //&jpeg.Options{Quality: 100});
+	err = png.Encode(b, rgba) //&jpeg.Options{Quality: 100});
 	if err != nil {
 		log.Println("unable to encode image.")
 		return nil, err
@@ -573,7 +603,7 @@ func (e *ItemPreview) render3Right() {
 }
 
 func (e *ItemPreview) renderSpellInfo(id int) {
-	info := library.SpellInfo(id)
+	_, info := library.SpellInfo(id)
 	for _, line := range info {
 		e.writeNoAlignLn("", line)
 	}

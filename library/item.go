@@ -3,6 +3,9 @@ package library
 import (
 	"context"
 	"fmt"
+	"image"
+	"image/draw"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -15,10 +18,12 @@ import (
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/tlog"
+	"github.com/xypwn/filediver/dds"
 )
 
 var (
 	itemIndex bleve.Index
+	itemIcons = make(map[int]image.Image)
 )
 
 type ItemIndexData struct {
@@ -30,6 +35,20 @@ type ItemIndexData struct {
 func initItems() error {
 	var err error
 	start := time.Now()
+
+	err = os.MkdirAll("assets", os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("os.MkdirAll: %w", err)
+	}
+
+	err = initItemIcons()
+	if err != nil {
+		if os.IsNotExist(err) {
+			tlog.Warnf("initItemIcons: %v", err)
+		}
+		tlog.Warnf("%v", err)
+		tlog.Infof("To add item icons, copy uifiles/default/dragitem*.dds to the assets folder")
+	}
 
 	isSearchEnabled := config.Get().Item.Search.IsEnabled
 
@@ -219,4 +238,62 @@ func ItemSearchByName(ctx context.Context, name string) ([]ItemIndexData, error)
 	}
 	tlog.Debugf("Search found %d results, %d hits", len(results), len(searchResults.Hits))
 	return results, nil
+}
+
+func initItemIcons() error {
+	files := []string{}
+	for i := 1; i < 179; i++ {
+		files = append(files, fmt.Sprintf("assets/dragitem%d.dds", i))
+	}
+
+	index := 500
+	for _, file := range files {
+		img, err := fetchDDS(file)
+		if err != nil {
+			return fmt.Errorf("fetchDDS: %w", err)
+		}
+
+		for x := 0; x+40 <= img.Bounds().Dx(); x += 40 {
+			for y := 0; y+40 <= img.Bounds().Dy(); y += 40 {
+				//subImg := img.(*image.NRGBA).SubImage(image.Rect(j*40, i*41, j*40+40, i*41+41))
+				// move subimg pixels to 0,0
+				iconImg := image.NewRGBA(image.Rect(0, 0, 40, 40))
+				//draw.Draw(iconImg, iconImg.Bounds(), subImg, image.Pt(0, 0), draw.Src)
+				draw.Draw(iconImg, iconImg.Bounds(), img, image.Pt(x, y), draw.Src)
+
+				itemIcons[index] = iconImg
+
+				index++
+			}
+		}
+	}
+
+	tlog.Debugf("Loaded %d item icons", len(itemIcons))
+
+	return nil
+}
+
+func fetchDDS(path string) (image.Image, error) {
+	r, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("os.Open: %w", err)
+	}
+	defer r.Close()
+
+	img, err := dds.Decode(r, false)
+	if err != nil {
+		return nil, fmt.Errorf("dds.Decode: %w", err)
+	}
+
+	return img, nil
+}
+
+func ItemIcon(id int) image.Image {
+	mu.RLock()
+	defer mu.RUnlock()
+	img, ok := itemIcons[id]
+	if !ok {
+		return nil
+	}
+	return img
 }

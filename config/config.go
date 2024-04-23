@@ -65,10 +65,10 @@ type ItemSearch struct {
 }
 
 type ItemPreview struct {
-	BGColor    string `toml:"bg_color" desc:"Default #303030, background color for item preview"`
-	FGColor    string `toml:"fg_color" desc:"Default #FFFFFF, foreground text color for item preview"`
-	FontNormal string `toml:"font" desc:"Default goregular, if changed place a .ttf file same path as binary"`
-	FontBold   string `toml:"font_bold" desc:"Default gobold, if changed place a .ttf file same path as binary"`
+	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for item preview"`
+	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for item preview"`
+	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
+	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
 }
 
 type Spell struct {
@@ -86,10 +86,10 @@ type SpellSearch struct {
 }
 
 type SpellPreview struct {
-	BGColor    string `toml:"bg_color" desc:"Default #303030, background color for spell preview"`
-	FGColor    string `toml:"fg_color" desc:"Default #FFFFFF, foreground text color for spell preview"`
-	FontNormal string `toml:"font" desc:"Default goregular, if changed place a .ttf file same path as binary"`
-	FontBold   string `toml:"font_bold" desc:"Default gobold, if changed place a .ttf file same path as binary"`
+	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for spell preview"`
+	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for spell preview"`
+	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
+	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
 }
 
 type FileCache struct {
@@ -215,10 +215,10 @@ func defaultLabel() Config {
 				IsOnlyPlayableObtainable: false,
 			},
 			Preview: ItemPreview{
-				BGColor:    "#303030",
-				FGColor:    "#FFFFFF",
-				FontNormal: "goregular",
-				FontBold:   "gobold",
+				BGColor:    "#313338",
+				FGColor:    "#DBDEE1",
+				FontNormal: "goregular.ttf",
+				FontBold:   "gobold.ttf",
 			},
 		},
 		Spell: Spell{
@@ -231,10 +231,10 @@ func defaultLabel() Config {
 				IsOnlyPlayerSpells: false,
 			},
 			Preview: SpellPreview{
-				BGColor:    "#303030",
-				FGColor:    "#FFFFFF",
-				FontNormal: "goregular",
-				FontBold:   "gobold",
+				BGColor:    "#313338",
+				FGColor:    "#DBDEE1",
+				FontNormal: "goregular.ttf",
+				FontBold:   "gobold.ttf",
 			},
 		},
 		Database: Database{

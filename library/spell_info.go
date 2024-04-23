@@ -8,17 +8,17 @@ import (
 	"github.com/xackery/tinywebeq/tlog"
 )
 
-func SpellInfo(id int) []string {
+func SpellInfo(id int) (int, []string) {
 	lines := []string{}
 	if !config.Get().Spell.IsSpellInfoEnabled {
-		return lines
+		return 0, lines
 	}
 
 	mu.RLock()
 	defer mu.RUnlock()
 	se, ok := spells[id]
 	if !ok {
-		return lines
+		return 0, lines
 	}
 
 	// based on https://github.com/macroquest/macroquest/blob/b5e5fe972b89642c64589751a7b3e1daab43bc49/src/plugins/itemdisplay/MQ2ItemDisplay.cpp#L881
@@ -79,11 +79,10 @@ func SpellInfo(id int) []string {
 		lines = append(lines, out)
 	}
 
-	return lines
+	return se.SpellIcon, lines
 }
 
 func spellEffect(se *Spell, index int) string {
-	//id := se.ID
 	spa := se.Attribs[index]
 	base := se.Bases[index]
 	base2 := se.Limits[index]

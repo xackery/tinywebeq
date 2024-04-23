@@ -32,6 +32,7 @@ func viewInit() error {
 	if err != nil {
 		return fmt.Errorf("template.ParseFS: %w", err)
 	}
+
 	return nil
 }
 
@@ -86,10 +87,12 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		IsSpellSearchEnabled bool
 	}
 
+	_, info := library.SpellInfo(id)
+
 	data := TemplateData{
 		Site:                 site.BaseDataInit("Spell View"),
 		Spell:                se,
-		SpellInfo:            library.SpellInfo(id),
+		SpellInfo:            info,
 		IsSpellSearchEnabled: config.Get().Spell.Search.IsEnabled,
 	}
 

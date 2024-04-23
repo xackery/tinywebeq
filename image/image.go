@@ -24,7 +24,7 @@ func Init(ctx context.Context) error {
 	var err error
 
 	focus := strings.ToUpper(config.Get().Item.Preview.FGColor)
-	if focus != "" && focus != "#FFFFFF" {
+	if focus != "" && focus != "#DBDEE1" {
 		itemFGColor, err = hexColor(focus)
 		if err != nil {
 			return fmt.Errorf("item.Preview.FGColor %s: %w", focus, err)
@@ -33,7 +33,7 @@ func Init(ctx context.Context) error {
 	}
 
 	focus = strings.ToUpper(config.Get().Item.Preview.BGColor)
-	if focus != "" && focus != "#303030" {
+	if focus != "" && focus != "#313338" {
 		itemBGColor, err = hexColor(focus)
 		if err != nil {
 			return fmt.Errorf("item.Preview.FGColor %s: %w", focus, err)
@@ -41,17 +41,17 @@ func Init(ctx context.Context) error {
 		itemBGImage = image.NewUniform(itemBGColor)
 	}
 
-	focus = strings.ToUpper(config.Get().Spell.Preview.FGColor)
-	if focus != "" && focus != "#FFFFFF" {
+	focus = strings.ToUpper(config.Get().Spell.Preview.BGColor)
+	if focus != "" && focus != "#DBDEE1" {
 		spellBGColor, err = hexColor(focus)
 		if err != nil {
-			return fmt.Errorf("spell.PreviewFGColor %s: %w", focus, err)
+			return fmt.Errorf("spell.BGColor %s: %w", focus, err)
 		}
 		spellBGImage = image.NewUniform(spellBGColor)
 	}
 
-	focus = strings.ToUpper(config.Get().Spell.Preview.BGColor)
-	if focus != "" && focus != "#303030" {
+	focus = strings.ToUpper(config.Get().Spell.Preview.FGColor)
+	if focus != "" && focus != "#313338" {
 		spellFGColor, err = hexColor(focus)
 		if err != nil {
 			return fmt.Errorf("spell.PreviewFGColor %s: %w", focus, err)
@@ -60,7 +60,7 @@ func Init(ctx context.Context) error {
 	}
 
 	focus = config.Get().Spell.Preview.FontNormal
-	if focus != "" && focus != "goregular" {
+	if focus != "" && focus != "goregular.ttf" {
 		tlog.Debugf("Loading spellFont: %s", focus)
 		spellFont, err = os.ReadFile(focus)
 		if err != nil {
@@ -69,7 +69,7 @@ func Init(ctx context.Context) error {
 	}
 
 	focus = config.Get().Spell.Preview.FontBold
-	if focus != "" && focus != "gobold" {
+	if focus != "" && focus != "gobold.ttf" {
 		tlog.Debugf("Loading spellFontBold: %s", focus)
 		spellFontBold, err = os.ReadFile(focus)
 		if err != nil {
@@ -78,7 +78,7 @@ func Init(ctx context.Context) error {
 	}
 
 	focus = config.Get().Item.Preview.FontNormal
-	if focus != "" && focus != "goregular" {
+	if focus != "" && focus != "goregular.ttf" {
 		tlog.Debugf("Loading itemFont: %s", focus)
 		itemFont, err = os.ReadFile(focus)
 		if err != nil {
@@ -87,7 +87,7 @@ func Init(ctx context.Context) error {
 	}
 
 	focus = config.Get().Item.Preview.FontBold
-	if focus != "" && focus != "gobold" {
+	if focus != "" && focus != "gobold.ttf" {
 		tlog.Debugf("Loading itemFontBold: %s", focus)
 		itemFontBold, err = os.ReadFile(focus)
 		if err != nil {
