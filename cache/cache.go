@@ -1,6 +1,10 @@
 package cache
 
 import (
+	"bytes"
+	"context"
+	"encoding/base64"
+	"encoding/gob"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,7 +13,7 @@ import (
 	"time"
 
 	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/db"
+	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/tlog"
 	"gopkg.in/yaml.v3"
 )
@@ -24,10 +28,10 @@ var (
 
 type cacheEntry struct {
 	expiration int64
-	data       db.CacheIdentifier
+	data       model.CacheIdentifier
 }
 
-func Init(isCacheFlush bool) error {
+func Init(ctx context.Context, isCacheFlush bool) error {
 	if isInitialized {
 		return nil
 	}
@@ -41,30 +45,65 @@ func Init(isCacheFlush bool) error {
 		go maintain()
 		return nil
 	}
+
+	err := dbliteInit(ctx)
+	if err != nil {
+		return fmt.Errorf("dblite init: %w", err)
+	}
+
 	readFileCacheIndex()
 	go maintain()
 	return nil
 }
 
 // Write writes data to cache
-func Write(path string, data db.CacheIdentifier) error {
+func Write(ctx context.Context, path string, data model.CacheIdentifier) error {
 	mu.Lock()
 	defer mu.Unlock()
 
-	err := writeMemoryCache(path, data)
-	if err != nil {
-		return fmt.Errorf("write memory cache: %w", err)
+	var err error
+	if config.Get().MemCache.IsEnabled {
+		err = writeMemoryCache(ctx, path, data)
+		if err != nil {
+			return fmt.Errorf("write memory cache: %w", err)
+		}
 	}
 
-	err = writeFileCache(path, data)
-	if err != nil {
-		return fmt.Errorf("write file cache: %w", err)
+	if config.Get().SqliteCache.IsEnabled {
+		err = writeSqliteCache(ctx, path, data)
+		if err != nil {
+			return fmt.Errorf("write sqlite cache: %w", err)
+		}
+	}
+
+	if config.Get().FileCache.IsEnabled {
+		err = writeFileCache(ctx, path, data)
+		if err != nil {
+			return fmt.Errorf("write file cache: %w", err)
+		}
 	}
 
 	return nil
 }
 
-func writeMemoryCache(path string, data db.CacheIdentifier) error {
+func Deserialize(data string) model.CacheIdentifier {
+	decoded, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		tlog.Warnf("base64 decode: %v", err)
+		return nil
+	}
+	buf := bytes.NewBuffer(decoded)
+	d := gob.NewDecoder(buf)
+	var result model.CacheIdentifier
+	err = d.Decode(&result)
+	if err != nil {
+		tlog.Warnf("gob decode: %v", err)
+		return nil
+	}
+	return result
+}
+
+func writeMemoryCache(ctx context.Context, path string, data model.CacheIdentifier) error {
 	if !config.Get().MemCache.IsEnabled {
 		return nil
 	}
@@ -96,7 +135,7 @@ func writeMemoryCache(path string, data db.CacheIdentifier) error {
 	return nil
 }
 
-func writeFileCache(path string, data db.CacheIdentifier) error {
+func writeFileCache(ctx context.Context, path string, data model.CacheIdentifier) error {
 	if !config.Get().FileCache.IsEnabled {
 		return nil
 	}
@@ -134,23 +173,31 @@ func writeFileCache(path string, data db.CacheIdentifier) error {
 }
 
 // Read reads data from cache
-func Read(path string) (bool, db.CacheIdentifier) {
+func Read(ctx context.Context, path string) (model.CacheIdentifier, bool) {
 	mu.Lock()
 	defer mu.Unlock()
 	size := 4000
 	if !config.Get().FileCache.IsEnabled && !config.Get().MemCache.IsEnabled {
-		return false, nil
+		return nil, false
 	}
 	if config.Get().MemCache.IsEnabled {
 		entry, ok := memCache[path]
 		if ok {
 			if entry.expiration > time.Now().Unix() {
 				tlog.Debugf("Memcache read: %s, expiration: %d", path, entry.expiration)
-				return true, entry.data
+				return entry.data, true
 			}
 			tlog.Debugf("Memcache expired: %s", path)
 			delete(memCache, path)
 			memCacheSize -= size
+		}
+	}
+
+	if config.Get().SqliteCache.IsEnabled {
+		data, ok := readSqliteCache(path)
+		if ok {
+			tlog.Debugf("SqliteCache read: %s, expiration: %d", path, data.Expiration())
+			return data, true
 		}
 	}
 
@@ -168,38 +215,38 @@ func Read(path string) (bool, db.CacheIdentifier) {
 				if err != nil {
 					tlog.Warnf("Write file cache index (skipping cache): %v", err)
 				}
-				return false, nil
+				return nil, false
 			}
 
 			tlog.Debugf("Filecache read: %s, expiration: %d", path, expiration)
 			r, err := os.Open("cache/" + path)
 			if err != nil {
 				tlog.Warnf("Open file (skipping cache): %v", err)
-				return false, nil
+				return nil, false
 			}
 			defer r.Close()
 
-			var cacheData db.CacheIdentifier
+			var cacheData model.CacheIdentifier
 			err = nil
 			if strings.HasPrefix(path, "item/") {
-				cacheData = &db.Item{}
+				cacheData = &model.Item{}
 				err = yaml.NewDecoder(r).Decode(cacheData)
 			}
 			if err != nil {
 				tlog.Warnf("Decode (skipping cache): %v", err)
-				return false, nil
+				return nil, false
 			}
 
-			err = writeMemoryCache(path, cacheData)
+			err = writeMemoryCache(ctx, path, cacheData)
 			if err != nil {
 				tlog.Warnf("Write memory cache: %v", err)
 			}
-			return true, cacheData
+			return cacheData, true
 		}
 	}
 
 	tlog.Debugf("Cache miss: %s", path)
-	return false, nil
+	return nil, false
 }
 
 func maintain() {
@@ -210,6 +257,8 @@ func maintain() {
 	defer tickerMemCache.Stop()
 	tickerFileCache := time.NewTicker(time.Duration(config.Get().FileCache.TruncateSchedule) * time.Second)
 	defer tickerFileCache.Stop()
+	tickerSqliteCache := time.NewTicker(time.Duration(config.Get().SqliteCache.TruncateSchedule) * time.Second)
+	defer tickerSqliteCache.Stop()
 
 	for {
 		select {
@@ -217,6 +266,8 @@ func maintain() {
 			truncateMemCache()
 		case <-tickerFileCache.C:
 			truncateFileCache()
+		case <-tickerSqliteCache.C:
+			truncateSqliteCache()
 		}
 	}
 }

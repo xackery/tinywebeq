@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -892,7 +891,7 @@ func spellEffect(se *Spell, index int) string {
 	case SPA_LIMIT_HP, SPA_LIMIT_MANA, SPA_LIMIT_ENDURANCE:
 		out += formatCount(spellEffectName, value, spellRange, "to")
 	case SPA_FOCUS_LIMIT_CLASS:
-		out += formatExtra(spellEffectName, db.ClassesFromMask(base), spellRange, "")
+		out += formatExtra(spellEffectName, ClassesFromMask(base), spellRange, "")
 	case SPA_FOCUS_LIMIT_RACE:
 		out += formatBase(spellEffectName, base, base, spellRange)
 	case SPA_FOCUS_BASE_EFFECTS:
@@ -921,7 +920,7 @@ func spellEffect(se *Spell, index int) string {
 	case SPA_PROC_SKILL_MODIFIER:
 		tmp = "All Skills"
 		if base >= 0 {
-			tmp = db.SkillName(base)
+			tmp = SkillName(base)
 		}
 		out += formatExtra(spellEffectName, tmp, spellRange, "")
 	case SPA_SKILL_PROC_SUCCESS:
@@ -1033,7 +1032,7 @@ func spellEffect(se *Spell, index int) string {
 	case SPA_FOCUS_INCOMING_DMG_MOD, SPA_FOCUS_INCOMING_DMG_AMT:
 		out += formatRange(spellEffectName, value, extendedRange, " (after crit)")
 	case SPA_FOCUS_LIMIT_CASTER_CLASS:
-		out += formatExtra(spellEffectName, db.ClassesFromMask(base), spellRange, "")
+		out += formatExtra(spellEffectName, ClassesFromMask(base), spellRange, "")
 	case SPA_FOCUS_LIMIT_SAME_CASTER:
 		tmp = "(Different)"
 		if base > 0 {

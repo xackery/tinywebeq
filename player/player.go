@@ -6,13 +6,14 @@ import (
 
 	"github.com/xackery/tinywebeq/cache"
 	"github.com/xackery/tinywebeq/db"
+	"github.com/xackery/tinywebeq/model"
 )
 
-func fetchPlayer(ctx context.Context, id int) (*db.Player, error) {
+func fetchPlayer(ctx context.Context, id int) (*model.Player, error) {
 	path := fmt.Sprintf("player/%d.yaml", id)
-	ok, cacheData := cache.Read(path)
+	cacheData, ok := cache.Read(ctx, path)
 	if ok {
-		cachePlayer := cacheData.(*db.Player)
+		cachePlayer := cacheData.(*model.Player)
 		if cachePlayer != nil {
 			return cachePlayer, nil
 		}
@@ -30,7 +31,7 @@ func fetchPlayer(ctx context.Context, id int) (*db.Player, error) {
 	}
 	defer rows.Close()
 
-	player := &db.Player{}
+	player := &model.Player{}
 
 	if !rows.Next() {
 		return nil, fmt.Errorf("not found")
@@ -41,7 +42,7 @@ func fetchPlayer(ctx context.Context, id int) (*db.Player, error) {
 		return nil, fmt.Errorf("rows.StructScan: %w", err)
 	}
 
-	err = cache.Write(path, player)
+	err = cache.Write(ctx, path, player)
 	if err != nil {
 		return nil, fmt.Errorf("cache write: %w", err)
 	}

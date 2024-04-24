@@ -8,6 +8,7 @@ import (
 
 	"github.com/jbsmith7741/toml"
 	"github.com/rs/zerolog"
+	"github.com/xackery/tinywebeq/tlog"
 )
 
 var (
@@ -16,15 +17,17 @@ var (
 
 // Config represents a configuration parse
 type Config struct {
-	IsDebugEnabled   bool      `toml:"is_debug_enabled" desc:"Default true, enables verbose logging"`
-	MaxLevel         int       `toml:"max_level" desc:"Default 65, Maximum level a character can obtain. Used by spell.playeronlyspells, spell.info, item.is_search_only_player_obtainable"`
-	CurrentExpansion int       `toml:"current_expansion" desc:"Default 0 (Classic), Current expansion for the server. Filters out spells that are not available to players."`
-	Server           Server    `toml:"server" desc:"Web Server configuration"`
-	Database         Database  `toml:"database" desc:"Database configuration"`
-	Item             Item      `toml:"item" desc:"Item configuration"`
-	Spell            Spell     `toml:"spell" desc:"Spell configuration"`
-	MemCache         MemCache  `toml:"mem_cache" desc:"Memory cache configuration"`
-	FileCache        FileCache `toml:"file_cache" desc:"File cache configuration"`
+	IsDebugEnabled   bool        `toml:"is_debug_enabled" desc:"Default true, enables verbose logging"`
+	MaxLevel         int         `toml:"max_level" desc:"Default 65, Maximum level a character can obtain. Used by spell.playeronlyspells, spell.info, item.is_search_only_player_obtainable"`
+	CurrentExpansion int         `toml:"current_expansion" desc:"Default 0 (Classic), Current expansion for the server. Filters out spells that are not available to players."`
+	Server           Server      `toml:"server" desc:"Web Server configuration"`
+	Database         Database    `toml:"database" desc:"Database configuration"`
+	Item             Item        `toml:"item" desc:"Item configuration"`
+	Spell            Spell       `toml:"spell" desc:"Spell configuration"`
+	Npc              Npc         `toml:"npc" desc:"NPC configuration"`
+	MemCache         MemCache    `toml:"mem_cache" desc:"Memory cache configuration"`
+	SqliteCache      SqliteCache `toml:"sqlite_cache" desc:"Sqlite cache configuration"`
+	FileCache        FileCache   `toml:"file_cache" desc:"File cache configuration"`
 }
 
 type Server struct {
@@ -92,9 +95,34 @@ type SpellPreview struct {
 	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
 }
 
+type Npc struct {
+	IsEnabled      bool       `toml:"is_enabled" desc:"Default true, enables npc endpoints"`
+	IsCacheEnabled bool       `toml:"is_cache_enabled" desc:"Default true, enables npc caching"`
+	Search         NpcSearch  `toml:"search" desc:"Npc search configuration"`
+	Preview        NpcPreview `toml:"preview" desc:"Npc preview configuration"`
+}
+
+type NpcSearch struct {
+	IsEnabled      bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the npc view for finding other npcs"`
+	IsBleveEnabled bool `toml:"is_bleve_enabled" desc:"Default false, costs ~200MB of memory to do names searches in memory with bleve indexing"`
+}
+
+type NpcPreview struct {
+	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for npc preview"`
+	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for npc preview"`
+	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
+	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
+}
+
 type FileCache struct {
-	IsEnabled        bool `toml:"is_enabled" desc:"Default true, when a page is requested it's data is cached to the cache subfolder"`
+	IsEnabled        bool `toml:"is_enabled" desc:"Default false, when a page is requested it's data is cached to the cache subfolder"`
 	MaxFiles         int  `toml:"max_files" desc:"Default 1000, maximum number of files to keep in cache"`
+	TruncateSchedule int  `toml:"truncate_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews file cache and truncates expired items, freeing up memory"`
+	Expiration       int  `toml:"expiration" desc:"How long to keep file cache in seconds, default 21600 seconds (6 hours) "`
+}
+
+type SqliteCache struct {
+	IsEnabled        bool `toml:"is_enabled" desc:"Default true, when a page is requested it's data is cached to the sqlite cache"`
 	TruncateSchedule int  `toml:"truncate_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews file cache and truncates expired items, freeing up memory"`
 	Expiration       int  `toml:"expiration" desc:"How long to keep file cache in seconds, default 21600 seconds (6 hours) "`
 }
@@ -173,6 +201,46 @@ func NewConfig(ctx context.Context) (*Config, error) {
 
 // Verify returns an error if configuration appears off
 func (c *Config) Verify() error {
+	if c.SqliteCache.Expiration < 1 {
+		tlog.Warnf("SqliteCache.Expiration is unset, setting to 21600")
+		c.SqliteCache.Expiration = 21600
+	}
+	if c.SqliteCache.TruncateSchedule < 1 {
+		tlog.Warnf("SqliteCache.TruncateSchedule is unset, setting to 25200")
+		c.SqliteCache.TruncateSchedule = 25200
+	}
+	if c.FileCache.Expiration < 1 {
+		tlog.Warnf("FileCache.Expiration is unset, setting to 21600")
+		c.FileCache.Expiration = 21600
+	}
+	if c.FileCache.TruncateSchedule < 1 {
+		tlog.Warnf("FileCache.TruncateSchedule is unset, setting to 25200")
+		c.FileCache.TruncateSchedule = 25200
+	}
+	if c.MemCache.Expiration < 1 {
+		tlog.Warnf("MemCache.Expiration is unset, setting to 300")
+		c.MemCache.Expiration = 300
+	}
+	if c.MemCache.TruncateSchedule < 1 {
+		tlog.Warnf("MemCache.TruncateSchedule is unset, setting to 600")
+		c.MemCache.TruncateSchedule = 600
+	}
+	if c.MemCache.MaxMemory < 1 {
+		tlog.Warnf("MemCache.MaxMemory is unset, setting to 150000000")
+		c.MemCache.MaxMemory = 150000000
+	}
+	if c.Server.Port < 1 {
+		tlog.Warnf("Server.Port is unset, setting to 8080")
+		c.Server.Port = 8080
+	}
+	if c.Server.Host == "" {
+		tlog.Warnf("Server.Host is unset, setting to localhost")
+		c.Server.Host = "localhost"
+	}
+	if c.Database.Host == "" {
+		tlog.Warnf("Database.Host is unset, setting to localhost")
+		c.Database.Host = "localhost"
+	}
 
 	return nil
 }
@@ -198,8 +266,13 @@ func defaultLabel() Config {
 			TruncateSchedule: 600,
 			Expiration:       300,
 		},
-		FileCache: FileCache{
+		SqliteCache: SqliteCache{
 			IsEnabled:        true,
+			TruncateSchedule: 25200,
+			Expiration:       21600,
+		},
+		FileCache: FileCache{
+			IsEnabled:        false,
 			MaxFiles:         1000,
 			TruncateSchedule: 25200,
 			Expiration:       21600,

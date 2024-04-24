@@ -1,4 +1,4 @@
-package db
+package library
 
 import "fmt"
 

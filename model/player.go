@@ -1,4 +1,4 @@
-package db
+package model
 
 import (
 	"database/sql"
@@ -6,6 +6,8 @@ import (
 )
 
 type Player struct {
+	key                   string
+	expiration            int64
 	ID                    int          `db:"id"`                      //	int(11) unsigned
 	AccountID             int          `db:"account_id"`              //	int(11)
 	Name                  string       `db:"name"`                    //	varchar(64)
@@ -112,7 +114,23 @@ type Player struct {
 }
 
 func (t *Player) Identifier() string {
-	return "Player"
+	return "player"
+}
+
+func (t *Player) Key() string {
+	return t.key
+}
+
+func (t *Player) SetKey(key string) {
+	t.key = key
+}
+
+func (t *Player) SetExpiration(expiration int64) {
+	t.expiration = expiration
+}
+
+func (t *Player) Expiration() int64 {
+	return t.expiration
 }
 
 func (t *Player) ClassStr() string {
@@ -144,4 +162,8 @@ func (t *Player) RaceStr() string {
 
 func (t *Player) IconUrl() string {
 	return "https://www.eqitems.com/item_images/"
+}
+
+func (t *Player) Serialize() string {
+	return serialize(t)
 }

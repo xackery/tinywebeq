@@ -1,28 +1,28 @@
-package item
+package npc
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/xackery/tinywebeq/cache"
-	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/model"
 )
 
 var (
-	isInitialied bool
+	isInitialized bool
 )
 
 func Init() error {
-	if isInitialied {
+	if isInitialized {
 		return nil
 	}
-	isInitialied = true
+	isInitialized = true
 	err := viewInit()
 	if err != nil {
 		return fmt.Errorf("viewInit: %w", err)
 	}
+
 	err = searchInit()
 	if err != nil {
 		return fmt.Errorf("searchInit: %w", err)
@@ -30,20 +30,20 @@ func Init() error {
 	return nil
 }
 
-func fetchItem(ctx context.Context, id int) (*model.Item, error) {
-	path := fmt.Sprintf("item/%d.yaml", id)
+func fetchNpc(ctx context.Context, id int) (*model.Npc, error) {
+	path := fmt.Sprintf("npc/%d.yaml", id)
 	cacheData, ok := cache.Read(ctx, path)
 	if ok {
-		cacheItem := cacheData.(*model.Item)
-		if cacheItem != nil {
-			return cacheItem, nil
+		cacheNpc, ok := cacheData.(*model.Npc)
+		if !ok {
+			return nil, fmt.Errorf("cache read: invalid type, wanted *model.Npc, got %T", cacheData)
+		}
+		if cacheNpc != nil {
+			return cacheNpc, nil
 		}
 	}
 
-	query := "SELECT * FROM items WHERE id=:id LIMIT 1"
-	if config.Get().Item.IsDiscoveredOnly {
-		query += "SELECT * FROM items, discovered items WHERE items.id=:id AND discovered_items.item_id=:id LIMIT 1"
-	}
+	query := "SELECT id, name FROM npc_types WHERE id=:id LIMIT 1"
 
 	rows, err := db.Query(ctx,
 		query,
@@ -51,25 +51,26 @@ func fetchItem(ctx context.Context, id int) (*model.Item, error) {
 			"id": id,
 		})
 	if err != nil {
-		return nil, fmt.Errorf("query items: %w", err)
+		return nil, fmt.Errorf("query npcs: %w", err)
 	}
 	defer rows.Close()
 
-	item := &model.Item{}
+	npc := &model.Npc{}
 
 	if !rows.Next() {
 		return nil, fmt.Errorf("not found")
 	}
 
-	err = rows.StructScan(item)
+	err = rows.StructScan(npc)
 	if err != nil {
 		return nil, fmt.Errorf("rows.StructScan: %w", err)
 	}
+	fmt.Println(npc)
 
-	err = cache.Write(ctx, path, item)
+	err = cache.Write(ctx, path, npc)
 	if err != nil {
 		return nil, fmt.Errorf("cache write: %w", err)
 	}
 
-	return item, nil
+	return npc, nil
 }

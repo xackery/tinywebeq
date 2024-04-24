@@ -10,9 +10,9 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/tlog"
 
-	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/site"
 )
 
@@ -79,7 +79,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 
 	type TemplateData struct {
 		Site                site.BaseData
-		Item                *db.Item
+		Item                *model.Item
 		Library             *library.Library
 		IsItemSearchEnabled bool
 	}

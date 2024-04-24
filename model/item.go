@@ -1,12 +1,16 @@
-package db
+package model
 
 import (
 	"database/sql"
 	"fmt"
 	"strings"
+
+	"github.com/xackery/tinywebeq/library"
 )
 
 type Item struct {
+	key                 string
+	expiration          int64
 	ID                  int            `db:"id"`
 	Minstatus           int            `db:"minstatus"`
 	Name                string         `db:"Name"`
@@ -295,11 +299,31 @@ type Item struct {
 }
 
 func (t *Item) Identifier() string {
-	return "Item"
+	return "item"
+}
+
+func (t *Item) Key() string {
+	return t.key
+}
+
+func (t *Item) SetKey(key string) {
+	t.key = key
+}
+
+func (t *Item) SetExpiration(expiration int64) {
+	t.expiration = expiration
+}
+
+func (t *Item) Expiration() int64 {
+	return t.expiration
+}
+
+func (t *Item) Serialize() string {
+	return serialize(t)
 }
 
 func (t *Item) ClassStr() string {
-	return ClassesFromMask(t.Classes)
+	return library.ClassesFromMask(t.Classes)
 }
 
 func (t *Item) RaceStr() string {
@@ -2354,9 +2378,9 @@ func (t *Item) AugRestrictType(val int) string {
 }
 
 func (t *Item) ExtraDamageSkillStr() string {
-	return SkillName(t.Extradmgskill)
+	return library.SkillName(t.Extradmgskill)
 }
 
 func (t *Item) SkillModTypeStr() string {
-	return SkillName(t.Skillmodtype)
+	return library.SkillName(t.Skillmodtype)
 }

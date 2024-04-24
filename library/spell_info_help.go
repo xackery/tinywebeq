@@ -3,8 +3,6 @@ package library
 import (
 	"fmt"
 	"math"
-
-	"github.com/xackery/tinywebeq/db"
 )
 
 func spellEffectNameByID(id int) string {
@@ -463,7 +461,7 @@ func formatRefreshTimer(spellEffectName string, value int, max int, skill int, p
 	}
 	tmpSkill := "All Skills"
 	if skill >= 0 {
-		tmpSkill = db.SkillName(skill)
+		tmpSkill = SkillName(skill)
 	}
 	if preposition == "" {
 		preposition = "with"
@@ -509,7 +507,7 @@ func formatSkillAttack(spellEffectName string, value int, max int, base2 int, sk
 	}
 	tmpSkill := "All Skills"
 	if skill >= 0 {
-		tmpSkill = db.SkillName(skill)
+		tmpSkill = SkillName(skill)
 	}
 	return fmt.Sprintf("%s %s %s for %d damage", formatPercent(spellEffectName, value, max, false, false, "%"), preposition, tmpSkill, base2)
 }
@@ -520,7 +518,7 @@ func formatSkills(spellEffectName string, value int, max int, skill int, percent
 	}
 	tmpSkill := "All Skills"
 	if skill >= 0 {
-		tmpSkill = db.SkillName(skill)
+		tmpSkill = SkillName(skill)
 	}
 	return fmt.Sprintf("%s %s %s", formatPercent(spellEffectName, value, max, true, false, percent), preposition, tmpSkill)
 }

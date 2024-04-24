@@ -16,6 +16,7 @@ import (
 	"github.com/xackery/tinywebeq/image"
 	"github.com/xackery/tinywebeq/item"
 	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/npc"
 	"github.com/xackery/tinywebeq/player"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/spell"
@@ -90,7 +91,7 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("site.Init: %w", err)
 	}
-	err = cache.Init(isCacheFlush)
+	err = cache.Init(ctx, isCacheFlush)
 	if err != nil {
 		return fmt.Errorf("cache.Init: %w", err)
 	}
@@ -123,6 +124,10 @@ func run() error {
 	err = spell.Init()
 	if err != nil {
 		return fmt.Errorf("spell.Init: %w", err)
+	}
+	err = npc.Init()
+	if err != nil {
+		return fmt.Errorf("npc.Init: %w", err)
 	}
 
 	err = library.Init()
@@ -160,6 +165,9 @@ func run() error {
 	mux.HandleFunc("/spell/view", spell.View)
 	mux.HandleFunc("/spell/search", spell.Search)
 	mux.HandleFunc("/spell/preview.png", spell.PreviewImage)
+	mux.HandleFunc("/npc/view/", npc.View)
+	mux.HandleFunc("/npc/search", npc.Search)
+	mux.HandleFunc("/npc/preview.png", npc.PreviewImage)
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))).ServeHTTP(w, r)
 	})

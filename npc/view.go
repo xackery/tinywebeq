@@ -1,4 +1,4 @@
-package player
+package npc
 
 import (
 	"context"
@@ -8,26 +8,22 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/xackery/tinywebeq/config"
+	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
-	"github.com/xackery/tinywebeq/tlog"
-
 	"github.com/xackery/tinywebeq/site"
+	"github.com/xackery/tinywebeq/tlog"
 )
 
 var (
-	viewTemplate  *template.Template
-	isInitialized bool
+	viewTemplate *template.Template
 )
 
-func Init() error {
-	if isInitialized {
-		return nil
-	}
-	isInitialized = true
+func viewInit() error {
 	var err error
 	viewTemplate = template.New("view")
 	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
-		"player/view.go.tpl",    // data
+		"npc/view.go.tpl",       // data
 		"head.go.tpl",           // head
 		"header.go.tpl",         // header
 		"footer.go.tpl",         // footer
@@ -36,10 +32,11 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("template.ParseFS: %w", err)
 	}
+
 	return nil
 }
 
-// View handles player view requests
+// View handles npc view requests
 func View(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var id int
@@ -62,6 +59,10 @@ func View(w http.ResponseWriter, r *http.Request) {
 
 	err = viewRender(ctx, id, w)
 	if err != nil {
+		if err.Error() == "npc not found" {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
 		tlog.Errorf("viewRender: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -70,23 +71,24 @@ func View(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
-	if id < 1 {
-		return fmt.Errorf("id too low")
-	}
 
-	player, err := fetchPlayer(ctx, id)
+	npc, err := fetchNpc(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchPlayer: %w", err)
+		return fmt.Errorf("fetchNpc: %w", err)
 	}
 
 	type TemplateData struct {
-		Site   site.BaseData
-		Player *model.Player
+		Site               site.BaseData
+		Npc                *model.Npc
+		Library            *library.Library
+		IsNpcSearchEnabled bool
 	}
 
 	data := TemplateData{
-		Site:   site.BaseDataInit("Player View"),
-		Player: player,
+		Site:               site.BaseDataInit("Npc View"),
+		Npc:                npc,
+		Library:            library.Instance(),
+		IsNpcSearchEnabled: config.Get().Npc.Search.IsEnabled,
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

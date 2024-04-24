@@ -11,8 +11,8 @@ import (
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/model"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
@@ -32,7 +32,7 @@ type ItemPreview struct {
 	cb          *freetype.Context
 	cbFont      *truetype.Font
 	cTitle      *freetype.Context
-	item        *db.Item
+	item        *model.Item
 	fontSize    float64
 	pt          fixed.Point26_6
 	lineStart   int
@@ -102,7 +102,7 @@ func (e *ItemPreview) writeNoAlignLn(field string, value string) {
 	e.newLine(1)
 }
 
-func GenerateItemPreview(item *db.Item) ([]byte, error) {
+func GenerateItemPreview(item *model.Item) ([]byte, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 	var newPos fixed.Point26_6
