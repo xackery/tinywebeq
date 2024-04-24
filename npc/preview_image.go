@@ -52,7 +52,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
-	npc, err := fetchNpc(ctx, id)
+	npc, err := FetchNpc(ctx, id)
 	if err != nil {
 		return fmt.Errorf("fetchNpc: %w", err)
 	}
@@ -82,6 +82,9 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 	if npc.Attackspeed == 0 {
 		npc.Attackspeed = 100
 	}
+	if npc.Attackspeed < 0 {
+		npc.Attackspeed = 100 - npc.Attackspeed
+	}
 
 	tags := ""
 	if npc.Lastname.Valid && npc.Lastname.String != "" {
@@ -99,9 +102,10 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 	}
 
 	lines := []string{
-		fmt.Sprintf("%s %s", npc.Name, tags),
+		fmt.Sprintf("%s %s", npc.CleanName(), tags),
 		fmt.Sprintf("Lvl %d %s %s", npc.Level, npc.RaceStr(), npc.ClassStr()),
-		fmt.Sprintf("%d HP, %d-%d DMG @ %d%%", npc.Hp, npc.Mindmg, npc.Maxdmg, npc.Attackspeed),
+
+		fmt.Sprintf("%d HP, %d-%d DMG @ %0.1f%%", npc.Hp, npc.Mindmg, npc.Maxdmg, npc.Attackspeed),
 		npc.NpcSpecialAttacksStr(),
 	}
 

@@ -16,7 +16,7 @@ type Npc struct {
 	expiration      int64
 	ID              int            `db:"id"`
 	Name            string         `db:"name"`
-	Attackspeed     int            `db:"attack_speed"`
+	Attackspeed     float32        `db:"attack_speed"`
 	Class           int            `db:"class"`
 	Hp              int            `db:"hp"`
 	Lastname        sql.NullString `db:"lastname"`

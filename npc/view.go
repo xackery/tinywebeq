@@ -77,7 +77,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 
 func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 
-	npc, err := fetchNpc(ctx, id)
+	npc, err := FetchNpc(ctx, id)
 	if err != nil {
 		return fmt.Errorf("fetchNpc: %w", err)
 	}

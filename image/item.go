@@ -33,6 +33,7 @@ type ItemPreview struct {
 	cbFont      *truetype.Font
 	cTitle      *freetype.Context
 	item        *model.Item
+	itemQuest   *model.ItemQuest
 	fontSize    float64
 	pt          fixed.Point26_6
 	lineStart   int
@@ -102,7 +103,7 @@ func (e *ItemPreview) writeNoAlignLn(field string, value string) {
 	e.newLine(1)
 }
 
-func GenerateItemPreview(item *model.Item) ([]byte, error) {
+func GenerateItemPreview(item *model.Item, itemQuest *model.ItemQuest) ([]byte, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 	var newPos fixed.Point26_6
@@ -146,12 +147,13 @@ func GenerateItemPreview(item *model.Item) ([]byte, error) {
 	cTitle.SetSrc(itemFGImage)
 
 	e := &ItemPreview{
-		c:        c,
-		cb:       cb,
-		cbFont:   fontBold,
-		cTitle:   cTitle,
-		item:     item,
-		fontSize: fontSize,
+		c:         c,
+		cb:        cb,
+		cbFont:    fontBold,
+		cTitle:    cTitle,
+		item:      item,
+		itemQuest: itemQuest,
+		fontSize:  fontSize,
 	}
 
 	//c.SetHinting(font.H)
@@ -182,6 +184,8 @@ func GenerateItemPreview(item *model.Item) ([]byte, error) {
 	e.render3Right()
 	e.lineStart = e.lineMax + 1
 	e.render4Left()
+	e.lineStart = e.lineMax + 1
+	e.render5Left()
 
 	//resize rgba image to maxHeight
 
@@ -337,6 +341,24 @@ func (e *ItemPreview) render3Left() {
 }
 
 func (e *ItemPreview) render4Left() {
+	itemQuest := e.itemQuest
+	e.setCursor(10, 20)
+	e.shiftLn(e.lineStart)
+	e.lineCurrent = e.lineStart
+	if itemQuest == nil {
+		return
+	}
+
+	for _, entry := range itemQuest.Entries {
+		e.writeNoAlignLn("Quest Reward from", fmt.Sprintf("%s in %s", entry.NpcCleanName(), entry.ZoneLongName()))
+	}
+	if e.lineCurrent > e.lineMax {
+		e.lineMax = e.lineCurrent
+	}
+
+}
+
+func (e *ItemPreview) render5Left() {
 	item := e.item
 	e.setCursor(10, 20)
 	e.shiftLn(e.lineStart)

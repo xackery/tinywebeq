@@ -77,11 +77,17 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		return fmt.Errorf("fetchItem: %w", err)
 	}
 
+	itemQuest, err := fetchItemQuest(ctx, id)
+	if err != nil {
+		return fmt.Errorf("fetchItemQuest: %w", err)
+	}
+
 	type TemplateData struct {
 		Site                site.BaseData
 		Item                *model.Item
 		Library             *library.Library
 		IsItemSearchEnabled bool
+		ItemQuest           *model.ItemQuest
 	}
 
 	data := TemplateData{
@@ -89,6 +95,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		Item:                item,
 		Library:             library.Instance(),
 		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
+		ItemQuest:           itemQuest,
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

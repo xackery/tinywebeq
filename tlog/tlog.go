@@ -6,26 +6,38 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/rs/zerolog"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 var (
 	isInitialied bool
+	level        = zap.DebugLevel
 	// Sugar represents a zap logger
 	Sugar *zap.SugaredLogger
 	// SugarFile represents a zap logger file
-	SugarFile *zap.SugaredLogger
+	SugarFile     *zap.SugaredLogger
+	fileWriter    io.Writer
+	consoleWriter io.Writer
 )
 
 // Init creates and initializes the logging
-func Init(fileWriter io.Writer, consoleWriter io.Writer) {
+func Init(newFileWriter io.Writer, newConsoleWriter io.Writer) {
 	if isInitialied {
 		return
 	}
 
 	isInitialied = true
 	//pe := zap.NewProductionEncoderConfig()
+
+	if consoleWriter == nil {
+		consoleWriter = os.Stdout
+	}
+	config()
+}
+
+func config() {
 
 	consoleConfig := zap.NewDevelopmentConfig()
 	consoleConfig.EncoderConfig.EncodeLevel = shortLevelEncoder
@@ -36,10 +48,6 @@ func Init(fileWriter io.Writer, consoleWriter io.Writer) {
 	consoleConfig.EncoderConfig.TimeKey = ""
 	consoleEncoder := zapcore.NewConsoleEncoder(consoleConfig.EncoderConfig)
 
-	level := zap.DebugLevel
-	if consoleWriter == nil {
-		consoleWriter = os.Stdout
-	}
 	core := zapcore.NewCore(consoleEncoder, zapcore.AddSync(consoleWriter), level)
 	Sugar = zap.New(core).Sugar()
 
@@ -60,6 +68,24 @@ func Init(fileWriter io.Writer, consoleWriter io.Writer) {
 		)
 		SugarFile = zap.New(core, opts...).Sugar()
 	}
+}
+
+func SetLevel(newLevel zerolog.Level) {
+	if newLevel == zerolog.DebugLevel {
+		level = zapcore.DebugLevel
+	} else if newLevel == zerolog.InfoLevel {
+		level = zapcore.InfoLevel
+	} else if newLevel == zerolog.WarnLevel {
+		level = zapcore.WarnLevel
+	} else if newLevel == zerolog.ErrorLevel {
+		level = zapcore.ErrorLevel
+	} else if newLevel == zerolog.FatalLevel {
+		level = zapcore.FatalLevel
+	} else if newLevel == zerolog.PanicLevel {
+		level = zapcore.PanicLevel
+	}
+
+	config()
 }
 
 // Debug uses fmt.Sprint to construct and log a message.

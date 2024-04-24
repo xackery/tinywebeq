@@ -53,7 +53,12 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 		return fmt.Errorf("fetchItem: %w", err)
 	}
 
-	data, err := image.GenerateItemPreview(item)
+	itemQuest, err := fetchItemQuest(ctx, id)
+	if err != nil {
+		return fmt.Errorf("fetchItemQuest: %w", err)
+	}
+
+	data, err := image.GenerateItemPreview(item, itemQuest)
 	if err != nil {
 		return fmt.Errorf("GenerateItemPreview: %w", err)
 	}

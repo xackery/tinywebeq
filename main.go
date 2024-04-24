@@ -18,6 +18,7 @@ import (
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/npc"
 	"github.com/xackery/tinywebeq/player"
+	"github.com/xackery/tinywebeq/quest"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/spell"
 	"github.com/xackery/tinywebeq/tlog"
@@ -47,15 +48,16 @@ func run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if config.Get().IsDebugEnabled {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
 	var err error
 
 	_, err = config.NewConfig(ctx)
 	if err != nil {
 		return fmt.Errorf("config.NewConfig: %w", err)
+	}
+	tlog.SetLevel(zerolog.InfoLevel)
+
+	if config.Get().IsDebugEnabled {
+		tlog.SetLevel(zerolog.DebugLevel)
 	}
 
 	args := os.Args
@@ -68,6 +70,8 @@ func run() error {
 	case "version":
 		fmt.Println(Version)
 		return nil
+	case "quest":
+		return questParse(ctx)
 	case "help":
 		usage()
 	case "flush":
@@ -95,6 +99,7 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("cache.Init: %w", err)
 	}
+	defer cache.Close()
 	if isCacheFlush {
 		tlog.Infof("Cache flushed")
 		return nil
@@ -182,7 +187,7 @@ func run() error {
 }
 
 func usage() {
-	fmt.Println("Usage: tinywebeq [server|letsencrypt|version|flush|help]")
+	fmt.Println("Usage: tinywebeq [server|quest|letsencrypt|version|flush|help]")
 	os.Exit(1)
 }
 
@@ -334,6 +339,31 @@ func letsencrypt() error {
 	}
 
 	tlog.Infof("Letsencrypt done!")
+	return nil
+}
+
+func questParse(ctx context.Context) error {
+	err := db.Init(ctx)
+	if err != nil {
+		return fmt.Errorf("db.Init: %w", err)
+	}
+
+	err = cache.Init(ctx, false)
+	if err != nil {
+		return fmt.Errorf("cache.Init: %w", err)
+	}
+
+	defer cache.Close()
+
+	err = library.Init()
+	if err != nil {
+		return fmt.Errorf("library.Init: %w", err)
+	}
+
+	err = quest.Parse(ctx, config.Get().Quest.ActiveConcurrency)
+	if err != nil {
+		return fmt.Errorf("questParse: %w", err)
+	}
 	return nil
 }
 

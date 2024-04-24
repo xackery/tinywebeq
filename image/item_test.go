@@ -29,7 +29,7 @@ func TestItemPreview(t *testing.T) {
 
 	}
 
-	data, err := GenerateItemPreview(item)
+	data, err := GenerateItemPreview(item, nil)
 	if err != nil {
 		t.Fatalf("GenerateItemPreview: %v", err)
 	}

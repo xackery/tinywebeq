@@ -25,6 +25,7 @@ type Config struct {
 	Item             Item        `toml:"item" desc:"Item configuration"`
 	Spell            Spell       `toml:"spell" desc:"Spell configuration"`
 	Npc              Npc         `toml:"npc" desc:"NPC configuration"`
+	Quest            Quest       `toml:"quest" desc:"Quest parser configuration"`
 	MemCache         MemCache    `toml:"mem_cache" desc:"Memory cache configuration"`
 	SqliteCache      SqliteCache `toml:"sqlite_cache" desc:"Sqlite cache configuration"`
 	FileCache        FileCache   `toml:"file_cache" desc:"File cache configuration"`
@@ -114,6 +115,15 @@ type NpcPreview struct {
 	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
 }
 
+type Quest struct {
+	IsEnabled                   bool   `toml:"is_enabled" desc:"Default true, enables quest features"`
+	Path                        string `toml:"path" desc:"Default quests/, where to find quest files"`
+	ActiveConcurrency           int    `toml:"active_concurrency" desc:"Default 100, how many quests to process at once when the quests dedicated command is ran (this impacts connection count)"`
+	IsBackgroundScanningEnabled bool   `toml:"is_background_scanning_enabled" desc:"Default false, when true, a background scanner will scan for new quests and update the cache at ScanSchedule"`
+	BackgroundScanConcurrency   int    `toml:"background_scan_concurrency" desc:"Default 10, how many quests to process at once when the background scanner is running"`
+	ScanSchedule                int    `toml:"scan_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews quest cache to rebuild it"`
+}
+
 type FileCache struct {
 	IsEnabled        bool `toml:"is_enabled" desc:"Default false, when a page is requested it's data is cached to the cache subfolder"`
 	MaxFiles         int  `toml:"max_files" desc:"Default 1000, maximum number of files to keep in cache"`
@@ -186,9 +196,9 @@ func NewConfig(ctx context.Context) (*Config, error) {
 		return nil, fmt.Errorf("decode tinywebeq.conf: %w", err)
 	}
 
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	tlog.SetLevel(zerolog.InfoLevel)
 	if cfg.IsDebugEnabled {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		tlog.SetLevel(zerolog.DebugLevel)
 	}
 
 	err = cfg.Verify()
@@ -240,6 +250,15 @@ func (c *Config) Verify() error {
 	if c.Database.Host == "" {
 		tlog.Warnf("Database.Host is unset, setting to localhost")
 		c.Database.Host = "localhost"
+	}
+
+	if c.Quest.ActiveConcurrency < 1 {
+		tlog.Warnf("Quest.ActiveConcurrency is unset, setting to 100")
+		c.Quest.ActiveConcurrency = 100
+	}
+	if c.Quest.BackgroundScanConcurrency < 1 {
+		tlog.Warnf("Quest.BackgroundScanConcurrency is unset, setting to 10")
+		c.Quest.BackgroundScanConcurrency = 10
 	}
 
 	return nil
@@ -310,6 +329,29 @@ func defaultLabel() Config {
 				FontBold:   "gobold.ttf",
 			},
 		},
+		Quest: Quest{
+			IsEnabled:                   true,
+			Path:                        "quests/",
+			ScanSchedule:                25200,
+			IsBackgroundScanningEnabled: false,
+			BackgroundScanConcurrency:   10,
+			ActiveConcurrency:           100,
+		},
+		Npc: Npc{
+			IsEnabled:      true,
+			IsCacheEnabled: true,
+			Search: NpcSearch{
+				IsEnabled:      false,
+				IsBleveEnabled: false,
+			},
+			Preview: NpcPreview{
+				BGColor:    "#313338",
+				FGColor:    "#DBDEE1",
+				FontNormal: "goregular.ttf",
+				FontBold:   "gobold.ttf",
+			},
+		},
+
 		Database: Database{
 			Host:     "localhost",
 			Port:     3306,

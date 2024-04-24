@@ -33,6 +33,7 @@ func dbliteInit(ctx context.Context) error {
 	scopes := []string{
 		"npc",
 		"item",
+		"item_quest",
 		"player",
 		"npc_loot",
 		"npc_merchant",
@@ -87,6 +88,8 @@ func readSqliteCache(path string) (model.CacheIdentifier, bool) {
 		data = &model.Npc{}
 	case "item":
 		data = &model.Item{}
+	case "item_quest":
+		data = &model.ItemQuest{}
 	case "player":
 		data = &model.Player{}
 	case "npc_loot":
@@ -118,7 +121,7 @@ func readSqliteCache(path string) (model.CacheIdentifier, bool) {
 	rawData := ""
 	err := row.Scan(&rawData)
 	if err != nil {
-		tlog.Warnf("rows.StructScan: %v", err)
+		//tlog.Warnf("rows.StructScan: %v", err)
 		return nil, false
 	}
 
@@ -171,7 +174,17 @@ func truncateSqliteCache() {
 	tlog.Debugf("Sqlitecache truncate schedule running...")
 	start := time.Now()
 
-	scopes := []string{"npc", "item", "player"}
+	scopes := []string{
+		"npc",
+		"item",
+		//"item_quest", // flushed on parse
+		"player",
+		"npc_loot",
+		"npc_merchant",
+		"npc_spawn",
+		"npc_faction",
+		"npc_spell",
+	}
 
 	for _, scope := range scopes {
 		query := fmt.Sprintf("DELETE FROM %s WHERE expiration < :expiration", scope)
@@ -188,4 +201,30 @@ func truncateSqliteCache() {
 	}
 
 	tlog.Debugf("Sqlitecache truncate schedule complete in %s", time.Since(start))
+}
+
+func sqliteClose() error {
+	if Instance != nil {
+		return Instance.Close()
+	}
+	return nil
+}
+
+func TruncateSqliteCache(ctx context.Context, name string) error {
+	if !config.Get().SqliteCache.IsEnabled {
+		return nil
+	}
+
+	query := fmt.Sprintf("DROP TABLE IF EXISTS %s", name)
+	_, err := Instance.ExecContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("truncate: %w", err)
+	}
+
+	query = fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (key INTEGER PRIMARY KEY, data TEXT, expiration INTEGER)", name)
+	_, err = Instance.ExecContext(ctx, query)
+	if err != nil {
+		return fmt.Errorf("create table: %w", err)
+	}
+	return nil
 }

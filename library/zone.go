@@ -12,7 +12,6 @@ var (
 )
 
 type Zone struct {
-	ID           int    `db:"id"`
 	ZoneIDNumber int    `db:"zoneidnumber"`
 	ShortName    string `db:"short_name"`
 	LongName     string `db:"long_name"`
@@ -21,7 +20,7 @@ type Zone struct {
 func initZones() error {
 	zones = map[int]*Zone{}
 
-	query := "SELECT id, zoneidnumber, short_name, long_name FROM zone"
+	query := "SELECT zoneidnumber, short_name, long_name FROM zone"
 
 	rows, err := db.Instance.Query(query)
 	if err != nil {
@@ -31,11 +30,11 @@ func initZones() error {
 
 	for rows.Next() {
 		ze := &Zone{}
-		err = rows.Scan(&ze.ID, &ze.ZoneIDNumber, &ze.ShortName, &ze.LongName)
+		err = rows.Scan(&ze.ZoneIDNumber, &ze.ShortName, &ze.LongName)
 		if err != nil {
 			return fmt.Errorf("rows.Scan: %w", err)
 		}
-		zones[ze.ID] = ze
+		zones[ze.ZoneIDNumber] = ze
 	}
 	tlog.Debugf("Loaded %d zones", len(zones))
 	return nil
@@ -60,4 +59,16 @@ func ZoneLongNameByShortName(shortName string) string {
 		}
 	}
 	return fmt.Sprintf("Unknown Zone %s", shortName)
+}
+
+func ZoneIDByShortName(shortName string) int {
+	mu.RLock()
+	defer mu.RUnlock()
+
+	for _, zone := range zones {
+		if zone.ShortName == shortName {
+			return zone.ZoneIDNumber
+		}
+	}
+	return 0
 }

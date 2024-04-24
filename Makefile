@@ -22,6 +22,14 @@ flush:
 	mkdir -p bin
 	go build -o bin/${NAME} main.go
 	cd bin && ./${NAME} flush
+
+.PHONY: quest
+quest:
+	@echo "quest: building"
+	mkdir -p bin
+	go build -o bin/${NAME} main.go
+	cd bin && ./${NAME} quest
+
 	
 # clean up and check for errors
 sanitize:

@@ -330,3 +330,7 @@ func readFileCacheIndex() error {
 	}
 	return nil
 }
+
+func Close() error {
+	return sqliteClose()
+}
