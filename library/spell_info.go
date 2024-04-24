@@ -7,7 +7,7 @@ import (
 	"github.com/xackery/tinywebeq/tlog"
 )
 
-func SpellInfo(id int) (int, []string) {
+func SpellInfo(id int, level int) (int, []string) {
 	lines := []string{}
 	if !config.Get().Spell.IsSpellInfoEnabled {
 		return 0, lines
@@ -27,6 +27,9 @@ func SpellInfo(id int) (int, []string) {
 	maxLevel := 60
 	if config.Get().MaxLevel > 0 {
 		maxLevel = config.Get().MaxLevel
+	}
+	if level != 0 {
+		maxLevel = level
 	}
 
 	duration := spellDuration(se, maxLevel)

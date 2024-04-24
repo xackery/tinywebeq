@@ -87,7 +87,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		IsSpellSearchEnabled bool
 	}
 
-	_, info := library.SpellInfo(id)
+	_, info := library.SpellInfo(id, 0)
 
 	data := TemplateData{
 		Site:                 site.BaseDataInit("Spell View"),

@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <p>Health points: {{ .Npc.Hp }}</p>
 <p>Damage: {{ .Npc.Mindmg }} to {{ .Npc.Maxdmg }}</p>
 <p>Attack speed: {{ if eq .Npc.Attackspeed 100 }}Normal {{ end }}{{ .Npc.Attackspeed }}%</p>
-<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>
+{{ if .Npc.NpcSpecialAttacksStr }}<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>{{ end }}
 
 {{ if .NpcSpawn }} {{ range .NpcSpawn.Entries }}
     <p>{{ .Spawngroup }} ({{ .Spawngroupid }}) {{ .LongName }} ({{ .ShortName}}) {{ .X }}, {{ .Y }}, {{ .Z }} {{ .Respawntime }} </p>
@@ -78,6 +78,12 @@ document.addEventListener("DOMContentLoaded", function() {
     {{ if .Ldonprice }}<p>LDoN Price: {{ .Ldonprice }}</p>{{ end }}
 {{ end }}{{ end}}
 
-
+{{ $level := .Npc.Level }}
+{{ if .NpcSpell }} {{ range .NpcSpell.Entries }}
+    <p>{{ .Name }} - {{ .Spell.Name }} </p>
+    {{ range .SpellInfo $level }}
+        <p>{{ . }}</p>
+    {{ end }}
+{{ end }}{{ end}}
 
 {{ end }}

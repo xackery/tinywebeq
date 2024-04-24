@@ -100,6 +100,14 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		}
 	}
 
+	var npcSpell *model.NpcSpell
+	if npc.Npcspellsid > 0 {
+		npcSpell, err = fetchNpcSpell(ctx, npc.Npcspellsid, npc.Level)
+		if err != nil {
+			return fmt.Errorf("fetchNpcSpell: %w", err)
+		}
+	}
+
 	npcSpawn, err := fetchNpcSpawn(ctx, id)
 	if err != nil {
 		return fmt.Errorf("fetchNpcSpawn: %w", err)
@@ -115,6 +123,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		NpcMerchant        *model.NpcMerchant
 		NpcSpawn           *model.NpcSpawn
 		NpcFaction         *model.NpcFaction
+		NpcSpell           *model.NpcSpell
 	}
 
 	data := TemplateData{
@@ -126,6 +135,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		NpcMerchant:        npcMerchant,
 		NpcSpawn:           npcSpawn,
 		NpcFaction:         npcFaction,
+		NpcSpell:           npcSpell,
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

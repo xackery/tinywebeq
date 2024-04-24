@@ -49,8 +49,8 @@ func Instance() *Library {
 	return instance
 }
 
-func (l *Library) SpellInfo(id int) (int, []string) {
-	return SpellInfo(id)
+func (l *Library) SpellInfo(id int, level int) (int, []string) {
+	return SpellInfo(id, level)
 }
 
 func (l *Library) SpellName(id int) string {

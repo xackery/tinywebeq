@@ -603,7 +603,7 @@ func (e *ItemPreview) render3Right() {
 }
 
 func (e *ItemPreview) renderSpellInfo(id int) {
-	_, info := library.SpellInfo(id)
+	_, info := library.SpellInfo(id, 0)
 	for _, line := range info {
 		e.writeNoAlignLn("", line)
 	}

@@ -21,14 +21,14 @@ type Npc struct {
 	Level           int    `db:"level"`
 	Maxdmg          int    `db:"maxdmg"`
 	Mindmg          int    `db:"mindmg"`
-	NpcSpellsid     int    `db:"npc_spells_id"`
+	Npcspellsid     int    `db:"npc_spells_id"`
 	Npcspecialattks string `db:"npcspecialattks"`
 	Race            int    `db:"race"`
 	Trackable       int    `db:"trackable"`
 	Loottableid     int    `db:"loottable_id"`
 	Merchantid      int    `db:"merchant_id"`
 	Npcfactionid    int    `db:"npc_faction_id"`
-	Rarespawn       int    `db:"rarespawn"`
+	Rarespawn       int    `db:"rare_spawn"`
 }
 
 func (t *Npc) Identifier() string {

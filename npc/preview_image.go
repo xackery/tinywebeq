@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/xackery/tinywebeq/image"
+	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/tlog"
 )
@@ -64,6 +66,14 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 		}
 	}
 
+	var npcSpell *model.NpcSpell
+	if npc.Npcspellsid > 0 {
+		npcSpell, err = fetchNpcSpell(ctx, npc.Npcspellsid, npc.Level)
+		if err != nil {
+			return fmt.Errorf("fetchNpcSpell: %w", err)
+		}
+	}
+
 	if npc.Attackspeed == 0 {
 		npc.Attackspeed = 100
 	}
@@ -98,6 +108,40 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 
 	if npcMerchant != nil {
 		lines = append(lines, fmt.Sprintf("Sells %d items", len(npcMerchant.Entries)))
+	}
+
+	if npcSpell != nil {
+		for i, entry := range npcSpell.Entries {
+			if i > 1 {
+				break
+			}
+			_, spellLines := library.SpellInfo(entry.Spellid, npc.Level)
+			isSlot := false
+			for _, line := range spellLines {
+				if strings.HasPrefix(line, "ID: ") {
+					continue
+				}
+				if strings.HasPrefix(line, "Recovery Time: ") {
+					continue
+				}
+				if strings.HasPrefix(line, "Mana: ") {
+					continue
+				}
+				if strings.HasPrefix(line, "Slot") {
+					isSlot = true
+				}
+				if isSlot && !strings.HasPrefix(line, "Slot") {
+					break
+				}
+				if len(line) == 0 {
+					continue
+				}
+				lines = append(lines, line)
+			}
+		}
+		if len(npcSpell.Entries) > 4 {
+			lines = append(lines, fmt.Sprintf("... and %d more spells", len(npcSpell.Entries)-4))
+		}
 	}
 
 	data, err := image.GenerateNpcPreview(npc.Race, lines)

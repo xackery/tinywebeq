@@ -43,7 +43,7 @@ func fetchNpc(ctx context.Context, id int) (*model.Npc, error) {
 		}
 	}
 
-	query := "SELECT id, name, attack_speed, class, hp, lastname, level, loottable_id, maxdmg, merchant_id, mindmg, npc_faction_id, npc_spells_id, npcspecialattks, race, trackable, rarespawn FROM npc_types WHERE id=:id LIMIT 1"
+	query := "SELECT id, name, attack_speed, class, hp, lastname, level, loottable_id, maxdmg, merchant_id, mindmg, npc_faction_id, npc_spells_id, npcspecialattks, race, trackable, rare_spawn FROM npc_types WHERE id=:id LIMIT 1"
 
 	rows, err := db.Query(ctx,
 		query,

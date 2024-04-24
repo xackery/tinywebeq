@@ -38,6 +38,7 @@ func dbliteInit(ctx context.Context) error {
 		"npc_merchant",
 		"npc_spawn",
 		"npc_faction",
+		"npc_spell",
 	}
 
 	for _, scope := range scopes {
@@ -96,6 +97,8 @@ func readSqliteCache(path string) (model.CacheIdentifier, bool) {
 		data = &model.NpcSpawn{}
 	case "npc_faction":
 		data = &model.NpcFaction{}
+	case "npc_spell":
+		data = &model.NpcSpell{}
 	default:
 		tlog.Warnf("Unknown cache scope: %s", scope)
 		return nil, false
