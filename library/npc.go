@@ -148,10 +148,6 @@ func initNpcs() error {
 	return nil
 }
 
-func NpcInfo(id int) (int, []string) {
-	return 0, []string{}
-}
-
 func NpcIcon(id int) image.Image {
 	return nil
 }

@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function() {
     <table width="100%" cellpadding="0" cellspacing="0">
 
     <tr> <td colspan="2" nowrap="1">{{ .Item.TagStr }}</td></tr>
-    {{ if (gt .Item.Classes 0) }}<tr><td colspan="2"><b>Class: </b>{{ .Item.ClassStr }}</td></tr>{{ end }}
+    {{ if (gt .Item.Classes 0) }}<tr><td colspan="2"><b>Class: </b>{{ .Item.ClassesStr }}</td></tr>{{ end }}
     {{ if (gt .Item.Races 0) }}<tr><td colspan="2"><b>Race: </b>{{ .Item.RaceStr }}</td></tr>{{ end }}
     {{ if (gt .Item.Deity 0) }}<tr><td colspan="2" nowrap="1"><b>Deity: </b>{{ .Item.DeityStr }}</td></tr>{{ end }}
     {{ if (gt .Item.Slots 0) }}<tr><td colspan="2"><b>{{ .Item.SlotStr }}</b></td></tr>{{ end }}

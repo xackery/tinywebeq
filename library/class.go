@@ -1,6 +1,47 @@
 package library
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
+
+func ClassStr(in int) string {
+	switch in {
+	case 1:
+		return "Warrior"
+	case 2:
+		return "Cleric"
+	case 3:
+		return "Paladin"
+	case 4:
+		return "Ranger"
+	case 5:
+		return "Shadow Knight"
+	case 6:
+		return "Druid"
+	case 7:
+		return "Monk"
+	case 8:
+		return "Bard"
+	case 9:
+		return "Rogue"
+	case 10:
+		return "Shaman"
+	case 11:
+		return "Necromancer"
+	case 12:
+		return "Wizard"
+	case 13:
+		return "Magician"
+	case 14:
+		return "Enchanter"
+	case 15:
+		return "Beastlord"
+	case 16:
+		return "Berserker"
+	}
+	return fmt.Sprintf("Unknown %d", in)
+}
 
 // ClassesFromMask returns a string of classes from a bitmask
 func ClassesFromMask(in int) string {

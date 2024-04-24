@@ -59,6 +59,24 @@ func Init(ctx context.Context) error {
 		spellFGImage = image.NewUniform(spellFGColor)
 	}
 
+	focus = strings.ToUpper(config.Get().Npc.Preview.BGColor)
+	if focus != "" && focus != "#DBDEE1" {
+		npcBGColor, err = hexColor(focus)
+		if err != nil {
+			return fmt.Errorf("npc.Preview.BGColor %s: %w", focus, err)
+		}
+		npcBGImage = image.NewUniform(npcBGColor)
+	}
+
+	focus = strings.ToUpper(config.Get().Npc.Preview.FGColor)
+	if focus != "" && focus != "#313338" {
+		npcFGColor, err = hexColor(focus)
+		if err != nil {
+			return fmt.Errorf("npc.Preview.FGColor %s: %w", focus, err)
+		}
+		npcFGImage = image.NewUniform(npcFGColor)
+	}
+
 	focus = config.Get().Spell.Preview.FontNormal
 	if focus != "" && focus != "goregular.ttf" {
 		tlog.Debugf("Loading spellFont: %s", focus)
@@ -92,6 +110,24 @@ func Init(ctx context.Context) error {
 		itemFontBold, err = os.ReadFile(focus)
 		if err != nil {
 			return fmt.Errorf("read itemFontBold: %w", err)
+		}
+	}
+
+	focus = config.Get().Npc.Preview.FontNormal
+	if focus != "" && focus != "goregular.ttf" {
+		tlog.Debugf("Loading npcFont: %s", focus)
+		npcFont, err = os.ReadFile(focus)
+		if err != nil {
+			return fmt.Errorf("read npcFont: %w", err)
+		}
+	}
+
+	focus = config.Get().Npc.Preview.FontBold
+	if focus != "" && focus != "gobold.ttf" {
+		tlog.Debugf("Loading npcFontBold: %s", focus)
+		npcFontBold, err = os.ReadFile(focus)
+		if err != nil {
+			return fmt.Errorf("read npcFontBold: %w", err)
 		}
 	}
 

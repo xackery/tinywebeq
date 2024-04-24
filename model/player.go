@@ -1,8 +1,14 @@
 package model
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/base64"
+	"encoding/gob"
+	"fmt"
 	"strings"
+
+	"github.com/xackery/tinywebeq/library"
 )
 
 type Player struct {
@@ -134,23 +140,7 @@ func (t *Player) Expiration() int64 {
 }
 
 func (t *Player) ClassStr() string {
-	out := "Unknown"
-
-	if t.Class == 1 {
-		out += "Warrior"
-	}
-	if t.Class == 2 {
-		out += "Cleric"
-	}
-	if t.Class == 3 {
-		out += "Paladin"
-	}
-	if t.Class == 4 {
-		out += "Ranger"
-	}
-
-	out = strings.TrimSuffix(out, " ")
-	return out
+	return library.ClassStr(t.Class)
 }
 
 func (t *Player) RaceStr() string {
@@ -166,4 +156,19 @@ func (t *Player) IconUrl() string {
 
 func (t *Player) Serialize() string {
 	return serialize(t)
+}
+
+func (t *Player) Deserialize(data string) error {
+	decoded, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return fmt.Errorf("base64 decode: %w", err)
+	}
+	buf := bytes.NewBuffer(decoded)
+	d := gob.NewDecoder(buf)
+
+	err = d.Decode(&t)
+	if err != nil {
+		return fmt.Errorf("gob decode: %w", err)
+	}
+	return nil
 }

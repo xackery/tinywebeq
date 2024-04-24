@@ -77,11 +77,44 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		return fmt.Errorf("fetchNpc: %w", err)
 	}
 
+	var npcLoot *model.NpcLoot
+	if npc.Loottableid > 0 {
+		npcLoot, err = fetchNpcLoot(ctx, npc.Loottableid)
+		if err != nil {
+			return fmt.Errorf("fetchNpcLoot: %w", err)
+		}
+	}
+	var npcMerchant *model.NpcMerchant
+	if npc.Merchantid > 0 {
+		npcMerchant, err = fetchNpcMerchant(ctx, npc.Merchantid)
+		if err != nil {
+			return fmt.Errorf("fetchNpcMerchant: %w", err)
+		}
+	}
+
+	var npcFaction *model.NpcFaction
+	if npc.Npcfactionid > 0 {
+		npcFaction, err = fetchNpcFaction(ctx, npc.Npcfactionid)
+		if err != nil {
+			return fmt.Errorf("fetchNpcFaction: %w", err)
+		}
+	}
+
+	npcSpawn, err := fetchNpcSpawn(ctx, id)
+	if err != nil {
+		return fmt.Errorf("fetchNpcSpawn: %w", err)
+	}
+
 	type TemplateData struct {
 		Site               site.BaseData
 		Npc                *model.Npc
 		Library            *library.Library
+		NpcInfo            []string
 		IsNpcSearchEnabled bool
+		NpcLoot            *model.NpcLoot
+		NpcMerchant        *model.NpcMerchant
+		NpcSpawn           *model.NpcSpawn
+		NpcFaction         *model.NpcFaction
 	}
 
 	data := TemplateData{
@@ -89,6 +122,10 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		Npc:                npc,
 		Library:            library.Instance(),
 		IsNpcSearchEnabled: config.Get().Npc.Search.IsEnabled,
+		NpcLoot:            npcLoot,
+		NpcMerchant:        npcMerchant,
+		NpcSpawn:           npcSpawn,
+		NpcFaction:         npcFaction,
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

@@ -52,7 +52,32 @@ document.addEventListener("DOMContentLoaded", function() {
 {{end}}
 <br>
 <p>Name: {{ .Npc.Name }}</p>
-{{ range $line := .NpcInfo }}
-    <p>{{ $line }}</p>
-{{ end }}
+<p>Level: {{ .Npc.Level }}</p>
+<p>Race: {{ .Npc.RaceStr }}</p>
+<p>Class: {{ .Npc.ClassStr }}</p>
+<p>Health points: {{ .Npc.Hp }}</p>
+<p>Damage: {{ .Npc.Mindmg }} to {{ .Npc.Maxdmg }}</p>
+<p>Attack speed: {{ if eq .Npc.Attackspeed 100 }}Normal {{ end }}{{ .Npc.Attackspeed }}%</p>
+<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>
+
+{{ if .NpcSpawn }} {{ range .NpcSpawn.Entries }}
+    <p>{{ .Spawngroup }} ({{ .Spawngroupid }}) {{ .LongName }} ({{ .ShortName}}) {{ .X }}, {{ .Y }}, {{ .Z }} {{ .Respawntime }} </p>
+{{ end }}{{ end }}
+
+{{ if .NpcFaction }} {{ range .NpcFaction.Entries }}
+    <p><a href="/faction/view?id={{ .ID }}">{{ .Name }}</a> {{ .Value }}</p>
+{{ end }}{{ end}}
+
+{{ if .NpcLoot }}{{ range .NpcLoot.Entries }}
+    <p><a href="/item/view?id={{ .ID }}">{{ .Name }}</a> ({{ .ItemTypeStr }}) - {{ .Chance }}% ({{ .ChanceGlobal }}% Global)</p>
+{{ end }}{{ end }}
+
+{{ if .NpcMerchant }} {{ range .NpcMerchant.Entries }}
+    <p>{{ .Name }}</p>
+    <p>Price: {{ .Price }}</p>
+    {{ if .Ldonprice }}<p>LDoN Price: {{ .Ldonprice }}</p>{{ end }}
+{{ end }}{{ end}}
+
+
+
 {{ end }}

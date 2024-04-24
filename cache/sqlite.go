@@ -30,7 +30,15 @@ func dbliteInit(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("make cache: %w", err)
 	}
-	scopes := []string{"npc", "item", "player"}
+	scopes := []string{
+		"npc",
+		"item",
+		"player",
+		"npc_loot",
+		"npc_merchant",
+		"npc_spawn",
+		"npc_faction",
+	}
 
 	for _, scope := range scopes {
 		query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (key INTEGER PRIMARY KEY, data TEXT, expiration INTEGER)", scope)
@@ -41,11 +49,6 @@ func dbliteInit(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func Query(ctx context.Context, query string, args map[string]interface{}) (*sqlx.Rows, error) {
-	tlog.Debugf("Querying `%s`, args: %v", query, args)
-	return Instance.NamedQueryContext(ctx, query, args)
 }
 
 func connect() error {
@@ -67,6 +70,8 @@ func readSqliteCache(path string) (model.CacheIdentifier, bool) {
 		return nil, false
 	}
 
+	var data model.CacheIdentifier
+
 	scope := strings.TrimPrefix(path, "cache/")
 	key := scope
 	if strings.Contains(scope, "/") {
@@ -76,31 +81,50 @@ func readSqliteCache(path string) (model.CacheIdentifier, bool) {
 	}
 	key = strings.TrimSuffix(key, ".yaml")
 
-	query := fmt.Sprintf("SELECT data FROM %s WHERE key = :key AND expiration > :expiration", scope)
-
-	rows, err := Query(context.Background(),
-		query,
-		map[string]interface{}{
-			"key":        key,
-			"expiration": time.Now().Unix(),
-		})
-	if err != nil {
-		tlog.Warnf("Query cache: %v", err)
+	switch scope {
+	case "npc":
+		data = &model.Npc{}
+	case "item":
+		data = &model.Item{}
+	case "player":
+		data = &model.Player{}
+	case "npc_loot":
+		data = &model.NpcLoot{}
+	case "npc_merchant":
+		data = &model.NpcMerchant{}
+	case "npc_spawn":
+		data = &model.NpcSpawn{}
+	case "npc_faction":
+		data = &model.NpcFaction{}
+	default:
+		tlog.Warnf("Unknown cache scope: %s", scope)
 		return nil, false
 	}
-	defer rows.Close()
 
-	if rows.Next() {
-		rawData := ""
-		err = rows.StructScan(&rawData)
-		if err != nil {
-			tlog.Warnf("rows.StructScan: %v", err)
-			return nil, false
-		}
-		return Deserialize(rawData), true
+	query := fmt.Sprintf("SELECT data FROM %s WHERE key = :key AND expiration > :expiration", scope)
+
+	row := Instance.QueryRowxContext(context.Background(),
+		query,
+		key,
+		time.Now().Unix())
+	if row.Err() != nil {
+		tlog.Warnf("Query cache: %v", row.Err())
+		return nil, false
 	}
 
-	return nil, false
+	rawData := ""
+	err := row.Scan(&rawData)
+	if err != nil {
+		tlog.Warnf("rows.StructScan: %v", err)
+		return nil, false
+	}
+
+	err = data.Deserialize(rawData)
+	if err != nil {
+		tlog.Warnf("Deserialize: %v", err)
+		return nil, false
+	}
+	return data, true
 }
 
 func writeSqliteCache(ctx context.Context, path string, data model.CacheIdentifier) error {

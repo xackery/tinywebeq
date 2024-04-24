@@ -1,10 +1,7 @@
 package cache
 
 import (
-	"bytes"
 	"context"
-	"encoding/base64"
-	"encoding/gob"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -86,23 +83,6 @@ func Write(ctx context.Context, path string, data model.CacheIdentifier) error {
 	return nil
 }
 
-func Deserialize(data string) model.CacheIdentifier {
-	decoded, err := base64.StdEncoding.DecodeString(data)
-	if err != nil {
-		tlog.Warnf("base64 decode: %v", err)
-		return nil
-	}
-	buf := bytes.NewBuffer(decoded)
-	d := gob.NewDecoder(buf)
-	var result model.CacheIdentifier
-	err = d.Decode(&result)
-	if err != nil {
-		tlog.Warnf("gob decode: %v", err)
-		return nil
-	}
-	return result
-}
-
 func writeMemoryCache(ctx context.Context, path string, data model.CacheIdentifier) error {
 	if !config.Get().MemCache.IsEnabled {
 		return nil
@@ -177,9 +157,6 @@ func Read(ctx context.Context, path string) (model.CacheIdentifier, bool) {
 	mu.Lock()
 	defer mu.Unlock()
 	size := 4000
-	if !config.Get().FileCache.IsEnabled && !config.Get().MemCache.IsEnabled {
-		return nil, false
-	}
 	if config.Get().MemCache.IsEnabled {
 		entry, ok := memCache[path]
 		if ok {

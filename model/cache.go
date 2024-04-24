@@ -14,6 +14,7 @@ type CacheIdentifier interface {
 	SetKey(string)
 	SetExpiration(int64)
 	Serialize() string
+	Deserialize(string) error
 	Expiration() int64
 }
 

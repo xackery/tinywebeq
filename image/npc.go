@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	npcFGColor  = color.RGBA{0x31, 0x33, 0x38, 0xff}
-	npcBGColor  = color.RGBA{0xdb, 0xde, 0xe1, 0xff}
+	npcFGColor  = color.RGBA{0xdb, 0xde, 0xe1, 0xff}
+	npcBGColor  = color.RGBA{0x31, 0x33, 0x38, 0xff}
 	npcFGImage  = image.NewUniform(npcFGColor)
 	npcBGImage  = image.NewUniform(npcBGColor)
 	npcFont     = goregular.TTF

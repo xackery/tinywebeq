@@ -245,7 +245,7 @@ func (e *ItemPreview) render1Left() {
 
 	e.writeNoAlignLn("", item.TagStr())
 	if item.Classes > 0 {
-		e.writeNoAlignLn("Class:", item.ClassStr())
+		e.writeNoAlignLn("Class:", item.ClassesStr())
 	}
 	if item.Races > 0 {
 		e.writeNoAlignLn("Race:", item.RaceStr())
