@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/image"
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
@@ -18,6 +19,10 @@ import (
 func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var id int
+	if !config.Get().Npc.IsEnabled {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
@@ -79,8 +84,8 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 	}
 
 	tags := ""
-	if npc.Lastname != "" {
-		tags += fmt.Sprintf("(%s) ", npc.Lastname)
+	if npc.Lastname.Valid && npc.Lastname.String != "" {
+		tags += fmt.Sprintf("(%s) ", npc.Lastname.String)
 	}
 	if npcMerchant != nil {
 		tags += "Merchant, "

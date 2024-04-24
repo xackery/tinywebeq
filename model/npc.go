@@ -2,9 +2,11 @@ package model
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/base64"
 	"encoding/gob"
 	"fmt"
+	"strings"
 
 	"github.com/xackery/tinywebeq/library"
 )
@@ -12,23 +14,23 @@ import (
 type Npc struct {
 	key             string
 	expiration      int64
-	ID              int    `db:"id"`
-	Name            string `db:"name"`
-	Attackspeed     int    `db:"attack_speed"`
-	Class           int    `db:"class"`
-	Hp              int    `db:"hp"`
-	Lastname        string `db:"lastname"`
-	Level           int    `db:"level"`
-	Maxdmg          int    `db:"maxdmg"`
-	Mindmg          int    `db:"mindmg"`
-	Npcspellsid     int    `db:"npc_spells_id"`
-	Npcspecialattks string `db:"npcspecialattks"`
-	Race            int    `db:"race"`
-	Trackable       int    `db:"trackable"`
-	Loottableid     int    `db:"loottable_id"`
-	Merchantid      int    `db:"merchant_id"`
-	Npcfactionid    int    `db:"npc_faction_id"`
-	Rarespawn       int    `db:"rare_spawn"`
+	ID              int            `db:"id"`
+	Name            string         `db:"name"`
+	Attackspeed     int            `db:"attack_speed"`
+	Class           int            `db:"class"`
+	Hp              int            `db:"hp"`
+	Lastname        sql.NullString `db:"lastname"`
+	Level           int            `db:"level"`
+	Maxdmg          int            `db:"maxdmg"`
+	Mindmg          int            `db:"mindmg"`
+	Npcspellsid     int            `db:"npc_spells_id"`
+	Npcspecialattks string         `db:"npcspecialattks"`
+	Race            int            `db:"race"`
+	Trackable       int            `db:"trackable"`
+	Loottableid     int            `db:"loottable_id"`
+	Merchantid      int            `db:"merchant_id"`
+	Npcfactionid    int            `db:"npc_faction_id"`
+	Rarespawn       int            `db:"rare_spawn"`
 }
 
 func (t *Npc) Identifier() string {
@@ -68,6 +70,16 @@ func (t *Npc) Deserialize(data string) error {
 		return fmt.Errorf("gob decode: %w", err)
 	}
 	return nil
+}
+
+func (t *Npc) CleanName() string {
+	out := t.Name
+	out = strings.ReplaceAll(out, "_", " ")
+	out = strings.ReplaceAll(out, "-", "`")
+	out = strings.ReplaceAll(out, "#", "")
+	out = strings.ReplaceAll(out, "!", "")
+	out = strings.ReplaceAll(out, "~", "")
+	return out
 }
 
 func (t *Npc) RaceStr() string {

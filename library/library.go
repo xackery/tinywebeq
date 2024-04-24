@@ -36,6 +36,12 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("initItems: %w", err)
 	}
+
+	tlog.Debugf("Loading library npcs")
+	err = initNpcs()
+	if err != nil {
+		return fmt.Errorf("initNpcs: %w", err)
+	}
 	return nil
 }
 

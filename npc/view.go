@@ -41,6 +41,11 @@ func View(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var id int
 
+	if !config.Get().Npc.IsEnabled {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+
 	tlog.Debugf("view: %s", r.URL.String())
 
 	strID := r.URL.Query().Get("id")

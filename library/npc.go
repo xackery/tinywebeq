@@ -95,7 +95,7 @@ func initNpcs() error {
 		}
 	}
 
-	query := "SELECT id, name, level FROM npcs"
+	query := "SELECT id, name, level FROM npc_types"
 
 	//fmt.Println(query)
 	rows, err := db.Instance.Query(query)
@@ -118,10 +118,18 @@ func initNpcs() error {
 			return fmt.Errorf("rows.Scan: %w", err)
 		}
 
+		out := ne.Name
+		out = strings.ReplaceAll(out, "_", " ")
+		out = strings.ReplaceAll(out, "-", "`")
+		out = strings.ReplaceAll(out, "#", "")
+		out = strings.ReplaceAll(out, "!", "")
+		out = strings.ReplaceAll(out, "~", "")
+		ne.Name = out
+
 		if isSearchEnabled && isNewIndex {
 			if totalCount%1000 == 0 {
 				if totalCount%10000 == 0 {
-					tlog.Infof("Indexed %d out of ~40000 npcs", totalCount)
+					tlog.Infof("Indexed %d out of ~67000 npcs", totalCount)
 				}
 				err = npcIndex.Batch(batch)
 				if err != nil {

@@ -104,7 +104,7 @@ type Npc struct {
 
 type NpcSearch struct {
 	IsEnabled      bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the npc view for finding other npcs"`
-	IsBleveEnabled bool `toml:"is_bleve_enabled" desc:"Default false, costs ~200MB of memory to do names searches in memory with bleve indexing"`
+	IsBleveEnabled bool `toml:"is_bleve_enabled" desc:"Default false, costs ~500MB of memory to do names searches in memory with bleve indexing"`
 }
 
 type NpcPreview struct {
