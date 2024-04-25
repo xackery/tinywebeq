@@ -20,7 +20,7 @@ type Config struct {
 	IsDebugEnabled   bool        `toml:"is_debug_enabled" desc:"Default true, enables verbose logging"`
 	MaxLevel         int         `toml:"max_level" desc:"Default 65, Maximum level a character can obtain. Used by spell.playeronlyspells, spell.info, item.is_search_only_player_obtainable"`
 	CurrentExpansion int         `toml:"current_expansion" desc:"Default 0 (Classic), Current expansion for the server. Filters out spells that are not available to players."`
-	Server           Server      `toml:"server" desc:"Web Server configuration"`
+	Site             Site        `toml:"server" desc:"Web Site configuration"`
 	Database         Database    `toml:"database" desc:"Database configuration"`
 	Item             Item        `toml:"item" desc:"Item configuration"`
 	Spell            Spell       `toml:"spell" desc:"Spell configuration"`
@@ -32,10 +32,12 @@ type Config struct {
 	FileCache        FileCache   `toml:"file_cache" desc:"File cache configuration"`
 }
 
-type Server struct {
+type Site struct {
 	Host        string      `toml:"host" desc:"Default localhost, what IP to bind to, can also have it empty to bind all"`
 	Port        int         `toml:"port" desc:"Default 8080, what port to bind to, if you're not using a proxy and use TLS set to 443"`
 	LetsEncrypt LetsEncrypt `toml:"lets_encrypt" desc:"LetsEncrypt configuration"`
+	BaseURL     string      `toml:"base_url" desc:"Default http://localhost:8080, base url for the site, e.g. https://foo.com"`
+	GoogleTag   string      `toml:"google_tag" desc:"Default empty, google tag manager id"`
 }
 
 type LetsEncrypt struct {
@@ -70,6 +72,7 @@ type ItemSearch struct {
 }
 
 type ItemPreview struct {
+	IsEnabled  bool   `toml:"is_enabled" desc:"Default true, enables item preview"`
 	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for item preview"`
 	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for item preview"`
 	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
@@ -91,6 +94,7 @@ type SpellSearch struct {
 }
 
 type SpellPreview struct {
+	IsEnabled  bool   `toml:"is_enabled" desc:"Default true, enables spell preview"`
 	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for spell preview"`
 	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for spell preview"`
 	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
@@ -110,6 +114,7 @@ type NpcSearch struct {
 }
 
 type NpcPreview struct {
+	IsEnabled  bool   `toml:"is_enabled" desc:"Default true, enables npc preview"`
 	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for npc preview"`
 	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for npc preview"`
 	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
@@ -248,13 +253,16 @@ func (c *Config) Verify() error {
 		tlog.Warnf("MemCache.MaxMemory is unset, setting to 150000000")
 		c.MemCache.MaxMemory = 150000000
 	}
-	if c.Server.Port < 1 {
+	if c.Site.Port < 1 {
 		tlog.Warnf("Server.Port is unset, setting to 8080")
-		c.Server.Port = 8080
+		c.Site.Port = 8080
 	}
-	if c.Server.Host == "" {
+	if c.Site.Host == "" {
 		tlog.Warnf("Server.Host is unset, setting to localhost")
-		c.Server.Host = "localhost"
+		c.Site.Host = "localhost"
+	}
+	if c.Site.BaseURL == "" {
+		return fmt.Errorf("Server.BaseURL is unset, please set to the base url of the site")
 	}
 	if c.Database.Host == "" {
 		tlog.Warnf("Database.Host is unset, setting to localhost")
@@ -287,9 +295,10 @@ func defaultLabel() Config {
 	cfg := Config{
 		IsDebugEnabled: true,
 		MaxLevel:       65,
-		Server: Server{
-			Host: "localhost",
-			Port: 8080,
+		Site: Site{
+			Host:    "localhost",
+			Port:    8080,
+			BaseURL: "http://localhost:8080",
 			LetsEncrypt: LetsEncrypt{
 				IsEnabled: false,
 				Email:     "example@email.com",
@@ -326,6 +335,7 @@ func defaultLabel() Config {
 				IsOnlyPlayableObtainable: false,
 			},
 			Preview: ItemPreview{
+				IsEnabled:  true,
 				BGColor:    "#313338",
 				FGColor:    "#DBDEE1",
 				FontNormal: "goregular.ttf",
@@ -342,6 +352,7 @@ func defaultLabel() Config {
 				IsOnlyPlayerSpells: false,
 			},
 			Preview: SpellPreview{
+				IsEnabled:  true,
 				BGColor:    "#313338",
 				FGColor:    "#DBDEE1",
 				FontNormal: "goregular.ttf",
@@ -372,6 +383,7 @@ func defaultLabel() Config {
 				IsBleveEnabled: false,
 			},
 			Preview: NpcPreview{
+				IsEnabled:  true,
 				BGColor:    "#313338",
 				FGColor:    "#DBDEE1",
 				FontNormal: "goregular.ttf",

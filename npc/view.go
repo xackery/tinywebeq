@@ -132,7 +132,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 	}
 
 	data := TemplateData{
-		Site:               site.BaseDataInit("Npc View"),
+		Site:               site.BaseDataInit(npc.Name),
 		Npc:                npc,
 		Library:            library.Instance(),
 		IsNpcSearchEnabled: config.Get().Npc.Search.IsEnabled,
@@ -141,6 +141,9 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		NpcSpawn:           npcSpawn,
 		NpcFaction:         npcFaction,
 		NpcSpell:           npcSpell,
+	}
+	if config.Get().Npc.Preview.IsEnabled {
+		data.Site.ImageURL = fmt.Sprintf("/npc/preview.png?id=%d", id)
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

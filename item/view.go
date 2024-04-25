@@ -97,7 +97,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 	}
 
 	data := TemplateData{
-		Site:                site.BaseDataInit(item.Name),
+		Site:                site.BaseDataInitWithImage(item.Name, fmt.Sprintf("/item/preview.png?id=%d", id)),
 		Item:                item,
 		Library:             library.Instance(),
 		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,

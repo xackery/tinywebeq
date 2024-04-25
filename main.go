@@ -143,23 +143,23 @@ func run() error {
 		return fmt.Errorf("library.Init: %w", err)
 	}
 
-	certPath := config.Get().Server.LetsEncrypt.CertPath
+	certPath := config.Get().Site.LetsEncrypt.CertPath
 	server := &http.Server{
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
-	if config.Get().Server.LetsEncrypt.IsEnabled {
+	if config.Get().Site.LetsEncrypt.IsEnabled {
 		tlog.Debugf("Letsencrypt enabled")
 		server.Addr = fmt.Sprintf(":%d", 443)
 		m := &autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist(config.Get().Server.LetsEncrypt.Domains...),
+			HostPolicy: autocert.HostWhitelist(config.Get().Site.LetsEncrypt.Domains...),
 			Cache:      autocert.DirCache(certPath),
 		}
 		server.TLSConfig = m.TLSConfig()
 	} else {
-		server.Addr = fmt.Sprintf("%s:%d", config.Get().Server.Host, config.Get().Server.Port)
+		server.Addr = fmt.Sprintf("%s:%d", config.Get().Site.Host, config.Get().Site.Port)
 	}
 
 	mux := http.NewServeMux()
@@ -183,7 +183,7 @@ func run() error {
 	server.Handler = mux
 
 	tlog.Infof("Listening on %s", server.Addr)
-	if config.Get().Server.LetsEncrypt.IsEnabled {
+	if config.Get().Site.LetsEncrypt.IsEnabled {
 		return server.ListenAndServeTLS("", "")
 	}
 	return server.ListenAndServe()
@@ -217,17 +217,17 @@ func (u *LetsEncryptUser) GetPrivateKey() crypto.PrivateKey {
 }
 
 func letsencrypt() error {
-	if !config.Get().Server.LetsEncrypt.IsEnabled {
+	if !config.Get().Site.LetsEncrypt.IsEnabled {
 		return fmt.Errorf("letsencrypt is disabled in config, enable it first")
 	}
-	if len(config.Get().Server.LetsEncrypt.Email) == 0 {
+	if len(config.Get().Site.LetsEncrypt.Email) == 0 {
 		return fmt.Errorf("letsencrypt email is not set in config")
 	}
-	if len(config.Get().Server.LetsEncrypt.Domains) < 1 {
+	if len(config.Get().Site.LetsEncrypt.Domains) < 1 {
 		return fmt.Errorf("letsencrypt domains is not set in config")
 	}
 
-	certPath := config.Get().Server.LetsEncrypt.CertPath
+	certPath := config.Get().Site.LetsEncrypt.CertPath
 	// remove trailing slash
 	certPath = filepath.Clean(certPath)
 	certPath = filepath.ToSlash(certPath)
@@ -253,7 +253,7 @@ func letsencrypt() error {
 
 	var privateKey crypto.PrivateKey
 	// check if private key exists
-	keyPath := config.Get().Server.LetsEncrypt.CertPath + "/key.pem"
+	keyPath := config.Get().Site.LetsEncrypt.CertPath + "/key.pem"
 	if _, err := os.Stat(keyPath); err == nil {
 		tlog.Infof("%s exists, doing renew instead", keyPath)
 		return letsencryptRenew()
@@ -266,14 +266,14 @@ func letsencrypt() error {
 	}
 
 	myUser := LetsEncryptUser{
-		Email: config.Get().Server.LetsEncrypt.Email,
+		Email: config.Get().Site.LetsEncrypt.Email,
 		key:   privateKey,
 	}
 
 	leConfig := lego.NewConfig(&myUser)
 
 	leConfig.CADirURL = lego.LEDirectoryStaging
-	if config.Get().Server.LetsEncrypt.IsProd {
+	if config.Get().Site.LetsEncrypt.IsProd {
 		leConfig.CADirURL = lego.LEDirectoryProduction
 	}
 
@@ -308,7 +308,7 @@ func letsencrypt() error {
 	myUser.Registration = reg
 
 	request := certificate.ObtainRequest{
-		Domains: config.Get().Server.LetsEncrypt.Domains,
+		Domains: config.Get().Site.LetsEncrypt.Domains,
 		Bundle:  true,
 	}
 	certificates, err := client.Certificate.Obtain(request)
@@ -371,7 +371,7 @@ func questParse(ctx context.Context) error {
 }
 
 func letsencryptRenew() error {
-	certPath := config.Get().Server.LetsEncrypt.CertPath
+	certPath := config.Get().Site.LetsEncrypt.CertPath
 	keyPath := certPath + "/key.pem"
 	data, err := os.ReadFile(keyPath)
 	if err != nil {
@@ -383,14 +383,14 @@ func letsencryptRenew() error {
 	}
 
 	myUser := LetsEncryptUser{
-		Email: config.Get().Server.LetsEncrypt.Email,
+		Email: config.Get().Site.LetsEncrypt.Email,
 		key:   privateKey,
 	}
 
 	leConfig := lego.NewConfig(&myUser)
 
 	leConfig.CADirURL = lego.LEDirectoryStaging
-	if config.Get().Server.LetsEncrypt.IsProd {
+	if config.Get().Site.LetsEncrypt.IsProd {
 		leConfig.CADirURL = lego.LEDirectoryProduction
 	}
 
