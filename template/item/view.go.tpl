@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     {{ if .ItemQuest }}
-        <r><td><b>Obtained from Quest:</b><br>
+        <r><td><b>Part of Quest:</b><br>
         {{ range .ItemQuest.Entries }}
             {{ .NpcCleanName }} in {{ .ZoneLongName }}<br>
         {{ end}}

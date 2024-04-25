@@ -355,7 +355,7 @@ func (e *ItemPreview) render4Left() {
 			if counter > 3 {
 				break
 			}
-			e.writeNoAlignLn("Quest Reward from", fmt.Sprintf("%s in %s", entry.NpcCleanName(), entry.ZoneLongName()))
+			e.writeNoAlignLn("Quest", fmt.Sprintf("%s in %s", entry.NpcCleanName(), entry.ZoneLongName()))
 		}
 	}
 	if itemRecipe != nil {

@@ -80,9 +80,6 @@ func (t *NpcSpellEntry) SpellInfo(level int) []string {
 		if strings.HasPrefix(line, "Spell Info") {
 			continue
 		}
-		if strings.HasPrefix(line, "ID: ") {
-			continue
-		}
 		if strings.HasPrefix(line, "Recovery Time: ") {
 			continue
 		}
