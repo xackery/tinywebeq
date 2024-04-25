@@ -928,3 +928,7 @@ func (t *Item) ExtraDamageSkillStr() string {
 func (t *Item) SkillModTypeStr() string {
 	return library.SkillName(t.Skillmodtype)
 }
+
+func (t *Item) ProcRateTotal() int {
+	return t.Procrate + 100
+}
