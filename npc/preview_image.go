@@ -103,6 +103,7 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 
 	lines := []string{
 		fmt.Sprintf("%s %s", npc.CleanName(), tags),
+		fmt.Sprintf("ID: %d", npc.ID),
 		fmt.Sprintf("Lvl %d %s %s", npc.Level, npc.RaceStr(), npc.ClassStr()),
 
 		fmt.Sprintf("%d HP, %d-%d DMG @ %0.1f%%", npc.Hp, npc.Mindmg, npc.Maxdmg, npc.Attackspeed),
