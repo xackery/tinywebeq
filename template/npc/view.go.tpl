@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <p>Class: {{ .Npc.ClassStr }}</p>
 <p>Health points: {{ .Npc.Hp }}</p>
 <p>Damage: {{ .Npc.Mindmg }} to {{ .Npc.Maxdmg }}</p>
-<p>Attack speed: {{ if eq .Npc.Attackspeed 100 }}Normal {{ end }}{{ .Npc.Attackspeed }}%</p>
+<p>Attack speed: {{ .Npc.Attackspeed }}%</p>
 {{ if .Npc.NpcSpecialAttacksStr }}<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>{{ end }}
 
 {{ if .NpcSpawn }} {{ range .NpcSpawn.Entries }}

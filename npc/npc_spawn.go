@@ -11,13 +11,20 @@ import (
 
 func fetchNpcSpawn(ctx context.Context, id int) (*model.NpcSpawn, error) {
 	path := fmt.Sprintf("npc_spawn/%d.yaml", id)
-	cacheData, ok := cache.Read(ctx, path)
+	cacheData, src, ok := cache.Read(ctx, path)
 	if ok {
 		cacheNpc, ok := cacheData.(*model.NpcSpawn)
 		if !ok {
 			return nil, fmt.Errorf("cache read: invalid type, wanted *model.NpcSpawn, got %T", cacheData)
 		}
 		if cacheNpc != nil {
+			if src != cache.SourceCacheMemory {
+				err := cache.WriteMemoryCache(ctx, path, cacheNpc)
+				if err != nil {
+					return nil, fmt.Errorf("cache write: %w", err)
+				}
+			}
+
 			return cacheNpc, nil
 		}
 	}

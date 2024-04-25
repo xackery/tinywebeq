@@ -55,10 +55,15 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 
 	itemQuest, err := fetchItemQuest(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchItemQuest: %w", err)
+		tlog.Debugf("Ignoring err fetchItemQuest: %v", err)
 	}
 
-	data, err := image.GenerateItemPreview(item, itemQuest)
+	itemRecipe, err := fetchItemRecipe(ctx, id)
+	if err != nil {
+		tlog.Debugf("Ignoring err fetchItemRecipe: %v", err)
+	}
+
+	data, err := image.GenerateItemPreview(item, itemQuest, itemRecipe)
 	if err != nil {
 		return fmt.Errorf("GenerateItemPreview: %w", err)
 	}

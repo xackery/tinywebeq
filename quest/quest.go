@@ -261,10 +261,8 @@ func writeItemQuest(ctx context.Context, zoneID int, npcID int, npcName string, 
 		path := fmt.Sprintf("item_quest/%d.yaml", itemID)
 
 		var itemQuest *model.ItemQuest
-		itemQuestCache, ok := cache.Read(ctx, path)
-		if !ok {
-			itemQuest = &model.ItemQuest{}
-		} else {
+		itemQuestCache, ok := cache.ReadSqlite(path)
+		if ok {
 			itemQuest = itemQuestCache.(*model.ItemQuest)
 		}
 		if itemQuest == nil {
@@ -281,7 +279,7 @@ func writeItemQuest(ctx context.Context, zoneID int, npcID int, npcName string, 
 
 		itemQuest.Entries = append(itemQuest.Entries, entry)
 
-		err = cache.Write(ctx, path, itemQuest)
+		err = cache.WriteSqlite(ctx, path, itemQuest)
 		if err != nil {
 			return fmt.Errorf("cache write: %w", err)
 		}

@@ -19,6 +19,7 @@ import (
 	"github.com/xackery/tinywebeq/npc"
 	"github.com/xackery/tinywebeq/player"
 	"github.com/xackery/tinywebeq/quest"
+	"github.com/xackery/tinywebeq/recipe"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/spell"
 	"github.com/xackery/tinywebeq/tlog"
@@ -72,6 +73,8 @@ func run() error {
 		return nil
 	case "quest":
 		return questParse(ctx)
+	case "recipe":
+		return recipeParse(ctx)
 	case "help":
 		usage()
 	case "flush":
@@ -467,3 +470,28 @@ func letsencryptRenew() error {
 
 // 	return resource
 // }
+
+func recipeParse(ctx context.Context) error {
+	err := db.Init(ctx)
+	if err != nil {
+		return fmt.Errorf("db.Init: %w", err)
+	}
+
+	err = cache.Init(ctx, false)
+	if err != nil {
+		return fmt.Errorf("cache.Init: %w", err)
+	}
+
+	defer cache.Close()
+
+	err = library.Init()
+	if err != nil {
+		return fmt.Errorf("library.Init: %w", err)
+	}
+
+	err = recipe.Parse(ctx)
+	if err != nil {
+		return fmt.Errorf("item.Parse: %w", err)
+	}
+	return nil
+}

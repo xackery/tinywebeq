@@ -30,6 +30,12 @@ quest:
 	go build -o bin/${NAME} main.go
 	cd bin && ./${NAME} quest
 
+.PHONY: recipe
+recipe:
+	@echo "recipe: building"
+	mkdir -p bin
+	go build -o bin/${NAME} main.go
+	cd bin && ./${NAME} recipe
 	
 # clean up and check for errors
 sanitize:

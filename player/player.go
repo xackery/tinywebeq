@@ -11,10 +11,17 @@ import (
 
 func fetchPlayer(ctx context.Context, id int) (*model.Player, error) {
 	path := fmt.Sprintf("player/%d.yaml", id)
-	cacheData, ok := cache.Read(ctx, path)
+	cacheData, src, ok := cache.Read(ctx, path)
 	if ok {
 		cachePlayer := cacheData.(*model.Player)
 		if cachePlayer != nil {
+			if src != cache.SourceCacheMemory {
+				err := cache.WriteMemoryCache(ctx, path, cachePlayer)
+				if err != nil {
+					return nil, fmt.Errorf("cache write: %w", err)
+				}
+			}
+
 			return cachePlayer, nil
 		}
 	}

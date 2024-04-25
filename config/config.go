@@ -26,6 +26,7 @@ type Config struct {
 	Spell            Spell       `toml:"spell" desc:"Spell configuration"`
 	Npc              Npc         `toml:"npc" desc:"NPC configuration"`
 	Quest            Quest       `toml:"quest" desc:"Quest parser configuration"`
+	Recipe           Recipe      `toml:"recipe" desc:"Recipe parser configuration"`
 	MemCache         MemCache    `toml:"mem_cache" desc:"Memory cache configuration"`
 	SqliteCache      SqliteCache `toml:"sqlite_cache" desc:"Sqlite cache configuration"`
 	FileCache        FileCache   `toml:"file_cache" desc:"File cache configuration"`
@@ -122,6 +123,14 @@ type Quest struct {
 	IsBackgroundScanningEnabled bool   `toml:"is_background_scanning_enabled" desc:"Default false, when true, a background scanner will scan for new quests and update the cache at ScanSchedule"`
 	BackgroundScanConcurrency   int    `toml:"background_scan_concurrency" desc:"Default 10, how many quests to process at once when the background scanner is running"`
 	ScanSchedule                int    `toml:"scan_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews quest cache to rebuild it"`
+}
+
+type Recipe struct {
+	IsEnabled                   bool `toml:"is_enabled" desc:"Default true, enables recipe features"`
+	ActiveConcurrency           int  `toml:"active_concurrency" desc:"Default 100, how many recipes to process at once when the recipes dedicated command is ran (this impacts connection count)"`
+	IsBackgroundScanningEnabled bool `toml:"is_background_scanning_enabled" desc:"Default false, when true, a background scanner will scan for new recipes and update the cache at ScanSchedule"`
+	BackgroundScanConcurrency   int  `toml:"background_scan_concurrency" desc:"Default 10, how many recipes to process at once when the background scanner is running"`
+	ScanSchedule                int  `toml:"scan_schedule" desc:"Default 25200 (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews recipe cache to rebuild it"`
 }
 
 type FileCache struct {
@@ -261,6 +270,16 @@ func (c *Config) Verify() error {
 		c.Quest.BackgroundScanConcurrency = 10
 	}
 
+	if c.Recipe.ActiveConcurrency < 1 {
+		tlog.Warnf("Recipe.ActiveConcurrency is unset, setting to 100")
+		c.Recipe.ActiveConcurrency = 100
+	}
+
+	if c.Recipe.BackgroundScanConcurrency < 1 {
+		tlog.Warnf("Recipe.BackgroundScanConcurrency is unset, setting to 10")
+		c.Recipe.BackgroundScanConcurrency = 10
+	}
+
 	return nil
 }
 
@@ -337,6 +356,14 @@ func defaultLabel() Config {
 			BackgroundScanConcurrency:   10,
 			ActiveConcurrency:           100,
 		},
+		Recipe: Recipe{
+			IsEnabled:                   true,
+			ScanSchedule:                25200,
+			IsBackgroundScanningEnabled: false,
+			BackgroundScanConcurrency:   10,
+			ActiveConcurrency:           100,
+		},
+
 		Npc: Npc{
 			IsEnabled:      true,
 			IsCacheEnabled: true,

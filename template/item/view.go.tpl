@@ -53,11 +53,10 @@ document.addEventListener("DOMContentLoaded", function() {
 <br>
 
 <table width="100%"><tr><td valign="top">
-{{/* if (eq .Item.Name "test") */}}
 <h4 style="margin-top:0">{{ .Item.Name }}</h4></td>
 <td><img src="{{ .Item.IconUrl }}item_{{ .Item.Icon }}.Item.png" align="right" valign="top"/></td></tr><tr><td>
-{{/* end */}}
-    <table width="100%" cellpadding="0" cellspacing="0">
+
+<table width="100%" cellpadding="0" cellspacing="0">
 
     <tr> <td colspan="2" nowrap="1">{{ .Item.TagStr }}</td></tr>
     {{ if (gt .Item.Classes 0) }}<tr><td colspan="2"><b>Class: </b>{{ .Item.ClassesStr }}</td></tr>{{ end }}
@@ -159,8 +158,25 @@ document.addEventListener("DOMContentLoaded", function() {
         <br><b>Effect chance modifier: {{ .Util.Add 100 .Item.Procrate }}%</b>
         </td></tr>
     {{ end }}
-{{ end }}
+    </table>
 
-{{ if .ItemQuest }}{{ range .ItemQuest.Entries }}
-    <r><td><b>Obtained from Quest:</b> {{ .ItemQuest.NpcCleanName }} in {{ .ItemQuest.ZoneLongName }}</td></tr>
-{{ end}}{{ end }}
+    {{ if .ItemRecipe }}
+        <br><b>Used in tradeskills:</b><br>
+        {{ range .ItemRecipe.ComponentEntries }}
+            {{ .RecipeName }}{{ if ne .ComponentCount 1}} ({{ .ComponentCount }}){{ end }}<br>
+        {{ end }}
+        <br><b>Result of tradeskills:</b><br>
+        {{ range .ItemRecipe.SuccessEntries }}
+            {{ .RecipeName }}{{ if ne .SuccessCount 1}} ({{ .SuccessCount }}){{ end }}<br>
+        {{ end }}
+    {{ end }}
+
+
+    {{ if .ItemQuest }}
+        <r><td><b>Obtained from Quest:</b><br>
+        {{ range .ItemQuest.Entries }}
+            {{ .NpcCleanName }} in {{ .ZoneLongName }}<br>
+        {{ end}}
+    {{ end }}
+
+{{ end }}

@@ -34,6 +34,7 @@ type ItemPreview struct {
 	cTitle      *freetype.Context
 	item        *model.Item
 	itemQuest   *model.ItemQuest
+	itemRecipe  *model.ItemRecipe
 	fontSize    float64
 	pt          fixed.Point26_6
 	lineStart   int
@@ -103,7 +104,7 @@ func (e *ItemPreview) writeNoAlignLn(field string, value string) {
 	e.newLine(1)
 }
 
-func GenerateItemPreview(item *model.Item, itemQuest *model.ItemQuest) ([]byte, error) {
+func GenerateItemPreview(item *model.Item, itemQuest *model.ItemQuest, itemRecipe *model.ItemRecipe) ([]byte, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 	var newPos fixed.Point26_6
@@ -147,13 +148,14 @@ func GenerateItemPreview(item *model.Item, itemQuest *model.ItemQuest) ([]byte, 
 	cTitle.SetSrc(itemFGImage)
 
 	e := &ItemPreview{
-		c:         c,
-		cb:        cb,
-		cbFont:    fontBold,
-		cTitle:    cTitle,
-		item:      item,
-		itemQuest: itemQuest,
-		fontSize:  fontSize,
+		c:          c,
+		cb:         cb,
+		cbFont:     fontBold,
+		cTitle:     cTitle,
+		item:       item,
+		itemQuest:  itemQuest,
+		itemRecipe: itemRecipe,
+		fontSize:   fontSize,
 	}
 
 	//c.SetHinting(font.H)
@@ -342,16 +344,40 @@ func (e *ItemPreview) render3Left() {
 
 func (e *ItemPreview) render4Left() {
 	itemQuest := e.itemQuest
+	itemRecipe := e.itemRecipe
 	e.setCursor(10, 20)
 	e.shiftLn(e.lineStart)
 	e.lineCurrent = e.lineStart
-	if itemQuest == nil {
-		return
+	counter := 0
+	if itemQuest != nil {
+		for _, entry := range itemQuest.Entries {
+			counter++
+			if counter > 3 {
+				break
+			}
+			e.writeNoAlignLn("Quest Reward from", fmt.Sprintf("%s in %s", entry.NpcCleanName(), entry.ZoneLongName()))
+		}
+	}
+	if itemRecipe != nil {
+		for _, entry := range itemRecipe.Entries {
+
+			if entry.ComponentCount > 0 {
+				counter++
+				if counter > 3 {
+					break
+				}
+				e.writeNoAlignLn("Recipe Component", fmt.Sprintf("%s x%d", entry.RecipeName, entry.ComponentCount))
+			}
+			if entry.SuccessCount > 0 {
+				counter++
+				if counter > 3 {
+					break
+				}
+				e.writeNoAlignLn("Recipe Result", fmt.Sprintf("%s x%d", entry.RecipeName, entry.SuccessCount))
+			}
+		}
 	}
 
-	for _, entry := range itemQuest.Entries {
-		e.writeNoAlignLn("Quest Reward from", fmt.Sprintf("%s in %s", entry.NpcCleanName(), entry.ZoneLongName()))
-	}
 	if e.lineCurrent > e.lineMax {
 		e.lineMax = e.lineCurrent
 	}

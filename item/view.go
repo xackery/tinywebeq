@@ -79,7 +79,12 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 
 	itemQuest, err := fetchItemQuest(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchItemQuest: %w", err)
+		tlog.Debugf("Ignoring err fetchItemQuest: %v", err)
+	}
+
+	itemRecipe, err := fetchItemRecipe(ctx, id)
+	if err != nil {
+		tlog.Debugf("Ignoring err fetchItemRecipe: %v", err)
 	}
 
 	type TemplateData struct {
@@ -88,14 +93,16 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		Library             *library.Library
 		IsItemSearchEnabled bool
 		ItemQuest           *model.ItemQuest
+		ItemRecipe          *model.ItemRecipe
 	}
 
 	data := TemplateData{
-		Site:                site.BaseDataInit("Item View"),
+		Site:                site.BaseDataInit(item.Name),
 		Item:                item,
 		Library:             library.Instance(),
 		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
 		ItemQuest:           itemQuest,
+		ItemRecipe:          itemRecipe,
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

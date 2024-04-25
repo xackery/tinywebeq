@@ -34,6 +34,7 @@ func dbliteInit(ctx context.Context) error {
 		"npc",
 		"item",
 		"item_quest",
+		"item_recipe",
 		"player",
 		"npc_loot",
 		"npc_merchant",
@@ -90,6 +91,8 @@ func readSqliteCache(path string) (model.CacheIdentifier, bool) {
 		data = &model.Item{}
 	case "item_quest":
 		data = &model.ItemQuest{}
+	case "item_recipe":
+		data = &model.ItemRecipe{}
 	case "player":
 		data = &model.Player{}
 	case "npc_loot":
@@ -133,6 +136,18 @@ func readSqliteCache(path string) (model.CacheIdentifier, bool) {
 	return data, true
 }
 
+func WriteSqlite(ctx context.Context, path string, data model.CacheIdentifier) error {
+	err := writeSqliteCache(ctx, path, data)
+	if err != nil {
+		return fmt.Errorf("write sqlite cache: %w", err)
+	}
+	return nil
+}
+
+func ReadSqlite(path string) (model.CacheIdentifier, bool) {
+	return readSqliteCache(path)
+}
+
 func writeSqliteCache(ctx context.Context, path string, data model.CacheIdentifier) error {
 	if !config.Get().SqliteCache.IsEnabled {
 		return nil
@@ -146,7 +161,7 @@ func writeSqliteCache(ctx context.Context, path string, data model.CacheIdentifi
 		key = records[1]
 	}
 	key = strings.TrimSuffix(key, ".yaml")
-	tlog.Debugf("Sqlite read: %s %s", scope, key)
+	//tlog.Debugf("Sqlitecache read: %s %s", scope, key)
 
 	query := fmt.Sprintf("REPLACE INTO %s (key, data, expiration) VALUES (?, ?, ?)", data.Identifier())
 
@@ -162,7 +177,7 @@ func writeSqliteCache(ctx context.Context, path string, data model.CacheIdentifi
 		return err
 	}
 
-	tlog.Debugf("Sqlitecache write: %s %s", scope, key)
+	//tlog.Debugf("Sqlitecache write: %s %s", scope, key)
 	return nil
 }
 
@@ -178,6 +193,7 @@ func truncateSqliteCache() {
 		"npc",
 		"item",
 		//"item_quest", // flushed on parse
+		//"item_recipe", // flushed on parse
 		"player",
 		"npc_loot",
 		"npc_merchant",

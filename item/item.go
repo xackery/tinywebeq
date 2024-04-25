@@ -32,10 +32,17 @@ func Init() error {
 
 func fetchItem(ctx context.Context, id int) (*model.Item, error) {
 	path := fmt.Sprintf("item/%d.yaml", id)
-	cacheData, ok := cache.Read(ctx, path)
+	cacheData, src, ok := cache.Read(ctx, path)
 	if ok {
 		cacheItem := cacheData.(*model.Item)
 		if cacheItem != nil {
+			if src != cache.SourceCacheMemory {
+				err := cache.WriteMemoryCache(ctx, path, cacheItem)
+				if err != nil {
+					return nil, fmt.Errorf("cache write: %w", err)
+				}
+			}
+
 			return cacheItem, nil
 		}
 	}

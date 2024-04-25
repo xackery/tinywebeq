@@ -8,21 +8,22 @@ import (
 	"github.com/xackery/tinywebeq/model"
 )
 
-func fetchItemQuest(ctx context.Context, id int) (*model.ItemQuest, error) {
-	path := fmt.Sprintf("item_quest/%d.yaml", id)
+func fetchItemRecipe(ctx context.Context, id int) (*model.ItemRecipe, error) {
+	path := fmt.Sprintf("item_recipe/%d.yaml", id)
 	cacheData, src, ok := cache.Read(ctx, path)
 	if ok {
-		cacheItemQuest := cacheData.(*model.ItemQuest)
+		cacheItemRecipe := cacheData.(*model.ItemRecipe)
 
-		if cacheItemQuest != nil {
+		if cacheItemRecipe != nil {
+
 			if src != cache.SourceCacheMemory {
-				err := cache.WriteMemoryCache(ctx, path, cacheItemQuest)
+				err := cache.WriteMemoryCache(ctx, path, cacheItemRecipe)
 				if err != nil {
 					return nil, fmt.Errorf("cache write: %w", err)
 				}
 			}
 
-			return cacheItemQuest, nil
+			return cacheItemRecipe, nil
 		}
 	}
 
