@@ -1,4 +1,4 @@
-package item
+package quest
 
 import (
 	"context"
@@ -7,14 +7,19 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/image"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
-// Preview handles item preview requests
+// Preview handles quest preview requests
 func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var id int
+	if !config.Get().Quest.IsEnabled {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
@@ -25,7 +30,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 		id, err = strconv.Atoi(strID)
 		if err != nil {
 			tlog.Errorf("strconv.Atoi: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			http.Error(w, "Not Found", http.StatusNotFound)
 			return
 		}
 	}
@@ -37,35 +42,26 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	err = previewImageRender(ctx, id, w)
 	if err != nil {
 		tlog.Errorf("previewImageRender: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
 	tlog.Debugf("previewImageRender: id: %d done", id)
 }
 
 func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
-	if id <= 1000 {
-		return fmt.Errorf("invalid id")
+	quest, err := FetchQuest(ctx, id)
+	if err != nil {
+		return fmt.Errorf("fetchQuest: %w", err)
 	}
 
-	item, err := FetchItem(ctx, id)
-	if err != nil {
-		return fmt.Errorf("fetchItem: %w", err)
+	lines := []string{
+		quest.Name,
+		"Level: " + strconv.Itoa(quest.Level),
 	}
 
-	itemQuest, err := fetchItemQuest(ctx, id)
+	data, err := image.GenerateQuestPreview(quest.Icon, lines)
 	if err != nil {
-		tlog.Debugf("Ignoring err fetchItemQuest: %v", err)
-	}
-
-	itemRecipe, err := fetchItemRecipe(ctx, id)
-	if err != nil {
-		tlog.Debugf("Ignoring err fetchItemRecipe: %v", err)
-	}
-
-	data, err := image.GenerateItemPreview(item, itemQuest, itemRecipe)
-	if err != nil {
-		return fmt.Errorf("GenerateItemPreview: %w", err)
+		return fmt.Errorf("GenerateQuestPreview: %w", err)
 	}
 
 	_, err = w.Write(data)

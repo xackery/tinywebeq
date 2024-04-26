@@ -173,9 +173,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
     {{ if .ItemQuest }}
-        <r><td><b>Part of Quest:</b><br>
-        {{ range .ItemQuest.Entries }}
-            {{ .NpcCleanName }} in {{ .ZoneLongName }}<br>
+        {{ if len .ItemQuest.RewardEntries}}
+            <r><td><b>Result of Quests:</b><br>
+            {{ range .ItemQuest.RewardEntries }}
+                <a href="/quest/view?id={{ .QuestID }}">Quest {{ .QuestName }}</a> - {{ .NpcCleanName }} in {{ .ZoneLongName }}<br>
+            {{ end}}
+        {{ end }}
+
+        {{ if len .ItemQuest.ComponentEntries}}
+            <r><td><b>Used in Quests:</b><br>
+            {{ range .ItemQuest.ComponentEntries }}
+                <a href="/quest/view?id={{ .QuestID }}">Quest {{ .QuestName }}</a> - {{ .NpcCleanName }} in {{ .ZoneLongName }}<br>
+            {{ end }}
         {{ end}}
     {{ end }}
 

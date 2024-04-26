@@ -8,9 +8,9 @@ import (
 )
 
 type NpcMerchant struct {
-	Entries    []*NpcMerchantEntry
-	key        string
-	expiration int64
+	Entries         []*NpcMerchantEntry
+	CacheKey        string `db:"key"`
+	CacheExpiration int64
 }
 
 type NpcMerchantEntry struct {
@@ -26,19 +26,19 @@ func (t *NpcMerchant) Identifier() string {
 }
 
 func (t *NpcMerchant) Key() string {
-	return t.key
+	return t.CacheKey
 }
 
 func (t *NpcMerchant) SetKey(key string) {
-	t.key = key
+	t.CacheKey = key
 }
 
 func (t *NpcMerchant) SetExpiration(expiration int64) {
-	t.expiration = expiration
+	t.CacheExpiration = expiration
 }
 
 func (t *NpcMerchant) Expiration() int64 {
-	return t.expiration
+	return t.CacheExpiration
 }
 
 func (t *NpcMerchant) Serialize() string {

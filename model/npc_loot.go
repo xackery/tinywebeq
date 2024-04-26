@@ -10,9 +10,9 @@ import (
 )
 
 type NpcLoot struct {
-	Entries    []*NpcLootEntry
-	key        string
-	expiration int64
+	Entries         []*NpcLootEntry
+	CacheKey        string `db:"key"`
+	CacheExpiration int64
 }
 
 type NpcLootEntry struct {
@@ -30,19 +30,19 @@ func (t *NpcLoot) Identifier() string {
 }
 
 func (t *NpcLoot) Key() string {
-	return t.key
+	return t.CacheKey
 }
 
 func (t *NpcLoot) SetKey(key string) {
-	t.key = key
+	t.CacheKey = key
 }
 
 func (t *NpcLoot) SetExpiration(expiration int64) {
-	t.expiration = expiration
+	t.CacheExpiration = expiration
 }
 
 func (t *NpcLoot) Expiration() int64 {
-	return t.expiration
+	return t.CacheExpiration
 }
 
 func (t *NpcLoot) Serialize() string {

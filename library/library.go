@@ -42,6 +42,11 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("initNpcs: %w", err)
 	}
+
+	err = initQuests()
+	if err != nil {
+		return fmt.Errorf("initQuests: %w", err)
+	}
 	return nil
 }
 

@@ -12,8 +12,8 @@ import (
 )
 
 type Npc struct {
-	key             string
-	expiration      int64
+	CacheKey        string         `db:"key"`
+	CacheExpiration int64          `db:"expiration"`
 	ID              int            `db:"id"`
 	Name            string         `db:"name"`
 	Attackspeed     float32        `db:"attack_speed"`
@@ -31,6 +31,7 @@ type Npc struct {
 	Merchantid      int            `db:"merchant_id"`
 	Npcfactionid    int            `db:"npc_faction_id"`
 	Rarespawn       int            `db:"rare_spawn"`
+	MinExpansion    int            `db:"min_expansion"`
 }
 
 func (t *Npc) Identifier() string {
@@ -38,19 +39,19 @@ func (t *Npc) Identifier() string {
 }
 
 func (t *Npc) Key() string {
-	return t.key
+	return t.CacheKey
 }
 
 func (t *Npc) SetKey(key string) {
-	t.key = key
+	t.CacheKey = key
 }
 
 func (t *Npc) SetExpiration(expiration int64) {
-	t.expiration = expiration
+	t.CacheExpiration = expiration
 }
 
 func (t *Npc) Expiration() int64 {
-	return t.expiration
+	return t.CacheExpiration
 }
 
 func (t *Npc) Serialize() string {
@@ -137,4 +138,12 @@ func (t *Npc) NpcSpecialAttacksStr() string {
 		out = out[:len(out)-2]
 	}
 	return out
+}
+
+func (t *Npc) ZoneID() int {
+	return t.ID / 1000
+}
+
+func (t *Npc) Zone() *library.Zone {
+	return library.ZoneByID(t.ZoneID())
 }

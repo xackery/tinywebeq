@@ -1,4 +1,4 @@
-package item
+package quest
 
 import (
 	"context"
@@ -11,21 +11,19 @@ import (
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
-	"github.com/xackery/tinywebeq/tlog"
-
 	"github.com/xackery/tinywebeq/site"
+	"github.com/xackery/tinywebeq/tlog"
 )
 
 var (
 	viewTemplate *template.Template
 )
 
-// https://allaclone.wayfarershaven.com/?a=item&id=1004
 func viewInit() error {
 	var err error
 	viewTemplate = template.New("view")
 	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
-		"item/view.go.tpl",      // data
+		"quest/view.go.tpl",     // data
 		"head.go.tpl",           // head
 		"header.go.tpl",         // header
 		"footer.go.tpl",         // footer
@@ -34,13 +32,19 @@ func viewInit() error {
 	if err != nil {
 		return fmt.Errorf("template.ParseFS: %w", err)
 	}
+
 	return nil
 }
 
-// View handles item view requests
+// View handles quest view requests
 func View(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var id int
+
+	if !config.Get().Quest.IsEnabled {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
 
 	tlog.Debugf("view: %s", r.URL.String())
 
@@ -60,6 +64,10 @@ func View(w http.ResponseWriter, r *http.Request) {
 
 	err = viewRender(ctx, id, w)
 	if err != nil {
+		if err.Error() == "quest not found" {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
 		tlog.Errorf("viewRender: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -68,44 +76,28 @@ func View(w http.ResponseWriter, r *http.Request) {
 }
 
 func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
-	if id <= 1000 {
-		return fmt.Errorf("id too low")
-	}
 
-	item, err := FetchItem(ctx, id)
+	quest, err := FetchQuest(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchItem: %w", err)
-	}
-
-	itemQuest, err := fetchItemQuest(ctx, id)
-	if err != nil {
-		tlog.Debugf("Ignoring err fetchItemQuest: %v", err)
-	}
-
-	itemRecipe, err := fetchItemRecipe(ctx, id)
-	if err != nil {
-		tlog.Debugf("Ignoring err fetchItemRecipe: %v", err)
+		return fmt.Errorf("fetchQuest: %w", err)
 	}
 
 	type TemplateData struct {
-		Site                site.BaseData
-		Item                *model.Item
-		Library             *library.Library
-		IsItemSearchEnabled bool
-		ItemQuest           *model.ItemQuest
-		ItemRecipe          *model.ItemRecipe
+		Site                 site.BaseData
+		Quest                *model.Quest
+		Library              *library.Library
+		QuestInfo            []string
+		IsQuestSearchEnabled bool
 	}
 
 	data := TemplateData{
-		Site:                site.BaseDataInit(item.Name),
-		Item:                item,
-		Library:             library.Instance(),
-		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
-		ItemQuest:           itemQuest,
-		ItemRecipe:          itemRecipe,
+		Site:                 site.BaseDataInit(quest.Name),
+		Quest:                quest,
+		Library:              library.Instance(),
+		IsQuestSearchEnabled: config.Get().Quest.Search.IsEnabled,
 	}
-	if config.Get().Item.Preview.IsEnabled {
-		data.Site.ImageURL = fmt.Sprintf("/item/preview.png?id=%d", id)
+	if config.Get().Quest.Preview.IsEnabled {
+		data.Site.ImageURL = fmt.Sprintf("/quest/preview.png?id=%d", id)
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

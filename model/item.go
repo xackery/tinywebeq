@@ -12,8 +12,8 @@ import (
 )
 
 type Item struct {
-	key                 string
-	expiration          int64
+	CacheKey            string
+	CacheExpiration     int64
 	ID                  int            `db:"id"`
 	Minstatus           int            `db:"minstatus"`
 	Name                string         `db:"Name"`
@@ -306,19 +306,19 @@ func (t *Item) Identifier() string {
 }
 
 func (t *Item) Key() string {
-	return t.key
+	return t.CacheKey
 }
 
 func (t *Item) SetKey(key string) {
-	t.key = key
+	t.CacheKey = key
 }
 
 func (t *Item) SetExpiration(expiration int64) {
-	t.expiration = expiration
+	t.CacheExpiration = expiration
 }
 
 func (t *Item) Expiration() int64 {
-	return t.expiration
+	return t.CacheExpiration
 }
 
 func (t *Item) Serialize() string {

@@ -113,6 +113,11 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		}
 	}
 
+	npcQuest, err := fetchNpcQuest(ctx, id)
+	if err != nil && err.Error() != "not found" {
+		return fmt.Errorf("fetchNpcQuest: %w", err)
+	}
+
 	npcSpawn, err := fetchNpcSpawn(ctx, id)
 	if err != nil {
 		return fmt.Errorf("fetchNpcSpawn: %w", err)
@@ -129,6 +134,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		NpcSpawn           *model.NpcSpawn
 		NpcFaction         *model.NpcFaction
 		NpcSpell           *model.NpcSpell
+		NpcQuest           *model.NpcQuest
 	}
 
 	data := TemplateData{
@@ -141,6 +147,7 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		NpcSpawn:           npcSpawn,
 		NpcFaction:         npcFaction,
 		NpcSpell:           npcSpell,
+		NpcQuest:           npcQuest,
 	}
 	if config.Get().Npc.Preview.IsEnabled {
 		data.Site.ImageURL = fmt.Sprintf("/npc/preview.png?id=%d", id)

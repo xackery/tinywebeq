@@ -11,9 +11,9 @@ import (
 )
 
 type NpcSpell struct {
-	Entries    []*NpcSpellEntry
-	key        string
-	expiration int64
+	Entries         []*NpcSpellEntry
+	CacheKey        string `db:"key"`
+	CacheExpiration int64
 }
 
 type NpcSpellEntry struct {
@@ -34,19 +34,19 @@ func (t *NpcSpell) Identifier() string {
 }
 
 func (t *NpcSpell) Key() string {
-	return t.key
+	return t.CacheKey
 }
 
 func (t *NpcSpell) SetKey(key string) {
-	t.key = key
+	t.CacheKey = key
 }
 
 func (t *NpcSpell) SetExpiration(expiration int64) {
-	t.expiration = expiration
+	t.CacheExpiration = expiration
 }
 
 func (t *NpcSpell) Expiration() int64 {
-	return t.expiration
+	return t.CacheExpiration
 }
 
 func (t *NpcSpell) Serialize() string {

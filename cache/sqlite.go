@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"strings"
@@ -41,6 +42,8 @@ func dbliteInit(ctx context.Context) error {
 		"npc_spawn",
 		"npc_faction",
 		"npc_spell",
+		"npc_quest",
+		"quest",
 	}
 
 	for _, scope := range scopes {
@@ -105,6 +108,10 @@ func readSqliteCache(path string) (model.CacheIdentifier, bool) {
 		data = &model.NpcFaction{}
 	case "npc_spell":
 		data = &model.NpcSpell{}
+	case "npc_quest":
+		data = &model.NpcQuest{}
+	case "quest":
+		data = &model.Quest{}
 	default:
 		tlog.Warnf("Unknown cache scope: %s", scope)
 		return nil, false
@@ -200,6 +207,8 @@ func truncateSqliteCache() {
 		"npc_spawn",
 		"npc_faction",
 		"npc_spell",
+		"npc_quest",
+		"quest",
 	}
 
 	for _, scope := range scopes {
@@ -243,4 +252,96 @@ func TruncateSqliteCache(ctx context.Context, name string) error {
 		return fmt.Errorf("create table: %w", err)
 	}
 	return nil
+}
+
+func DumpSqlite(ctx context.Context, path string) ([]model.CacheIdentifier, error) {
+	if !config.Get().SqliteCache.IsEnabled {
+		return nil, fmt.Errorf("sqlite cache is disabled")
+	}
+
+	scope := strings.TrimPrefix(path, "cache/")
+	if strings.Contains(scope, "/") {
+		records := strings.Split(scope, "/")
+		scope = records[0]
+	}
+
+	// check if table exists
+
+	query := fmt.Sprintf("SELECT key, data FROM %s", scope)
+	rows, err := Instance.QueryxContext(context.Background(),
+		query)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+
+	results := []model.CacheIdentifier{}
+
+	for rows.Next() {
+		var data model.CacheIdentifier
+		switch scope {
+		case "npc":
+			data = &model.Npc{}
+		case "item":
+			data = &model.Item{}
+		case "item_quest":
+			data = &model.ItemQuest{}
+		case "item_recipe":
+			data = &model.ItemRecipe{}
+		case "player":
+			data = &model.Player{}
+		case "npc_loot":
+			data = &model.NpcLoot{}
+		case "npc_merchant":
+			data = &model.NpcMerchant{}
+		case "npc_spawn":
+			data = &model.NpcSpawn{}
+		case "npc_faction":
+			data = &model.NpcFaction{}
+		case "npc_spell":
+			data = &model.NpcSpell{}
+		case "npc_quest":
+			data = &model.NpcQuest{}
+		case "quest":
+			data = &model.Quest{}
+		default:
+			return nil, fmt.Errorf("unknown cache scope: %s", scope)
+		}
+
+		var key string
+		var rawData string
+		err = rows.Scan(&key, &rawData)
+		if err != nil {
+			return results, fmt.Errorf("rows.Scan: %w", err)
+		}
+
+		err = data.Deserialize(rawData)
+		if err != nil {
+			return results, fmt.Errorf("deserialize: %w", err)
+		}
+		data.SetKey(key)
+		results = append(results, data)
+	}
+	return results, nil
+}
+
+func NextIDSqlite(ctx context.Context, scope string) (int, error) {
+	if !config.Get().SqliteCache.IsEnabled {
+		return 0, fmt.Errorf("sqlite cache is disabled")
+	}
+
+	query := fmt.Sprintf("SELECT MAX(key) FROM %s", scope)
+	row := Instance.QueryRowxContext(context.Background(), query)
+	if row.Err() != nil {
+		return 0, fmt.Errorf("query: %w", row.Err())
+	}
+
+	var key sql.NullInt64
+	err := row.Scan(&key)
+	if err != nil {
+		return 0, fmt.Errorf("scan: %w", err)
+	}
+	if !key.Valid {
+		return 1, nil
+	}
+	return int(key.Int64) + 1, nil
 }

@@ -20,6 +20,10 @@ var (
 	fileCache     map[string]int = make(map[string]int)
 )
 
+const (
+	ErrCacheNotFound = "cache not found"
+)
+
 type cacheSource int
 
 const (
@@ -30,8 +34,8 @@ const (
 )
 
 type cacheEntry struct {
-	expiration int64
-	data       model.CacheIdentifier
+	CacheExpiration int64
+	data            model.CacheIdentifier
 }
 
 func Init(ctx context.Context, isCacheFlush bool) error {
@@ -97,7 +101,7 @@ func Read(ctx context.Context, path string) (model.CacheIdentifier, cacheSource,
 	if config.Get().MemCache.IsEnabled {
 		entry, ok := memCache[path]
 		if ok {
-			if entry.expiration > time.Now().Unix() {
+			if entry.CacheExpiration > time.Now().Unix() {
 				//tlog.Debugf("Memcache read: %s, expiration: %d", path, entry.expiration)
 				return entry.data, SourceCacheMemory, true
 			}

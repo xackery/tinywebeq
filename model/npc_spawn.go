@@ -8,9 +8,9 @@ import (
 )
 
 type NpcSpawn struct {
-	Entries    []*NpcSpawnEntry
-	key        string
-	expiration int64
+	Entries         []*NpcSpawnEntry
+	CacheKey        string `db:"key"`
+	CacheExpiration int64
 }
 
 type NpcSpawnEntry struct {
@@ -29,19 +29,19 @@ func (t *NpcSpawn) Identifier() string {
 }
 
 func (t *NpcSpawn) Key() string {
-	return t.key
+	return t.CacheKey
 }
 
 func (t *NpcSpawn) SetKey(key string) {
-	t.key = key
+	t.CacheKey = key
 }
 
 func (t *NpcSpawn) SetExpiration(expiration int64) {
-	t.expiration = expiration
+	t.CacheExpiration = expiration
 }
 
 func (t *NpcSpawn) Expiration() int64 {
-	return t.expiration
+	return t.CacheExpiration
 }
 
 func (t *NpcSpawn) Serialize() string {

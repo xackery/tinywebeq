@@ -24,11 +24,11 @@ func WriteMemoryCache(ctx context.Context, path string, data model.CacheIdentifi
 	if ok {
 		memCacheSize -= size
 		memCache[path] = &cacheEntry{
-			expiration: time.Now().Add(time.Minute * time.Duration(config.Get().MemCache.Expiration)).Unix(),
-			data:       data,
+			CacheExpiration: time.Now().Add(time.Minute * time.Duration(config.Get().MemCache.Expiration)).Unix(),
+			data:            data,
 		}
 		memCacheSize += size
-		tlog.Debugf("Memcache overwrite: %s, expiration: %d", path, memCache[path].expiration)
+		tlog.Debugf("Memcache overwrite: %s, expiration: %d", path, memCache[path].CacheExpiration)
 		return nil
 	}
 
@@ -38,8 +38,8 @@ func WriteMemoryCache(ctx context.Context, path string, data model.CacheIdentifi
 	}
 
 	memCache[path] = &cacheEntry{
-		expiration: time.Now().Add(time.Minute * time.Duration(config.Get().MemCache.Expiration)).Unix(),
-		data:       data,
+		CacheExpiration: time.Now().Add(time.Minute * time.Duration(config.Get().MemCache.Expiration)).Unix(),
+		data:            data,
 	}
 	memCacheSize += size
 	//tlog.Debugf("Memcache write: %s, expiration: %d (%d total size)", path, memCache[path].expiration, memCacheSize)
@@ -57,7 +57,7 @@ func truncateMemCache() {
 	start := time.Now()
 	mu.Lock()
 	for path, entry := range memCache {
-		if entry.expiration > time.Now().Unix() {
+		if entry.CacheExpiration > time.Now().Unix() {
 			continue
 		}
 		tlog.Debugf("Memcache expired: %s", path)

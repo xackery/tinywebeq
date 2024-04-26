@@ -60,6 +60,11 @@ document.addEventListener("DOMContentLoaded", function() {
 <p>Attack speed: {{ .Npc.Attackspeed }}%</p>
 {{ if .Npc.NpcSpecialAttacksStr }}<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>{{ end }}
 
+{{ if .NpcQuest }} {{ range .NpcQuest.Entries }}
+    <p><a href="/quest/view?id={{ .QuestID }}">{{ .QuestName }}</a> in {{ .ZoneLongName }}</p>
+{{ end }}{{ end }}
+
+
 {{ if .NpcSpawn }} {{ range .NpcSpawn.Entries }}
     <p>{{ .Spawngroup }} ({{ .Spawngroupid }}) {{ .LongName }} ({{ .ShortName}}) {{ .X }}, {{ .Y }}, {{ .Z }} {{ .Respawntime }} </p>
 {{ end }}{{ end }}

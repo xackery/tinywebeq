@@ -15,13 +15,15 @@ type Zone struct {
 	ZoneIDNumber int    `db:"zoneidnumber"`
 	ShortName    string `db:"short_name"`
 	LongName     string `db:"long_name"`
+	Expansion    int    `db:"expansion"`
+	MinExpansion int    `db:"min_expansion"`
+	MaxExpansion int    `db:"max_expansion"`
 }
 
 func initZones() error {
 	zones = map[int]*Zone{}
 
-	query := "SELECT zoneidnumber, short_name, long_name FROM zone"
-
+	query := "SELECT zoneidnumber, short_name, long_name, expansion, min_expansion, max_expansion FROM zone"
 	rows, err := db.Instance.Query(query)
 	if err != nil {
 		return fmt.Errorf("query spells: %w", err)
@@ -30,13 +32,23 @@ func initZones() error {
 
 	for rows.Next() {
 		ze := &Zone{}
-		err = rows.Scan(&ze.ZoneIDNumber, &ze.ShortName, &ze.LongName)
+		err = rows.Scan(&ze.ZoneIDNumber, &ze.ShortName, &ze.LongName, &ze.Expansion, &ze.MinExpansion, &ze.MaxExpansion)
 		if err != nil {
 			return fmt.Errorf("rows.Scan: %w", err)
 		}
 		zones[ze.ZoneIDNumber] = ze
 	}
 	tlog.Debugf("Loaded %d zones", len(zones))
+	return nil
+}
+
+func ZoneByID(id int) *Zone {
+	mu.RLock()
+	defer mu.RUnlock()
+
+	if zone, ok := zones[id]; ok {
+		return zone
+	}
 	return nil
 }
 

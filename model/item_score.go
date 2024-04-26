@@ -7,43 +7,43 @@ import (
 	"fmt"
 )
 
-type NpcFaction struct {
-	Entries         []*NpcFactionEntry
+type ItemScore struct {
+	Entries         []*ItemScoreEntry
 	CacheKey        string `db:"key"`
 	CacheExpiration int64
 }
 
-type NpcFactionEntry struct {
-	ID    int    `db:"id"`
-	Name  string `db:"name"`
-	Value int    `db:"value"`
+type ItemScoreEntry struct {
+	ItemID    int `db:"item_id"`
+	Score     int `db:"score"`
+	Expansion int `db:"expansion"`
 }
 
-func (t *NpcFaction) Identifier() string {
-	return "npc_faction"
+func (t *ItemScore) Identifier() string {
+	return "item_score"
 }
 
-func (t *NpcFaction) Key() string {
+func (t *ItemScore) Key() string {
 	return t.CacheKey
 }
 
-func (t *NpcFaction) SetKey(key string) {
+func (t *ItemScore) SetKey(key string) {
 	t.CacheKey = key
 }
 
-func (t *NpcFaction) SetExpiration(expiration int64) {
+func (t *ItemScore) SetExpiration(expiration int64) {
 	t.CacheExpiration = expiration
 }
 
-func (t *NpcFaction) Expiration() int64 {
+func (t *ItemScore) Expiration() int64 {
 	return t.CacheExpiration
 }
 
-func (t *NpcFaction) Serialize() string {
+func (t *ItemScore) Serialize() string {
 	return serialize(t)
 }
 
-func (t *NpcFaction) Deserialize(data string) error {
+func (t *ItemScore) Deserialize(data string) error {
 	decoded, err := base64.StdEncoding.DecodeString(data)
 	if err != nil {
 		return fmt.Errorf("base64 decode: %w", err)

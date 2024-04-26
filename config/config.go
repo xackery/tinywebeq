@@ -122,12 +122,27 @@ type NpcPreview struct {
 }
 
 type Quest struct {
-	IsEnabled                   bool   `toml:"is_enabled" desc:"Default true, enables quest features"`
-	Path                        string `toml:"path" desc:"Default quests/, where to find quest files"`
-	ActiveConcurrency           int    `toml:"active_concurrency" desc:"Default 100, how many quests to process at once when the quests dedicated command is ran (this impacts connection count)"`
-	IsBackgroundScanningEnabled bool   `toml:"is_background_scanning_enabled" desc:"Default false, when true, a background scanner will scan for new quests and update the cache at ScanSchedule"`
-	BackgroundScanConcurrency   int    `toml:"background_scan_concurrency" desc:"Default 10, how many quests to process at once when the background scanner is running"`
-	ScanSchedule                int    `toml:"scan_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews quest cache to rebuild it"`
+	IsEnabled                   bool         `toml:"is_enabled" desc:"Default true, enables quest features"`
+	Path                        string       `toml:"path" desc:"Default quests/, where to find quest files"`
+	ActiveConcurrency           int          `toml:"active_concurrency" desc:"Default 100, how many quests to process at once when the quests dedicated command is ran (this impacts connection count)"`
+	IsBackgroundScanningEnabled bool         `toml:"is_background_scanning_enabled" desc:"Default false, when true, a background scanner will scan for new quests and update the cache at ScanSchedule"`
+	BackgroundScanConcurrency   int          `toml:"background_scan_concurrency" desc:"Default 10, how many quests to process at once when the background scanner is running"`
+	ScanSchedule                int          `toml:"scan_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews quest cache to rebuild it"`
+	Preview                     QuestPreview `toml:"preview" desc:"Quest preview configuration"`
+	Search                      QuestSearch  `toml:"search" desc:"Quest search configuration"`
+}
+
+type QuestPreview struct {
+	IsEnabled  bool   `toml:"is_enabled" desc:"Default true, enables quest preview"`
+	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for quest preview"`
+	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for quest preview"`
+	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
+	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
+}
+
+type QuestSearch struct {
+	IsEnabled      bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the quest view for finding other quests"`
+	IsBleveEnabled bool `toml:"is_bleve_enabled" desc:"Default false, costs ~200MB of memory to do names searches in memory with bleve indexing"`
 }
 
 type Recipe struct {
@@ -366,6 +381,17 @@ func defaultLabel() Config {
 			IsBackgroundScanningEnabled: false,
 			BackgroundScanConcurrency:   10,
 			ActiveConcurrency:           100,
+			Preview: QuestPreview{
+				IsEnabled:  true,
+				BGColor:    "#313338",
+				FGColor:    "#DBDEE1",
+				FontNormal: "goregular.ttf",
+				FontBold:   "gobold.ttf",
+			},
+			Search: QuestSearch{
+				IsEnabled:      false,
+				IsBleveEnabled: false,
+			},
 		},
 		Recipe: Recipe{
 			IsEnabled:                   true,

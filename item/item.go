@@ -30,7 +30,7 @@ func Init() error {
 	return nil
 }
 
-func fetchItem(ctx context.Context, id int) (*model.Item, error) {
+func FetchItem(ctx context.Context, id int) (*model.Item, error) {
 	path := fmt.Sprintf("item/%d.yaml", id)
 	cacheData, src, ok := cache.Read(ctx, path)
 	if ok {

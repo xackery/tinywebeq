@@ -138,6 +138,11 @@ func run() error {
 		return fmt.Errorf("npc.Init: %w", err)
 	}
 
+	err = quest.Init()
+	if err != nil {
+		return fmt.Errorf("quest.Init: %w", err)
+	}
+
 	err = library.Init()
 	if err != nil {
 		return fmt.Errorf("library.Init: %w", err)
@@ -176,6 +181,9 @@ func run() error {
 	mux.HandleFunc("/npc/view/", npc.View)
 	mux.HandleFunc("/npc/search", npc.Search)
 	mux.HandleFunc("/npc/preview.png", npc.PreviewImage)
+	mux.HandleFunc("/quest/view/", quest.View)
+	mux.HandleFunc("/quest/search", quest.Search)
+	mux.HandleFunc("/quest/preview.png", quest.PreviewImage)
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))).ServeHTTP(w, r)
 	})

@@ -12,8 +12,8 @@ import (
 )
 
 type Player struct {
-	key                   string
-	expiration            int64
+	CacheKey              string
+	CacheExpiration       int64
 	ID                    int          `db:"id"`                      //	int(11) unsigned
 	AccountID             int          `db:"account_id"`              //	int(11)
 	Name                  string       `db:"name"`                    //	varchar(64)
@@ -124,19 +124,19 @@ func (t *Player) Identifier() string {
 }
 
 func (t *Player) Key() string {
-	return t.key
+	return t.CacheKey
 }
 
 func (t *Player) SetKey(key string) {
-	t.key = key
+	t.CacheKey = key
 }
 
 func (t *Player) SetExpiration(expiration int64) {
-	t.expiration = expiration
+	t.CacheExpiration = expiration
 }
 
 func (t *Player) Expiration() int64 {
-	return t.expiration
+	return t.CacheExpiration
 }
 
 func (t *Player) ClassStr() string {

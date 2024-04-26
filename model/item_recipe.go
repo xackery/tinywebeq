@@ -10,9 +10,9 @@ import (
 )
 
 type ItemRecipe struct {
-	Entries    []*ItemRecipeEntry
-	key        string
-	expiration int64
+	Entries         []*ItemRecipeEntry
+	CacheKey        string `db:"key"`
+	CacheExpiration int64
 }
 
 type ItemRecipeEntry struct {
@@ -31,19 +31,19 @@ func (t *ItemRecipe) Identifier() string {
 }
 
 func (t *ItemRecipe) Key() string {
-	return t.key
+	return t.CacheKey
 }
 
 func (t *ItemRecipe) SetKey(key string) {
-	t.key = key
+	t.CacheKey = key
 }
 
 func (t *ItemRecipe) SetExpiration(expiration int64) {
-	t.expiration = expiration
+	t.CacheExpiration = expiration
 }
 
 func (t *ItemRecipe) Expiration() int64 {
-	return t.expiration
+	return t.CacheExpiration
 }
 
 func (t *ItemRecipe) Serialize() string {
