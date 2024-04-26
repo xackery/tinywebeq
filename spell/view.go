@@ -90,10 +90,13 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 	_, info := library.SpellInfo(id, 0)
 
 	data := TemplateData{
-		Site:                 site.BaseDataInit("Spell View"),
+		Site:                 site.BaseDataInit(se.Name),
 		Spell:                se,
 		SpellInfo:            info,
 		IsSpellSearchEnabled: config.Get().Spell.Search.IsEnabled,
+	}
+	if config.Get().Spell.Preview.IsEnabled {
+		data.Site.ImageURL = fmt.Sprintf("/spell/preview.png?id=%d", id)
 	}
 
 	err := viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

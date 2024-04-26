@@ -97,12 +97,15 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 	}
 
 	data := TemplateData{
-		Site:                site.BaseDataInitWithImage(item.Name, fmt.Sprintf("/item/preview.png?id=%d", id)),
+		Site:                site.BaseDataInit(item.Name),
 		Item:                item,
 		Library:             library.Instance(),
 		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
 		ItemQuest:           itemQuest,
 		ItemRecipe:          itemRecipe,
+	}
+	if config.Get().Item.Preview.IsEnabled {
+		data.Site.ImageURL = fmt.Sprintf("/item/preview.png?id=%d", id)
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)
