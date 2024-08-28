@@ -21,5 +21,10 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("searchInit: %w", err)
 	}
+
+	err = peekInit()
+	if err != nil {
+		return fmt.Errorf("peekInit: %w", err)
+	}
 	return nil
 }

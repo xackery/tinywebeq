@@ -1,4 +1,4 @@
-package npc
+package item
 
 import (
 	"bytes"
@@ -29,7 +29,7 @@ func peekInit() error {
 	var err error
 	peekTemplate = template.New("peek")
 	peekTemplate, err = peekTemplate.ParseFS(site.TemplateFS(),
-		"npc/peek.go.tpl", // data
+		"item/peek.go.tpl", // data
 	)
 	if err != nil {
 		return fmt.Errorf("template.ParseFS: %w", err)
@@ -38,12 +38,12 @@ func peekInit() error {
 	return nil
 }
 
-// Peek handles npc peek requests
+// Peek handles item peek requests
 func Peek(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var id int64
 
-	if !config.Get().Npc.IsEnabled {
+	if !config.Get().Item.IsEnabled {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
 	}
@@ -67,7 +67,7 @@ func Peek(w http.ResponseWriter, r *http.Request) {
 
 	err = peekRender(ctx, id, w)
 	if err != nil {
-		if err.Error() == "npc not found" {
+		if err.Error() == "item not found" {
 			http.Error(w, "Not Found", http.StatusNotFound)
 			return
 		}
@@ -79,77 +79,39 @@ func Peek(w http.ResponseWriter, r *http.Request) {
 
 func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 
-	npc, err := store.NpcByNpcID(ctx, id)
+	item, err := store.ItemByItemID(ctx, id)
 	if err != nil {
-		return fmt.Errorf("store.NpcByNpcID: %w", err)
+		return fmt.Errorf("store.ItemByItemID: %w", err)
 	}
 
-	var npcLoot *model.NpcLoot
-	if npc.LoottableID > 0 {
-		npcLoot, err = store.NpcLootByNpcID(ctx, int64(npc.LoottableID))
-		if err != nil {
-			return fmt.Errorf("store.NpcLootByNpcID: %w", err)
-		}
-
-	}
-	var npcMerchant *model.NpcMerchant
-	if npc.MerchantID > 0 {
-		npcMerchant, err = store.NpcMerchantByNpcID(ctx, int64(npc.MerchantID))
-		if err != nil {
-			return fmt.Errorf("store.NpcMerchantByNpcID: %w", err)
-		}
-	}
-
-	var npcFaction *model.NpcFaction
-	if npc.NpcFactionID > 0 {
-		npcFaction, err = store.NpcFactionByFactionID(ctx, int64(npc.NpcFactionID))
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("store.NpcFactionByFactionID: %w", err)
-		}
-	}
-
-	var npcSpell *model.NpcSpell
-	if npc.NpcSpellsID > 0 {
-		npcSpell, err = store.NpcSpellByNpcSpellsID(ctx, int64(npc.NpcSpellsID))
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			return fmt.Errorf("store.NpcSpellByNpcSpellsID: %w", err)
-		}
-	}
-
-	npcQuest, err := store.NpcQuestByNpcID(ctx, id)
+	itemQuest, err := store.ItemQuestByItemID(ctx, id)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("store.NpcQuestByNpcID: %w", err)
+		return fmt.Errorf("store.ItemQuestByItemID: %w", err)
 	}
 
-	npcSpawn, err := store.NpcSpawnByNpcID(ctx, id)
+	itemRecipe, err := store.ItemRecipeByItemID(ctx, id)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("store.NpcSpawnByNpcID: %w", err)
+		return fmt.Errorf("store.ItemRecipeByItemID: %w", err)
 	}
+
 	type TemplateData struct {
-		Site               site.BaseData
-		Library            *library.Library
-		NpcInfo            []string
-		IsNpcSearchEnabled bool
-		Npc                *model.Npc
-		NpcLoot            *model.NpcLoot
-		NpcMerchant        *model.NpcMerchant
-		NpcFaction         *model.NpcFaction
-		NpcSpell           *model.NpcSpell
-		NpcQuest           *model.NpcQuest
-		NpcSpawn           *model.NpcSpawn
+		Site                site.BaseData
+		Library             *library.Library
+		ItemInfo            []string
+		IsItemSearchEnabled bool
+
+		Item       *model.Item
+		ItemRecipe *model.ItemRecipe
+		ItemQuest  *model.ItemQuest
 	}
 
 	data := TemplateData{
-		Site:               site.BaseDataInit("NPC"),
-		Library:            library.Instance(),
-		IsNpcSearchEnabled: config.Get().Npc.Search.IsEnabled,
-		Npc:                npc,
-		NpcLoot:            npcLoot,
-		NpcMerchant:        npcMerchant,
-		NpcFaction:         npcFaction,
-		NpcSpell:           npcSpell,
-		NpcQuest:           npcQuest,
-		NpcSpawn:           npcSpawn,
+		Site:                site.BaseDataInit("ITEM"),
+		Library:             library.Instance(),
+		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
+		Item:                item,
+		ItemRecipe:          itemRecipe,
+		ItemQuest:           itemQuest,
 	}
 
 	buf := &bytes.Buffer{}
@@ -180,5 +142,6 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 	if err != nil {
 		return fmt.Errorf("toml.NewEncoder: %w", err)
 	}
+
 	return nil
 }

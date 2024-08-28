@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
         </td><td>
         <table style="width: 33%">
             {{ if (ne .Item.Damage 0) }}<tr><td><b>Base Damage:</b></td><td style='text-align:right'>{{ .Item.Damage }}</td></tr>{{ end }}
-            {{ if (ne .Item.Elemdmgamt 0) }}<tr><td><b>{{ .Item.EleDamageTypeStr }} Damage:</b></td><td style='text-align:right'>{{ .Item.Eledmgamt }}</td></tr>{{ end }}
+            {{ if (ne .Item.Elemdmgamt 0) }}<tr><td><b>{{ .Item.EleDamageTypeStr }} Damage:</b></td><td style='text-align:right'>{{ .Item.Elemdmgamt }}</td></tr>{{ end }}
             {{ if (ne .Item.Banedmgrace 0) }}<tr><td><b>Bane Damage ({{ .Item.BaneDamageTypeStr }})</b></td><td>{{ .Item.Banedmgamt }}</td></tr>{{ end }}
             {{ if (ne .Item.Banedmgamt 0) }}<tr><td><b>{{ .Item.BaneDamageTypeStr }} Damage:</b></td><td style='text-align:right'>{{ .Item.Banedmgamt }}</td></tr>{{ end }}
             {{ if (ne .Item.Backstabdmg 0) }}<tr><td><b>Backstab Damage:</b></td><td style='text-align:right'>{{ .Item.Backstabdmg }}</td></tr>{{ end }}

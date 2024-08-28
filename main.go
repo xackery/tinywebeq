@@ -184,6 +184,7 @@ func run() error {
 		w.Write([]byte("Hello, world!"))
 	})
 	mux.HandleFunc("/item/view/", item.View)
+	mux.HandleFunc("/item/peek", item.Peek)
 	mux.HandleFunc("/item/search", item.Search)
 	mux.HandleFunc("/item/preview.png", item.PreviewImage)
 	mux.HandleFunc("/player/view/", player.View)

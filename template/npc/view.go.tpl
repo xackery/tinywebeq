@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function() {
 {{ if .Npc.NpcSpecialAttacksStr }}<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>{{ end }}
 
 {{ if .NpcQuest }} {{ range .NpcQuest.Entries }}
-    <p><a href="/quest/view?id={{ .QuestID }}">{{ .QuestName }}</a> in {{ .ZoneLongName }}</p>
+    <p><a href="/quest/view?id={{ .QuestID }}">{{ .QuestName }}</a> in {{ .ZoneID }}</p>
 {{ end }}{{ end }}
 
 
