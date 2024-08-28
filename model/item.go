@@ -14,291 +14,294 @@ import (
 type Item struct {
 	CacheKey            string
 	CacheExpiration     int64
-	ID                  int            `db:"id"`
-	Minstatus           int            `db:"minstatus"`
-	Name                string         `db:"Name"`
-	Aagi                int            `db:"aagi"`
-	Ac                  int            `db:"ac"`
-	Accuracy            int            `db:"accuracy"`
-	Acha                int            `db:"acha"`
-	Adex                int            `db:"adex"`
-	Aint                int            `db:"aint"`
-	Artifactflag        int            `db:"artifactflag"`
-	Asta                int            `db:"asta"`
-	Astr                int            `db:"astr"`
-	Attack              int            `db:"attack"`
-	Augrestrict         int            `db:"augrestrict"`
-	Augslot1type        int            `db:"augslot1type"`
-	Augslot1visible     int            `db:"augslot1visible"`
-	Augslot2type        int            `db:"augslot2type"`
-	Augslot2visible     int            `db:"augslot2visible"`
-	Augslot3type        int            `db:"augslot3type"`
-	Augslot3visible     int            `db:"augslot3visible"`
-	Augslot4type        int            `db:"augslot4type"`
-	Augslot4visible     int            `db:"augslot4visible"`
-	Augslot5type        int            `db:"augslot5type"`
-	Augslot5visible     int            `db:"augslot5visible"`
-	Augslot6type        int            `db:"augslot6type"`
-	Augslot6visible     int            `db:"augslot6visible"`
-	Augtype             int            `db:"augtype"`
-	Avoidance           int            `db:"avoidance"`
-	Awis                int            `db:"awis"`
-	Bagsize             int            `db:"bagsize"`
-	Bagslots            int            `db:"bagslots"`
-	Bagtype             int            `db:"bagtype"`
-	Bagwr               int            `db:"bagwr"`
-	Banedmgamt          int            `db:"banedmgamt"`
-	Banedmgraceamt      int            `db:"banedmgraceamt"`
-	Banedmgbody         int            `db:"banedmgbody"`
-	Banedmgrace         int            `db:"banedmgrace"`
-	Bardtype            int            `db:"bardtype"`
-	Bardvalue           int            `db:"bardvalue"`
-	Book                int            `db:"book"`
-	Casttime            int            `db:"casttime"`
-	Casttime_           int            `db:"casttime_"`
-	Charmfile           string         `db:"charmfile"`
-	Charmfileid         string         `db:"charmfileid"`
-	Classes             int            `db:"classes"`
-	Color               int            `db:"color"`
-	Combateffects       string         `db:"combateffects"`
-	Extradmgskill       int            `db:"extradmgskill"`
-	Extradmgamt         int            `db:"extradmgamt"`
-	Price               int            `db:"price"`
-	Cr                  int            `db:"cr"`
-	Damage              int            `db:"damage"`
-	Damageshield        int            `db:"damageshield"`
-	Deity               int            `db:"deity"`
-	Delay               int            `db:"delay"`
-	Augdistiller        int            `db:"augdistiller"`
-	Dotshielding        int            `db:"dotshielding"`
-	Dr                  int            `db:"dr"`
-	Clicktype           int            `db:"clicktype"`
-	Clicklevel2         int            `db:"clicklevel2"`
-	Elemdmgtype         int            `db:"elemdmgtype"`
-	Elemdmgamt          int            `db:"elemdmgamt"`
-	Endur               int            `db:"endur"`
-	Factionamt1         int            `db:"factionamt1"`
-	Factionamt2         int            `db:"factionamt2"`
-	Factionamt3         int            `db:"factionamt3"`
-	Factionamt4         int            `db:"factionamt4"`
-	Factionmod1         int            `db:"factionmod1"`
-	Factionmod2         int            `db:"factionmod2"`
-	Factionmod3         int            `db:"factionmod3"`
-	Factionmod4         int            `db:"factionmod4"`
-	Filename            string         `db:"filename"`
-	Focuseffect         int            `db:"focuseffect"`
-	Fr                  int            `db:"fr"`
-	Fvnodrop            int            `db:"fvnodrop"`
-	Haste               int            `db:"haste"`
-	Clicklevel          int            `db:"clicklevel"`
-	Hp                  int            `db:"hp"`
-	Regen               int            `db:"regen"`
-	Icon                int            `db:"icon"`
-	Idfile              string         `db:"idfile"`
-	Itemclass           int            `db:"itemclass"`
-	Itemtype            int            `db:"itemtype"`
-	Ldonprice           int            `db:"ldonprice"`
-	Ldontheme           int            `db:"ldontheme"`
-	Ldonsold            int            `db:"ldonsold"`
-	Light               int            `db:"light"`
-	Lore                string         `db:"lore"`
-	Loregroup           int            `db:"loregroup"`
-	Magic               int            `db:"magic"`
-	Mana                int            `db:"mana"`
-	Manaregen           int            `db:"manaregen"`
-	Enduranceregen      int            `db:"enduranceregen"`
-	Material            int            `db:"material"`
-	Herosforgemodel     int            `db:"herosforgemodel"`
-	Maxcharges          int            `db:"maxcharges"`
-	Mr                  int            `db:"mr"`
-	Nodrop              int            `db:"nodrop"`
-	Norent              int            `db:"norent"`
-	Pendingloreflag     int            `db:"pendingloreflag"`
-	Pr                  int            `db:"pr"`
-	Procrate            int            `db:"procrate"`
-	Races               int            `db:"races"`
-	Range               int            `db:"range"`
-	Reclevel            int            `db:"reclevel"`
-	Recskill            int            `db:"recskill"`
-	Reqlevel            int            `db:"reqlevel"`
-	Sellrate            float64        `db:"sellrate"`
-	Shielding           int            `db:"shielding"`
-	Size                int            `db:"size"`
-	Skillmodtype        int            `db:"skillmodtype"`
-	Skillmodvalue       int            `db:"skillmodvalue"`
-	Slots               int            `db:"slots"`
-	Clickeffect         int            `db:"clickeffect"`
-	Spellshield         int            `db:"spellshield"`
-	Strikethrough       int            `db:"strikethrough"`
-	Stunresist          int            `db:"stunresist"`
-	Summonedflag        int            `db:"summonedflag"`
-	Tradeskills         int            `db:"tradeskills"`
-	Favor               int            `db:"favor"`
-	Weight              int            `db:"weight"`
-	Unk012              int            `db:"UNK012"`
-	Unk013              int            `db:"UNK013"`
-	Benefitflag         int            `db:"benefitflag"`
-	Unk054              int            `db:"UNK054"`
-	Unk059              int            `db:"UNK059"`
-	Booktype            int            `db:"booktype"`
-	Recastdelay         int            `db:"recastdelay"`
-	Recasttype          int            `db:"recasttype"`
-	Guildfavor          int            `db:"guildfavor"`
-	Unk123              int            `db:"UNK123"`
-	Unk124              int            `db:"UNK124"`
-	Attuneable          int            `db:"attuneable"`
-	Nopet               int            `db:"nopet"`
-	Updated             sql.NullTime   `db:"updated"`
-	Comment             string         `db:"comment"`
-	Unk127              int            `db:"UNK127"`
-	Pointtype           int            `db:"pointtype"`
-	Potionbelt          int            `db:"potionbelt"`
-	Potionbeltslots     int            `db:"potionbeltslots"`
-	Stacksize           int            `db:"stacksize"`
-	Notransfer          int            `db:"notransfer"`
-	Stackable           int            `db:"stackable"`
-	Unk134              string         `db:"UNK134"`
-	Unk137              int            `db:"UNK137"`
-	Proceffect          int            `db:"proceffect"`
-	Proctype            int            `db:"proctype"`
-	Proclevel2          int            `db:"proclevel2"`
-	Proclevel           int            `db:"proclevel"`
-	Unk142              int            `db:"UNK142"`
-	Worneffect          int            `db:"worneffect"`
-	Worntype            int            `db:"worntype"`
-	Wornlevel2          int            `db:"wornlevel2"`
-	Wornlevel           int            `db:"wornlevel"`
-	Unk147              int            `db:"UNK147"`
-	Focustype           int            `db:"focustype"`
-	Focuslevel2         int            `db:"focuslevel2"`
-	Focuslevel          int            `db:"focuslevel"`
-	Unk152              int            `db:"UNK152"`
-	Scrolleffect        int            `db:"scrolleffect"`
-	Scrolltype          int            `db:"scrolltype"`
-	Scrolllevel2        int            `db:"scrolllevel2"`
-	Scrolllevel         int            `db:"scrolllevel"`
-	Unk157              int            `db:"UNK157"`
-	Serialized          sql.NullTime   `db:"serialized"`
-	Verified            sql.NullTime   `db:"verified"`
-	Serialization       sql.NullString `db:"serialization"`
-	Source              string         `db:"source"`
-	Unk033              int            `db:"UNK033"`
-	Lorefile            string         `db:"lorefile"`
-	Unk014              int            `db:"UNK014"`
-	Svcorruption        int            `db:"svcorruption"`
-	Skillmodmax         int            `db:"skillmodmax"`
-	Unk060              int            `db:"UNK060"`
-	Augslot1unk2        int            `db:"augslot1unk2"`
-	Augslot2unk2        int            `db:"augslot2unk2"`
-	Augslot3unk2        int            `db:"augslot3unk2"`
-	Augslot4unk2        int            `db:"augslot4unk2"`
-	Augslot5unk2        int            `db:"augslot5unk2"`
-	Augslot6unk2        int            `db:"augslot6unk2"`
-	Unk120              int            `db:"UNK120"`
-	Unk121              int            `db:"UNK121"`
-	Questitemflag       int            `db:"questitemflag"`
-	Unk132              sql.NullString `db:"UNK132"`
-	Clickunk5           int            `db:"clickunk5"`
-	Clickunk6           string         `db:"clickunk6"`
-	Clickunk7           int            `db:"clickunk7"`
-	Procunk1            int            `db:"procunk1"`
-	Procunk2            int            `db:"procunk2"`
-	Procunk3            int            `db:"procunk3"`
-	Procunk4            int            `db:"procunk4"`
-	Procunk6            string         `db:"procunk6"`
-	Procunk7            int            `db:"procunk7"`
-	Wornunk1            int            `db:"wornunk1"`
-	Wornunk2            int            `db:"wornunk2"`
-	Wornunk3            int            `db:"wornunk3"`
-	Wornunk4            int            `db:"wornunk4"`
-	Wornunk5            int            `db:"wornunk5"`
-	Wornunk6            string         `db:"wornunk6"`
-	Wornunk7            int            `db:"wornunk7"`
-	Focusunk1           int            `db:"focusunk1"`
-	Focusunk2           int            `db:"focusunk2"`
-	Focusunk3           int            `db:"focusunk3"`
-	Focusunk4           int            `db:"focusunk4"`
-	Focusunk5           int            `db:"focusunk5"`
-	Focusunk6           string         `db:"focusunk6"`
-	Focusunk7           int            `db:"focusunk7"`
-	Scrollunk1          int            `db:"scrollunk1"`
-	Scrollunk2          int            `db:"scrollunk2"`
-	Scrollunk3          int            `db:"scrollunk3"`
-	Scrollunk4          int            `db:"scrollunk4"`
-	Scrollunk5          int            `db:"scrollunk5"`
-	Scrollunk6          string         `db:"scrollunk6"`
-	Scrollunk7          int            `db:"scrollunk7"`
-	Unk193              int            `db:"UNK193"`
-	Purity              int            `db:"purity"`
-	Evoitem             int            `db:"evoitem"`
-	Evoid               int            `db:"evoid"`
-	Evolvinglevel       int            `db:"evolvinglevel"`
-	Evomax              int            `db:"evomax"`
-	Clickname           string         `db:"clickname"`
-	Procname            string         `db:"procname"`
-	Wornname            string         `db:"wornname"`
-	Focusname           string         `db:"focusname"`
-	Scrollname          string         `db:"scrollname"`
-	Dsmitigation        int            `db:"dsmitigation"`
-	Heroic_str          int            `db:"heroic_str"`
-	Heroic_int          int            `db:"heroic_int"`
-	Heroic_wis          int            `db:"heroic_wis"`
-	Heroic_agi          int            `db:"heroic_agi"`
-	Heroic_dex          int            `db:"heroic_dex"`
-	Heroic_sta          int            `db:"heroic_sta"`
-	Heroic_cha          int            `db:"heroic_cha"`
-	Heroic_pr           int            `db:"heroic_pr"`
-	Heroic_dr           int            `db:"heroic_dr"`
-	Heroic_fr           int            `db:"heroic_fr"`
-	Heroic_cr           int            `db:"heroic_cr"`
-	Heroic_mr           int            `db:"heroic_mr"`
-	Heroic_svcorrup     int            `db:"heroic_svcorrup"`
-	Healamt             int            `db:"healamt"`
-	Spelldmg            int            `db:"spelldmg"`
-	Clairvoyance        int            `db:"clairvoyance"`
-	Backstabdmg         int            `db:"backstabdmg"`
-	Created             string         `db:"created"`
-	Elitematerial       int            `db:"elitematerial"`
-	Ldonsellbackrate    int            `db:"ldonsellbackrate"`
-	Scriptfileid        int            `db:"scriptfileid"`
-	Expendablearrow     int            `db:"expendablearrow"`
-	Powersourcecapacity int            `db:"powersourcecapacity"`
-	Bardeffect          int            `db:"bardeffect"`
-	Bardeffecttype      int            `db:"bardeffecttype"`
-	Bardlevel2          int            `db:"bardlevel2"`
-	Bardlevel           int            `db:"bardlevel"`
-	Bardunk1            int            `db:"bardunk1"`
-	Bardunk2            int            `db:"bardunk2"`
-	Bardunk3            int            `db:"bardunk3"`
-	Bardunk4            int            `db:"bardunk4"`
-	Bardunk5            int            `db:"bardunk5"`
-	Bardname            string         `db:"bardname"`
-	Bardunk7            int            `db:"bardunk7"`
-	Unk214              int            `db:"UNK214"`
-	Subtype             int            `db:"subtype"`
-	Unk220              int            `db:"UNK220"`
-	Unk221              int            `db:"UNK221"`
-	Heirloom            int            `db:"heirloom"`
-	Unk223              int            `db:"UNK223"`
-	Unk224              int            `db:"UNK224"`
-	Unk225              int            `db:"UNK225"`
-	Unk226              int            `db:"UNK226"`
-	Unk227              int            `db:"UNK227"`
-	Unk228              int            `db:"UNK228"`
-	Unk229              int            `db:"UNK229"`
-	Unk230              int            `db:"UNK230"`
-	Unk231              int            `db:"UNK231"`
-	Unk232              int            `db:"UNK232"`
-	Unk233              int            `db:"UNK233"`
-	Unk234              int            `db:"UNK234"`
-	Placeable           int            `db:"placeable"`
-	Unk236              int            `db:"UNK236"`
-	Unk237              int            `db:"UNK237"`
-	Unk238              int            `db:"UNK238"`
-	Unk239              int            `db:"UNK239"`
-	Unk240              int            `db:"UNK240"`
-	Unk241              int            `db:"UNK241"`
-	Epicitem            int            `db:"epicitem"`
+	ID                  int32
+	Minstatus           int16
+	Name                string
+	Aagi                int32
+	Ac                  int32
+	Accuracy            int32
+	Acha                int32
+	Adex                int32
+	Aint                int32
+	Artifactflag        uint8
+	Asta                int32
+	Astr                int32
+	Attack              int32
+	Augrestrict         int32
+	Augslot1type        int8
+	Augslot1visible     int8
+	Augslot2type        int8
+	Augslot2visible     int8
+	Augslot3type        int8
+	Augslot3visible     int8
+	Augslot4type        int8
+	Augslot4visible     int8
+	Augslot5type        int8
+	Augslot5visible     int8
+	Augslot6type        int8
+	Augslot6visible     int8
+	Augtype             int32
+	Avoidance           int32
+	Awis                int32
+	Bagsize             int32
+	Bagslots            int32
+	Bagtype             int32
+	Bagwr               int32
+	Banedmgamt          int32
+	Banedmgraceamt      int32
+	Banedmgbody         int32
+	Banedmgrace         int32
+	Bardtype            int32
+	Bardvalue           int32
+	Book                int32
+	Casttime            int32
+	Charmfile           string
+	Charmfileid         string
+	Classes             int32
+	Color               uint32
+	Combateffects       string
+	Extradmgskill       int32
+	Extradmgamt         int32
+	Price               int32
+	Cr                  int32
+	Damage              int32
+	Damageshield        int32
+	Deity               int32
+	Delay               int32
+	Augdistiller        uint32
+	Dotshielding        int32
+	Dr                  int32
+	Clicktype           int32
+	Clicklevel2         int32
+	Elemdmgtype         int32
+	Elemdmgamt          int32
+	Endur               int32
+	Factionamt1         int32
+	Factionamt2         int32
+	Factionamt3         int32
+	Factionamt4         int32
+	Factionmod1         int32
+	Factionmod2         int32
+	Factionmod3         int32
+	Factionmod4         int32
+	Filename            string
+	Focuseffect         int32
+	Fr                  int32
+	Fvnodrop            int32
+	Haste               int32
+	Clicklevel          int32
+	Hp                  int32
+	Regen               int32
+	Icon                int32
+	Idfile              string
+	Itemclass           int32
+	Itemtype            int32
+	Ldonprice           int32
+	Ldontheme           int32
+	Ldonsold            int32
+	Light               int32
+	Lore                string
+	Loregroup           int32
+	Magic               int32
+	Mana                int32
+	Manaregen           int32
+	Enduranceregen      int32
+	Material            int32
+	Herosforgemodel     int32
+	Maxcharges          int32
+	Mr                  int32
+	Nodrop              int32
+	Norent              int32
+	Pendingloreflag     uint8
+	Pr                  int32
+	Procrate            int32
+	Races               int32
+	Range               int32
+	Reclevel            int32
+	Recskill            int32
+	Reqlevel            int32
+	Sellrate            float64
+	Shielding           int32
+	Size                int32
+	Skillmodtype        int32
+	Skillmodvalue       int32
+	Slots               int32
+	Clickeffect         int32
+	Spellshield         int32
+	Strikethrough       int32
+	Stunresist          int32
+	Summonedflag        uint8
+	Tradeskills         int32
+	Favor               int32
+	Weight              int32
+	Unk012              int32
+	Unk013              int32
+	Benefitflag         int32
+	Unk054              int32
+	Unk059              int32
+	Booktype            int32
+	Recastdelay         int32
+	Recasttype          int32
+	Guildfavor          int32
+	Unk123              int32
+	Unk124              int32
+	Attuneable          int32
+	Nopet               int32
+	Updated             sql.NullTime
+	Comment             string
+	Unk127              int32
+	Pointtype           int32
+	Potionbelt          int32
+	Potionbeltslots     int32
+	Stacksize           int32
+	Notransfer          int32
+	Stackable           int32
+	Unk134              string
+	Unk137              int32
+	Proceffect          int32
+	Proctype            int32
+	Proclevel2          int32
+	Proclevel           int32
+	Unk142              int32
+	Worneffect          int32
+	Worntype            int32
+	Wornlevel2          int32
+	Wornlevel           int32
+	Unk147              int32
+	Focustype           int32
+	Focuslevel2         int32
+	Focuslevel          int32
+	Unk152              int32
+	Scrolleffect        int32
+	Scrolltype          int32
+	Scrolllevel2        int32
+	Scrolllevel         int32
+	Unk157              int32
+	Serialized          sql.NullTime
+	Verified            sql.NullTime
+	Serialization       sql.NullString
+	Source              string
+	Unk033              int32
+	Lorefile            string
+	Unk014              int32
+	Svcorruption        int32
+	Skillmodmax         int32
+	Unk060              int32
+	Augslot1unk2        int32
+	Augslot2unk2        int32
+	Augslot3unk2        int32
+	Augslot4unk2        int32
+	Augslot5unk2        int32
+	Augslot6unk2        int32
+	Unk120              int32
+	Unk121              int32
+	Questitemflag       int32
+	Unk132              sql.NullString
+	Clickunk5           int32
+	Clickunk6           string
+	Clickunk7           int32
+	Procunk1            int32
+	Procunk2            int32
+	Procunk3            int32
+	Procunk4            int32
+	Procunk6            string
+	Procunk7            int32
+	Wornunk1            int32
+	Wornunk2            int32
+	Wornunk3            int32
+	Wornunk4            int32
+	Wornunk5            int32
+	Wornunk6            string
+	Wornunk7            int32
+	Focusunk1           int32
+	Focusunk2           int32
+	Focusunk3           int32
+	Focusunk4           int32
+	Focusunk5           int32
+	Focusunk6           string
+	Focusunk7           int32
+	Scrollunk1          uint32
+	Scrollunk2          int32
+	Scrollunk3          int32
+	Scrollunk4          int32
+	Scrollunk5          int32
+	Scrollunk6          string
+	Scrollunk7          int32
+	Unk193              int32
+	Purity              int32
+	Evoitem             int32
+	Evoid               int32
+	Evolvinglevel       int32
+	Evomax              int32
+	Clickname           string
+	Procname            string
+	Wornname            string
+	Focusname           string
+	Scrollname          string
+	Dsmitigation        int16
+	HeroicStr           int16
+	HeroicInt           int16
+	HeroicWis           int16
+	HeroicAgi           int16
+	HeroicDex           int16
+	HeroicSta           int16
+	HeroicCha           int16
+	HeroicPr            int16
+	HeroicDr            int16
+	HeroicFr            int16
+	HeroicCr            int16
+	HeroicMr            int16
+	HeroicSvcorrup      int16
+	Healamt             int16
+	Spelldmg            int16
+	Clairvoyance        int16
+	Backstabdmg         int16
+	Created             string
+	Elitematerial       int16
+	Ldonsellbackrate    int16
+	Scriptfileid        int32
+	Expendablearrow     int16
+	Powersourcecapacity int32
+	Bardeffect          int32
+	Bardeffecttype      int16
+	Bardlevel2          int16
+	Bardlevel           int16
+	Bardunk1            int16
+	Bardunk2            int16
+	Bardunk3            int16
+	Bardunk4            int16
+	Bardunk5            int16
+	Bardname            string
+	Bardunk7            int16
+	Unk214              int16
+	Subtype             int32
+	Unk220              int32
+	Unk221              int32
+	Heirloom            int32
+	Unk223              int32
+	Unk224              int32
+	Unk225              int32
+	Unk226              int32
+	Unk227              int32
+	Unk228              int32
+	Unk229              int32
+	Unk230              int32
+	Unk231              int32
+	Unk232              int32
+	Unk233              int32
+	Unk234              int32
+	Placeable           int32
+	Unk236              int32
+	Unk237              int32
+	Unk238              int32
+	Unk239              int32
+	Unk240              int32
+	Unk241              int32
+	Epicitem            int32
+	ItemID              uint32
+	CharName            string
+	DiscoveredDate      uint32
+	AccountStatus       int32
 }
 
 func (t *Item) Identifier() string {
@@ -862,7 +865,7 @@ func (t *Item) AugSlotStr() string {
 		Comma := ""
 		AugSlots := ""
 		AugType := t.Augtype
-		Bit := 1
+		Bit := int32(1)
 		for i := 1; i < 25; i++ {
 			if Bit <= AugType && Bit&AugType != 0 {
 				AugSlots += Comma + fmt.Sprintf("%d", i)
@@ -890,7 +893,7 @@ func (t *Item) AugRestrictStr() string {
 	return fmt.Sprintf("Augmentation Restriction: %s", t.AugRestrictType(t.Augrestrict))
 }
 
-func (t *Item) AugRestrictType(val int) string {
+func (t *Item) AugRestrictType(val int32) string {
 	switch val {
 	case 1:
 		return "Armor Only"
@@ -929,6 +932,6 @@ func (t *Item) SkillModTypeStr() string {
 	return library.SkillName(t.Skillmodtype)
 }
 
-func (t *Item) ProcRateTotal() int {
+func (t *Item) ProcRateTotal() int32 {
 	return t.Procrate + 100
 }

@@ -12,7 +12,7 @@ import (
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/store"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
@@ -125,7 +125,7 @@ func GenerateQuestPreview(questIcon int, lines []string) ([]byte, error) {
 	for i, line := range lines {
 		if i == 0 {
 			line = strings.ReplaceAll(line, "Quest Info for Effect: ", "")
-			iconImg := library.QuestIcon(questIcon)
+			iconImg := store.QuestIcon(int32(questIcon))
 			titleOffset := 10
 			// draw a 40x41 image
 			if iconImg != nil {

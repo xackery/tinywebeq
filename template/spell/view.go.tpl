@@ -36,13 +36,13 @@ document.addEventListener("DOMContentLoaded", function() {
                     for (let i = 0; i < spells.length; i++) {
                         let spell = spells[i];
                         let link = document.createElement("a");
-                        link.href = "/spell/view?id=" + spell.id;
-                        link.innerText = spell.name;
+                        link.href = "/spell/view?id=" + spell.ID;
+                        link.innerText = spell.Name;
                         searchResults.appendChild(link);
-                        let suffix = " (Lvl "+spell.level+", ID " + spell.id + ")";
+                        let suffix = " (Lvl "+spell.Level+", ID " + spell.ID + ")";
                         searchResults.appendChild(document.createTextNode(suffix));
                         searchResults.appendChild(document.createElement("br"));
-                        console.log("Adding link" + spell.id)
+                        console.log("Adding link" + spell.ID)
                     }
                 });
         }, 300);

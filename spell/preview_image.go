@@ -8,9 +8,8 @@ import (
 	"time"
 
 	"github.com/xackery/tinywebeq/image"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
-
-	"github.com/xackery/tinywebeq/library"
 )
 
 // Preview handles spell preview requests
@@ -46,7 +45,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 }
 
 func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
-	spellIcon, lines := library.SpellInfo(id, 0)
+	spellIcon, lines := store.SpellInfo(int32(id), 0)
 	if len(lines) == 0 {
 		return fmt.Errorf("no spell info found")
 	}

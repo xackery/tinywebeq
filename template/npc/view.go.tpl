@@ -51,13 +51,14 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 {{end}}
 <br>
+<sl-button disabled>Click me</sl-button>
 <p>Name: {{ .Npc.Name }}</p>
 <p>Level: {{ .Npc.Level }}</p>
 <p>Race: {{ .Npc.RaceStr }}</p>
 <p>Class: {{ .Npc.ClassStr }}</p>
 <p>Health points: {{ .Npc.Hp }}</p>
 <p>Damage: {{ .Npc.Mindmg }} to {{ .Npc.Maxdmg }}</p>
-<p>Attack speed: {{ .Npc.Attackspeed }}%</p>
+<p>Attack speed: {{ .Npc.AttackSpeed }}%</p>
 {{ if .Npc.NpcSpecialAttacksStr }}<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>{{ end }}
 
 {{ if .NpcQuest }} {{ range .NpcQuest.Entries }}

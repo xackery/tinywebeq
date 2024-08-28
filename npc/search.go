@@ -9,7 +9,8 @@ import (
 
 	"github.com/go-jose/go-jose/v4/json"
 	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -32,9 +33,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("search: %s", r.URL.String())
 
 	type Response struct {
-		Code    int                    `json:"code"`
-		Message string                 `json:"message"`
-		Npcs    []library.NpcIndexData `json:"npcs,omitempty"`
+		Code    int                `json:"code"`
+		Message string             `json:"message"`
+		Npcs    []*model.NpcSearch `json:"npcs,omitempty"`
 	}
 
 	name = r.URL.Query().Get("name")
@@ -61,9 +62,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tlog.Debugf("search: name: %s", name)
-	result, err := library.NpcSearchByName(ctx, name)
+	result, err := store.NpcSearchByName(ctx, name)
 	if err != nil {
-		tlog.Errorf("library.NpcSearchByName: %v", err)
+		tlog.Errorf("store.NpcSearchByName: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

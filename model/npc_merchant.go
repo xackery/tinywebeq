@@ -14,11 +14,11 @@ type NpcMerchant struct {
 }
 
 type NpcMerchantEntry struct {
-	ID        int    `db:"id"`
-	Name      string `db:"name"`
-	Price     int    `db:"price"`
-	Ldonprice int    `db:"ldonprice"`
-	Icon      string `db:"icon"`
+	ID        int32
+	Name      string
+	Price     int32
+	Ldonprice int32
+	Icon      int32
 }
 
 func (t *NpcMerchant) Identifier() string {

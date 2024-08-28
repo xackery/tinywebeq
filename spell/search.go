@@ -9,7 +9,8 @@ import (
 
 	"github.com/go-jose/go-jose/v4/json"
 	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -32,9 +33,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("search: %s", r.URL.String())
 
 	type Response struct {
-		Code    int                      `json:"code"`
-		Message string                   `json:"message"`
-		Spells  []library.SpellIndexData `json:"spells,omitempty"`
+		Code    int                  `json:"code"`
+		Message string               `json:"message"`
+		Spells  []*model.SpellSearch `json:"spells,omitempty"`
 	}
 
 	name = r.URL.Query().Get("name")
@@ -61,7 +62,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tlog.Debugf("search: name: %s", name)
-	result, err := library.SpellSearchByName(ctx, name)
+	results, err := store.SpellSearchByName(ctx, name)
 	if err != nil {
 		tlog.Errorf("library.SpellSearchByName: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -70,8 +71,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	resp := Response{
 		Code:    200,
-		Message: fmt.Sprintf("There are %d spells found", len(result)),
-		Spells:  result,
+		Message: fmt.Sprintf("There are %d spells found", len(results)),
+		Spells:  results,
 	}
 
 	err = json.NewEncoder(w).Encode(resp)

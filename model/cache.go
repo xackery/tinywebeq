@@ -8,17 +8,21 @@ import (
 	"github.com/xackery/tinywebeq/tlog"
 )
 
+type CacheSerializer interface {
+	Serialize() string
+	Deserialize(string) error
+}
+
 type CacheIdentifier interface {
 	Identifier() string
 	Key() string
 	SetKey(string)
 	SetExpiration(int64)
-	Serialize() string
-	Deserialize(string) error
 	Expiration() int64
+	CacheSerializer
 }
 
-func serialize(data CacheIdentifier) string {
+func serialize(data CacheSerializer) string {
 	buf := bytes.Buffer{}
 	e := gob.NewEncoder(&buf)
 	err := e.Encode(data)

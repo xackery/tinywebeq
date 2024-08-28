@@ -1,30 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/rs/zerolog"
-	"github.com/xackery/tinywebeq/cache"
-	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/image"
-	"github.com/xackery/tinywebeq/item"
-	"github.com/xackery/tinywebeq/library"
-	"github.com/xackery/tinywebeq/npc"
-	"github.com/xackery/tinywebeq/player"
-	"github.com/xackery/tinywebeq/quest"
-	"github.com/xackery/tinywebeq/recipe"
-	"github.com/xackery/tinywebeq/site"
-	"github.com/xackery/tinywebeq/spell"
-	"github.com/xackery/tinywebeq/tlog"
-
-	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/go-acme/lego/challenge/tlsalpn01"
 	"github.com/go-acme/lego/v4/certcrypto"
@@ -32,6 +19,22 @@ import (
 	"github.com/go-acme/lego/v4/challenge/http01"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
+	"github.com/rs/zerolog"
+	"github.com/xackery/tinywebeq/config"
+	"github.com/xackery/tinywebeq/db"
+	"github.com/xackery/tinywebeq/image"
+	"github.com/xackery/tinywebeq/item"
+	"github.com/xackery/tinywebeq/npc"
+	"github.com/xackery/tinywebeq/player"
+	"github.com/xackery/tinywebeq/quest"
+	"github.com/xackery/tinywebeq/quest/parse"
+	"github.com/xackery/tinywebeq/recipe"
+	"github.com/xackery/tinywebeq/site"
+	"github.com/xackery/tinywebeq/spell"
+	"github.com/xackery/tinywebeq/store"
+	"github.com/xackery/tinywebeq/tlog"
+	"github.com/xackery/tinywebeq/zone"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 // Version is the build version
@@ -48,7 +51,9 @@ func main() {
 func run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
+	go func() {
+		log.Println(http.ListenAndServe("localhost:8082", nil))
+	}()
 	var err error
 
 	_, err = config.NewConfig(ctx)
@@ -98,15 +103,26 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("site.Init: %w", err)
 	}
-	err = cache.Init(ctx, isCacheFlush)
-	if err != nil {
-		return fmt.Errorf("cache.Init: %w", err)
-	}
-	defer cache.Close()
+
 	if isCacheFlush {
+		err = os.RemoveAll("cache")
+		if err != nil {
+			return fmt.Errorf("remove cache: %w", err)
+		}
 		tlog.Infof("Cache flushed")
 		return nil
 	}
+
+	err = db.Init(ctx)
+	if err != nil {
+		return fmt.Errorf("db.Init: %w", err)
+	}
+
+	err = store.Init(ctx)
+	if err != nil {
+		return fmt.Errorf("store.Init: %w", err)
+	}
+
 	err = os.MkdirAll("cache", 0755)
 	if err != nil {
 		return fmt.Errorf("make cache: %w", err)
@@ -117,10 +133,6 @@ func run() error {
 		return fmt.Errorf("image.Init: %w", err)
 	}
 
-	err = db.Init(ctx)
-	if err != nil {
-		return fmt.Errorf("db.Init: %w", err)
-	}
 	err = item.Init()
 	if err != nil {
 		return fmt.Errorf("item.Init: %w", err)
@@ -143,9 +155,9 @@ func run() error {
 		return fmt.Errorf("quest.Init: %w", err)
 	}
 
-	err = library.Init()
+	err = zone.Init()
 	if err != nil {
-		return fmt.Errorf("library.Init: %w", err)
+		return fmt.Errorf("zone.Init: %w", err)
 	}
 
 	certPath := config.Get().Site.LetsEncrypt.CertPath
@@ -179,11 +191,34 @@ func run() error {
 	mux.HandleFunc("/spell/search", spell.Search)
 	mux.HandleFunc("/spell/preview.png", spell.PreviewImage)
 	mux.HandleFunc("/npc/view/", npc.View)
+	mux.HandleFunc("/npc/peek/", npc.Peek)
 	mux.HandleFunc("/npc/search", npc.Search)
 	mux.HandleFunc("/npc/preview.png", npc.PreviewImage)
 	mux.HandleFunc("/quest/view/", quest.View)
 	mux.HandleFunc("/quest/search", quest.Search)
 	mux.HandleFunc("/quest/preview.png", quest.PreviewImage)
+	// mux.HandleFunc("/recipe/view/", recipe.View)
+	// mux.HandleFunc("/recipe/search", recipe.Search)
+	// mux.HandleFunc("/recipe/preview.png", recipe.PreviewImage)
+	mux.HandleFunc("/zone/view/", zone.View)
+	mux.HandleFunc("/zone/search", zone.Search)
+	mux.HandleFunc("/zone/preview.png", zone.PreviewImage)
+	mux.HandleFunc("/css/style.css", func(w http.ResponseWriter, r *http.Request) {
+		fi, err := site.TemplateFS().Open("style.css")
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		defer fi.Close()
+		data, err := io.ReadAll(fi)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		http.ServeContent(w, r, "style.css", time.Now(), bytes.NewReader(data))
+	})
+
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))).ServeHTTP(w, r)
 	})
@@ -359,19 +394,12 @@ func questParse(ctx context.Context) error {
 		return fmt.Errorf("db.Init: %w", err)
 	}
 
-	err = cache.Init(ctx, false)
+	err = store.Init(ctx)
 	if err != nil {
-		return fmt.Errorf("cache.Init: %w", err)
+		return fmt.Errorf("store.Init: %w", err)
 	}
 
-	defer cache.Close()
-
-	err = library.Init()
-	if err != nil {
-		return fmt.Errorf("library.Init: %w", err)
-	}
-
-	err = quest.Parse(ctx, config.Get().Quest.ActiveConcurrency)
+	err = parse.Parse(ctx, config.Get().Quest.ActiveConcurrency)
 	if err != nil {
 		return fmt.Errorf("questParse: %w", err)
 	}
@@ -485,16 +513,9 @@ func recipeParse(ctx context.Context) error {
 		return fmt.Errorf("db.Init: %w", err)
 	}
 
-	err = cache.Init(ctx, false)
+	err = store.Init(ctx)
 	if err != nil {
-		return fmt.Errorf("cache.Init: %w", err)
-	}
-
-	defer cache.Close()
-
-	err = library.Init()
-	if err != nil {
-		return fmt.Errorf("library.Init: %w", err)
+		return fmt.Errorf("store.Init: %w", err)
 	}
 
 	err = recipe.Parse(ctx)

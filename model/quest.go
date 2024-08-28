@@ -8,7 +8,7 @@ import (
 )
 
 type Quest struct {
-	ID              int    `db:"id"`
+	ID              int64  `db:"id"`
 	Name            string `db:"name"`
 	Level           int    `db:"level"`
 	Icon            int    `db:"icon"`
@@ -18,13 +18,13 @@ type Quest struct {
 }
 
 type QuestEntry struct {
-	ItemID    int    `db:"item_id"`
+	ItemID    int64  `db:"item_id"`
 	ItemName  string `db:"item_name"`
-	ZoneID    int    `db:"zone_id"`
-	NpcID     int    `db:"npc_id"`
+	ZoneID    int32  `db:"zone_id"`
+	NpcID     int64  `db:"npc_id"`
 	NpcName   string `db:"npc_name"`
 	Score     int    `db:"score"`
-	Expansion int    `db:"expansion"`
+	Expansion int8   `db:"expansion"`
 	FileName  string `db:"file_name"`
 	UseCase   string `db:"use_case"`
 }
@@ -68,8 +68,8 @@ func (t *Quest) Deserialize(data string) error {
 	return nil
 }
 
-func (t *Quest) Expansion() int {
-	expansion := 0
+func (t *Quest) Expansion() int8 {
+	expansion := int8(0)
 	for _, entry := range t.Entries {
 		if entry.Expansion > expansion {
 			expansion = entry.Expansion

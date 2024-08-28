@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"sync"
 
 	"github.com/jbsmith7741/toml"
 	"github.com/rs/zerolog"
@@ -13,23 +14,24 @@ import (
 
 var (
 	cfg Config
+	mu  sync.RWMutex
 )
 
 // Config represents a configuration parse
 type Config struct {
-	IsDebugEnabled   bool        `toml:"is_debug_enabled" desc:"Default true, enables verbose logging"`
-	MaxLevel         int         `toml:"max_level" desc:"Default 65, Maximum level a character can obtain. Used by spell.playeronlyspells, spell.info, item.is_search_only_player_obtainable"`
-	CurrentExpansion int         `toml:"current_expansion" desc:"Default 0 (Classic), Current expansion for the server. Filters out spells that are not available to players."`
-	Site             Site        `toml:"server" desc:"Web Site configuration"`
-	Database         Database    `toml:"database" desc:"Database configuration"`
-	Item             Item        `toml:"item" desc:"Item configuration"`
-	Spell            Spell       `toml:"spell" desc:"Spell configuration"`
-	Npc              Npc         `toml:"npc" desc:"NPC configuration"`
-	Quest            Quest       `toml:"quest" desc:"Quest parser configuration"`
-	Recipe           Recipe      `toml:"recipe" desc:"Recipe parser configuration"`
-	MemCache         MemCache    `toml:"mem_cache" desc:"Memory cache configuration"`
-	SqliteCache      SqliteCache `toml:"sqlite_cache" desc:"Sqlite cache configuration"`
-	FileCache        FileCache   `toml:"file_cache" desc:"File cache configuration"`
+	IsDebugEnabled   bool     `toml:"is_debug_enabled" desc:"Default true, enables verbose logging"`
+	MaxLevel         int32    `toml:"max_level" desc:"Default 65, Maximum level a character can obtain. Used by spell.playeronlyspells, spell.info, item.is_search_only_player_obtainable"`
+	CurrentExpansion int      `toml:"current_expansion" desc:"Default 0 (Classic), Current expansion for the server. Filters out spells that are not available to players."`
+	Site             Site     `toml:"server" desc:"Web Site configuration"`
+	Database         Database `toml:"database" desc:"Database configuration"`
+	Item             Item     `toml:"item" desc:"Item configuration"`
+	Spell            Spell    `toml:"spell" desc:"Spell configuration"`
+	Npc              Npc      `toml:"npc" desc:"NPC configuration"`
+	Quest            Quest    `toml:"quest" desc:"Quest parser configuration"`
+	Recipe           Recipe   `toml:"recipe" desc:"Recipe parser configuration"`
+	Player           Player   `toml:"player" desc:"Player parser configuration"`
+	Zone             Zone     `toml:"zone" desc:"Zone parser configuration"`
+	MemCache         MemCache `toml:"mem_cache" desc:"Memory cache configuration"`
 }
 
 type Site struct {
@@ -67,7 +69,7 @@ type Item struct {
 
 type ItemSearch struct {
 	IsEnabled                bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the item view for finding other items"`
-	IsBleveEnabled           bool `toml:"is_bleve_enabled" desc:"Default false, costs ~200MB of memory to do names searches in memory with bleve indexing"`
+	IsMemorySearchEnabled    bool `toml:"is_memory_search_enabled" desc:"Default false, enables memory search for items"`
 	IsOnlyPlayableObtainable bool `toml:"is_only_player_obtainable" desc:"Default false, only items determined player obtainable come up in search"`
 }
 
@@ -75,6 +77,26 @@ type ItemPreview struct {
 	IsEnabled  bool   `toml:"is_enabled" desc:"Default true, enables item preview"`
 	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for item preview"`
 	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for item preview"`
+	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
+	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
+}
+
+type Player struct {
+	IsEnabled      bool          `toml:"is_enabled" desc:"Default true, enables player endpoints"`
+	IsCacheEnabled bool          `toml:"is_cache_enabled" desc:"Default true, enables player caching"`
+	Search         PlayerSearch  `toml:"search" desc:"Player search configuration"`
+	Preview        PlayerPreview `toml:"preview" desc:"Player preview configuration"`
+}
+
+type PlayerSearch struct {
+	IsEnabled             bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the player view for finding other players"`
+	IsMemorySearchEnabled bool `toml:"is_memory_search_enabled" desc:"Default false, enables memory search for players"`
+}
+
+type PlayerPreview struct {
+	IsEnabled  bool   `toml:"is_enabled" desc:"Default true, enables player preview"`
+	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for player preview"`
+	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for player preview"`
 	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
 	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
 }
@@ -88,15 +110,34 @@ type Spell struct {
 }
 
 type SpellSearch struct {
-	IsEnabled          bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the spell view for finding other spells"`
-	IsBleveEnabled     bool `toml:"is_bleve_enabled" desc:"Default false, when enabled it costs ~200MB of memory to do names searches with no DB hit"`
-	IsOnlyPlayerSpells bool `toml:"is_only_player_spells" desc:"Default false, only spells determined player obtainable come up in search"`
+	IsEnabled             bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the spell view for finding other spells"`
+	IsMemorySearchEnabled bool `toml:"is_memory_search_enabled" desc:"Default false, enables memory search for spells"`
+	IsOnlyPlayerSpells    bool `toml:"is_only_player_spells" desc:"Default false, only spells determined player obtainable come up in search"`
 }
 
 type SpellPreview struct {
 	IsEnabled  bool   `toml:"is_enabled" desc:"Default true, enables spell preview"`
 	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for spell preview"`
 	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for spell preview"`
+	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
+	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
+}
+
+type Zone struct {
+	IsEnabled bool        `toml:"is_enabled" desc:"Default true, enables zone endpoints"`
+	Search    ZoneSearch  `toml:"search" desc:"Zone search configuration"`
+	Preview   ZonePreview `toml:"preview" desc:"Zone preview configuration"`
+}
+
+type ZoneSearch struct {
+	IsEnabled             bool `toml:"is_enabled" desc:"Default true, makes a search box appear in the zone view for finding other zones"`
+	IsMemorySearchEnabled bool `toml:"is_memory_search_enabled" desc:"Default false, enables memory search for zones"`
+}
+
+type ZonePreview struct {
+	IsEnabled  bool   `toml:"is_enabled" desc:"Default true, enables zone preview"`
+	BGColor    string `toml:"bg_color" desc:"Default #313338, background color for zone preview"`
+	FGColor    string `toml:"fg_color" desc:"Default #DBDEE1, foreground text color for zone preview"`
 	FontNormal string `toml:"font" desc:"Default goregular.ttf, if changed place a .ttf file same path as binary"`
 	FontBold   string `toml:"font_bold" desc:"Default gobold.ttf, if changed place a .ttf file same path as binary"`
 }
@@ -109,8 +150,8 @@ type Npc struct {
 }
 
 type NpcSearch struct {
-	IsEnabled      bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the npc view for finding other npcs"`
-	IsBleveEnabled bool `toml:"is_bleve_enabled" desc:"Default false, costs ~500MB of memory to do names searches in memory with bleve indexing"`
+	IsEnabled             bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the npc view for finding other npcs"`
+	IsMemorySearchEnabled bool `toml:"is_memory_search_enabled" desc:"Default false, enables memory search for npcs"`
 }
 
 type NpcPreview struct {
@@ -141,8 +182,8 @@ type QuestPreview struct {
 }
 
 type QuestSearch struct {
-	IsEnabled      bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the quest view for finding other quests"`
-	IsBleveEnabled bool `toml:"is_bleve_enabled" desc:"Default false, costs ~200MB of memory to do names searches in memory with bleve indexing"`
+	IsEnabled             bool `toml:"is_enabled" desc:"Default false, makes a search box appear in the quest view for finding other quests"`
+	IsMemorySearchEnabled bool `toml:"is_memory_search_enabled" desc:"Default false, enables memory search for quests"`
 }
 
 type Recipe struct {
@@ -153,24 +194,11 @@ type Recipe struct {
 	ScanSchedule                int  `toml:"scan_schedule" desc:"Default 25200 (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews recipe cache to rebuild it"`
 }
 
-type FileCache struct {
-	IsEnabled        bool `toml:"is_enabled" desc:"Default false, when a page is requested it's data is cached to the cache subfolder"`
-	MaxFiles         int  `toml:"max_files" desc:"Default 1000, maximum number of files to keep in cache"`
-	TruncateSchedule int  `toml:"truncate_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews file cache and truncates expired items, freeing up memory"`
-	Expiration       int  `toml:"expiration" desc:"How long to keep file cache in seconds, default 21600 seconds (6 hours) "`
-}
-
-type SqliteCache struct {
-	IsEnabled        bool `toml:"is_enabled" desc:"Default true, when a page is requested it's data is cached to the sqlite cache"`
-	TruncateSchedule int  `toml:"truncate_schedule" desc:"Default 25200, (25200 is seconds = 7 hours), when this hits a scheduler fires that reviews file cache and truncates expired items, freeing up memory"`
-	Expiration       int  `toml:"expiration" desc:"How long to keep file cache in seconds, default 21600 seconds (6 hours) "`
-}
-
 type MemCache struct {
-	IsEnabled        bool `toml:"is_enabled" desc:"If true, memory cache is enabled, default true"`
-	MaxMemory        int  `toml:"max_memory" desc:"Default 150000000, (150000000 bytes = 150 MB) how much maximum memory should be used for caching page data (this does not include bleve search memory)"`
-	TruncateSchedule int  `toml:"truncate_schedule" desc:"Default 600, (600s = 10 minutes), when this hits a scheduler fires that reviews memory cache and truncates expired items, freeing up memory"`
-	Expiration       int  `toml:"expiration" desc:"How long to keep memory cache in seconds, default 300 seconds (5 minutes)"`
+	IsEnabled        bool  `toml:"is_enabled" desc:"If true, memory cache is enabled, default true"`
+	MaxMemory        int   `toml:"max_memory" desc:"Default 150000000, (150000000 bytes = 150 MB) how much maximum memory should be used for caching page data (this does not include bleve search memory)"`
+	TruncateSchedule int   `toml:"truncate_schedule" desc:"Default 600, (600s = 10 minutes), when this hits a scheduler fires that reviews memory cache and truncates expired items, freeing up memory"`
+	Duration         int64 `toml:"duration" desc:"How long to keep memory cache in seconds, default 300 seconds (5 minutes)"`
 }
 
 // NewConfig creates a new configuration
@@ -240,25 +268,10 @@ func NewConfig(ctx context.Context) (*Config, error) {
 
 // Verify returns an error if configuration appears off
 func (c *Config) Verify() error {
-	if c.SqliteCache.Expiration < 1 {
-		tlog.Warnf("SqliteCache.Expiration is unset, setting to 21600")
-		c.SqliteCache.Expiration = 21600
-	}
-	if c.SqliteCache.TruncateSchedule < 1 {
-		tlog.Warnf("SqliteCache.TruncateSchedule is unset, setting to 25200")
-		c.SqliteCache.TruncateSchedule = 25200
-	}
-	if c.FileCache.Expiration < 1 {
-		tlog.Warnf("FileCache.Expiration is unset, setting to 21600")
-		c.FileCache.Expiration = 21600
-	}
-	if c.FileCache.TruncateSchedule < 1 {
-		tlog.Warnf("FileCache.TruncateSchedule is unset, setting to 25200")
-		c.FileCache.TruncateSchedule = 25200
-	}
-	if c.MemCache.Expiration < 1 {
+
+	if c.MemCache.Duration < 1 {
 		tlog.Warnf("MemCache.Expiration is unset, setting to 300")
-		c.MemCache.Expiration = 300
+		c.MemCache.Duration = 300
 	}
 	if c.MemCache.TruncateSchedule < 1 {
 		tlog.Warnf("MemCache.TruncateSchedule is unset, setting to 600")
@@ -326,18 +339,7 @@ func defaultLabel() Config {
 			IsEnabled:        true,
 			MaxMemory:        150000000,
 			TruncateSchedule: 600,
-			Expiration:       300,
-		},
-		SqliteCache: SqliteCache{
-			IsEnabled:        true,
-			TruncateSchedule: 25200,
-			Expiration:       21600,
-		},
-		FileCache: FileCache{
-			IsEnabled:        false,
-			MaxFiles:         1000,
-			TruncateSchedule: 25200,
-			Expiration:       21600,
+			Duration:         300,
 		},
 		Item: Item{
 			IsEnabled:           true,
@@ -346,7 +348,6 @@ func defaultLabel() Config {
 			DiscoverCacheReload: 640,
 			Search: ItemSearch{
 				IsEnabled:                false,
-				IsBleveEnabled:           false,
 				IsOnlyPlayableObtainable: false,
 			},
 			Preview: ItemPreview{
@@ -362,8 +363,7 @@ func defaultLabel() Config {
 			IsCacheEnabled:     true,
 			IsSpellInfoEnabled: true,
 			Search: SpellSearch{
-				IsEnabled:          false,
-				IsBleveEnabled:     false,
+				IsEnabled:          true,
 				IsOnlyPlayerSpells: false,
 			},
 			Preview: SpellPreview{
@@ -389,8 +389,7 @@ func defaultLabel() Config {
 				FontBold:   "gobold.ttf",
 			},
 			Search: QuestSearch{
-				IsEnabled:      false,
-				IsBleveEnabled: false,
+				IsEnabled: false,
 			},
 		},
 		Recipe: Recipe{
@@ -405,10 +404,22 @@ func defaultLabel() Config {
 			IsEnabled:      true,
 			IsCacheEnabled: true,
 			Search: NpcSearch{
-				IsEnabled:      false,
-				IsBleveEnabled: false,
+				IsEnabled: false,
 			},
 			Preview: NpcPreview{
+				IsEnabled:  true,
+				BGColor:    "#313338",
+				FGColor:    "#DBDEE1",
+				FontNormal: "goregular.ttf",
+				FontBold:   "gobold.ttf",
+			},
+		},
+		Zone: Zone{
+			IsEnabled: true,
+			Search: ZoneSearch{
+				IsEnabled: true,
+			},
+			Preview: ZonePreview{
 				IsEnabled:  true,
 				BGColor:    "#313338",
 				FGColor:    "#DBDEE1",
@@ -430,5 +441,7 @@ func defaultLabel() Config {
 }
 
 func Get() *Config {
+	mu.RLock()
+	defer mu.RUnlock()
 	return &cfg
 }

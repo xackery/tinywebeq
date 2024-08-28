@@ -14,9 +14,9 @@ type NpcFaction struct {
 }
 
 type NpcFactionEntry struct {
-	ID    int    `db:"id"`
+	ID    int32  `db:"id"`
 	Name  string `db:"name"`
-	Value int    `db:"value"`
+	Value int32  `db:"value"`
 }
 
 func (t *NpcFaction) Identifier() string {

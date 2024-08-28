@@ -2,6 +2,8 @@ package npc
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -10,15 +12,15 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/image"
-	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
 // Preview handles npc preview requests
 func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var id int
+	var id int64
 	if !config.Get().Npc.IsEnabled {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
@@ -30,7 +32,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 
 	strID := r.URL.Query().Get("id")
 	if len(strID) > 0 {
-		id, err = strconv.Atoi(strID)
+		id, err = strconv.ParseInt(strID, 10, 64)
 		if err != nil {
 			tlog.Errorf("strconv.Atoi: %v", err)
 			http.Error(w, "Not Found", http.StatusNotFound)
@@ -51,39 +53,52 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("previewImageRender: id: %d done", id)
 }
 
-func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
-	npc, err := FetchNpc(ctx, id)
+func previewImageRender(ctx context.Context, id int64, w http.ResponseWriter) error {
+
+	npc, err := store.NpcByNpcID(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchNpc: %w", err)
+		return fmt.Errorf("store.NpcByNpcID: %w", err)
 	}
+
 	var npcLoot *model.NpcLoot
-	if npc.Loottableid > 0 {
-		npcLoot, err = fetchNpcLoot(ctx, npc.Loottableid)
+	if npc.LoottableID > 0 {
+		npcLoot, err = store.NpcLootByNpcID(ctx, int64(npc.LoottableID))
 		if err != nil {
-			return fmt.Errorf("fetchNpcLoot: %w", err)
+			return fmt.Errorf("store.NpcLootByNpcID: %w", err)
 		}
+
 	}
 	var npcMerchant *model.NpcMerchant
-	if npc.Merchantid > 0 {
-		npcMerchant, err = fetchNpcMerchant(ctx, npc.Merchantid)
+	if npc.MerchantID > 0 {
+		npcMerchant, err = store.NpcMerchantByNpcID(ctx, int64(npc.MerchantID))
 		if err != nil {
-			return fmt.Errorf("fetchNpcMerchant: %w", err)
+			return fmt.Errorf("store.NpcMerchantByNpcID: %w", err)
 		}
 	}
 
 	var npcSpell *model.NpcSpell
-	if npc.Npcspellsid > 0 {
-		npcSpell, err = fetchNpcSpell(ctx, npc.Npcspellsid, npc.Level)
-		if err != nil {
-			return fmt.Errorf("fetchNpcSpell: %w", err)
+	if npc.NpcSpellsID > 0 {
+		npcSpell, err = store.NpcSpellByNpcSpellsID(ctx, int64(npc.NpcSpellsID))
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("store.NpcSpellByNpcSpellsID: %w", err)
 		}
 	}
 
-	if npc.Attackspeed == 0 {
-		npc.Attackspeed = 100
+	npcQuest, err := store.NpcQuestByNpcID(ctx, id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("store.NpcQuestByNpcID: %w", err)
 	}
-	if npc.Attackspeed < 0 {
-		npc.Attackspeed = 100 - npc.Attackspeed
+
+	npcSpawn, err := store.NpcSpawnByNpcID(ctx, id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("store.NpcSpawnByNpcID: %w", err)
+	}
+
+	if npc.AttackSpeed == 0 {
+		npc.AttackSpeed = 100
+	}
+	if npc.AttackSpeed < 0 {
+		npc.AttackSpeed = 100 - npc.AttackSpeed
 	}
 
 	tags := ""
@@ -93,7 +108,7 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 	if npcMerchant != nil {
 		tags += "Merchant, "
 	}
-	if npc.Rarespawn > 0 {
+	if npc.RareSpawn > 0 {
 		tags += "Rare "
 	}
 
@@ -106,8 +121,16 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 		fmt.Sprintf("ID: %d", npc.ID),
 		fmt.Sprintf("Lvl %d %s %s", npc.Level, npc.RaceStr(), npc.ClassStr()),
 
-		fmt.Sprintf("%d HP, %d-%d DMG @ %0.1f%%", npc.Hp, npc.Mindmg, npc.Maxdmg, npc.Attackspeed),
+		fmt.Sprintf("%d HP, %d-%d DMG @ %0.1f%%", npc.Hp, npc.Mindmg, npc.Maxdmg, npc.AttackSpeed),
 		npc.NpcSpecialAttacksStr(),
+	}
+
+	if len(npcQuest.Entries) > 0 {
+		lines = append(lines, fmt.Sprintf("Starts %d quests", len(npcQuest.Entries)))
+	}
+
+	if len(npcSpawn.Entries) > 0 {
+		lines = append(lines, fmt.Sprintf("Spawns at %d locations", len(npcSpawn.Entries)))
 	}
 
 	lines = append(lines, "")
@@ -125,7 +148,7 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 			if i > 1 {
 				break
 			}
-			_, spellLines := library.SpellInfo(entry.Spellid, npc.Level)
+			_, spellLines := store.SpellInfo(int32(entry.Spellid), int32(npc.Level))
 			isSlot := false
 			for _, line := range spellLines {
 				if strings.HasPrefix(line, "ID: ") {
@@ -154,7 +177,7 @@ func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) erro
 		}
 	}
 
-	data, err := image.GenerateNpcPreview(npc.Race, lines)
+	data, err := image.GenerateNpcPreview(int32(npc.Race), lines)
 	if err != nil {
 		return fmt.Errorf("GenerateNpcPreview: %w", err)
 	}

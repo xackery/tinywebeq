@@ -12,7 +12,7 @@ import (
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/store"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
@@ -65,7 +65,7 @@ func (e *SpellPreview) writeNoAlignLn(field string, value string) {
 	e.newLine(1)
 }
 
-func GenerateSpellPreview(spellIcon int, lines []string) ([]byte, error) {
+func GenerateSpellPreview(spellIcon int32, lines []string) ([]byte, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 
@@ -125,7 +125,7 @@ func GenerateSpellPreview(spellIcon int, lines []string) ([]byte, error) {
 	for i, line := range lines {
 		if i == 0 {
 			line = strings.ReplaceAll(line, "Spell Info for Effect: ", "")
-			iconImg := library.SpellIcon(spellIcon)
+			iconImg := store.SpellIcon(spellIcon)
 			titleOffset := 10
 			// draw a 40x41 image
 			if iconImg != nil {

@@ -6,26 +6,25 @@ import (
 	"encoding/gob"
 	"fmt"
 	"strings"
-
-	"github.com/xackery/tinywebeq/library"
-	"github.com/xackery/tinywebeq/tlog"
 )
 
 type ItemQuest struct {
-	ID              int
+	ItemID          int64
 	Entries         []*ItemQuestEntry
 	CacheKey        string `db:"key"`
 	CacheExpiration int64
 }
 
 type ItemQuestEntry struct {
-	ItemID    int    `db:"item_id"`
-	NpcID     int    `db:"npc_id"`
+	ItemID    int64  `db:"item_id"`
+	ItemName  string `db:"item_name"`
+	NpcID     int64  `db:"npc_id"`
 	NpcName   string `db:"npc_name"`
-	ZoneID    int    `db:"zone_id"`
+	ZoneID    int32  `db:"zone_id"`
 	UseCase   string `db:"use_case"`
-	QuestID   int    `db:"quest_id"`
+	QuestID   int64  `db:"quest_id"`
 	QuestName string `db:"quest_name"`
+	Zone      *Zone
 }
 
 func (t *ItemQuest) Identifier() string {
@@ -64,14 +63,7 @@ func (t *ItemQuest) Deserialize(data string) error {
 	if err != nil {
 		return fmt.Errorf("gob decode: %w", err)
 	}
-	for _, entry := range t.Entries {
-		tlog.Debugf("entry: %+v", entry)
-	}
 	return nil
-}
-
-func (t *ItemQuestEntry) ZoneLongName() string {
-	return library.ZoneLongNameByID(t.ZoneID)
 }
 
 func (t *ItemQuestEntry) NpcCleanName() string {

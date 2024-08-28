@@ -9,13 +9,14 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/image"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
 // Preview handles quest preview requests
 func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var id int
+	var id int64
 	if !config.Get().Quest.IsEnabled {
 		http.Error(w, "Not Found", http.StatusNotFound)
 		return
@@ -27,7 +28,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 
 	strID := r.URL.Query().Get("id")
 	if len(strID) > 0 {
-		id, err = strconv.Atoi(strID)
+		id, err = strconv.ParseInt(strID, 10, 64)
 		if err != nil {
 			tlog.Errorf("strconv.Atoi: %v", err)
 			http.Error(w, "Not Found", http.StatusNotFound)
@@ -48,10 +49,10 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("previewImageRender: id: %d done", id)
 }
 
-func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
-	quest, err := FetchQuest(ctx, id)
+func previewImageRender(ctx context.Context, id int64, w http.ResponseWriter) error {
+	quest, err := store.QuestByQuestID(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchQuest: %w", err)
+		return fmt.Errorf("store.QuestByID: %w", err)
 	}
 
 	lines := []string{

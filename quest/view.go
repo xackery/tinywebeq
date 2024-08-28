@@ -12,6 +12,7 @@ import (
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/site"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -26,6 +27,7 @@ func viewInit() error {
 		"quest/view.go.tpl",     // data
 		"head.go.tpl",           // head
 		"header.go.tpl",         // header
+		"sidebar.go.tpl",        // sidebar
 		"footer.go.tpl",         // footer
 		"layout/content.go.tpl", // layout (requires footer, header, head, data)
 	)
@@ -39,7 +41,7 @@ func viewInit() error {
 // View handles quest view requests
 func View(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var id int
+	var id int64
 
 	if !config.Get().Quest.IsEnabled {
 		http.Error(w, "Not Found", http.StatusNotFound)
@@ -50,7 +52,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 
 	strID := r.URL.Query().Get("id")
 	if len(strID) > 0 {
-		id, err = strconv.Atoi(strID)
+		id, err = strconv.ParseInt(strID, 10, 64)
 		if err != nil {
 			tlog.Errorf("strconv.Atoi: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -75,11 +77,11 @@ func View(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("viewRender: id: %d done", id)
 }
 
-func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
+func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 
-	quest, err := FetchQuest(ctx, id)
+	quest, err := store.QuestByQuestID(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchQuest: %w", err)
+		return fmt.Errorf("store.QuestByQuestID: %w", err)
 	}
 
 	type TemplateData struct {

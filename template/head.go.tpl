@@ -7,6 +7,8 @@
 <meta name="author" content="Xackery">
 <link rel="canonical" href="{{ .Site.BaseURL }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/dark.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+<link rel="stylesheet" href="{{ .Site.BaseURL }}/css/style.css">
 <link rel="icon" href="{{ .Site.BaseURL }}/favicon.ico">
 <noscript>
     <style>

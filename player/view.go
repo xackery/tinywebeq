@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/xackery/tinywebeq/model"
-	"github.com/xackery/tinywebeq/tlog"
-
 	"github.com/xackery/tinywebeq/site"
+	"github.com/xackery/tinywebeq/store"
+	"github.com/xackery/tinywebeq/tlog"
 )
 
 var (
@@ -30,6 +30,7 @@ func Init() error {
 		"player/view.go.tpl",    // data
 		"head.go.tpl",           // head
 		"header.go.tpl",         // header
+		"sidebar.go.tpl",        // sidebar
 		"footer.go.tpl",         // footer
 		"layout/content.go.tpl", // layout (requires footer, header, head, data)
 	)
@@ -42,13 +43,13 @@ func Init() error {
 // View handles player view requests
 func View(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var id int
+	var id int64
 
 	tlog.Debugf("view: %s", r.URL.String())
 
 	strID := r.URL.Query().Get("id")
 	if len(strID) > 0 {
-		id, err = strconv.Atoi(strID)
+		id, err = strconv.ParseInt(strID, 10, 64)
 		if err != nil {
 			tlog.Errorf("strconv.Atoi: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -69,14 +70,14 @@ func View(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("viewRender: id: %d done", id)
 }
 
-func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
+func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 	if id < 1 {
 		return fmt.Errorf("id too low")
 	}
 
-	player, err := fetchPlayer(ctx, id)
+	player, err := store.PlayerByCharacterID(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchPlayer: %w", err)
+		return fmt.Errorf("store.PlayerByCharacterID: %w", err)
 	}
 
 	type TemplateData struct {

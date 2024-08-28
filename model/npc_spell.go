@@ -2,12 +2,10 @@ package model
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/base64"
 	"encoding/gob"
 	"fmt"
-	"strings"
-
-	"github.com/xackery/tinywebeq/library"
 )
 
 type NpcSpell struct {
@@ -17,16 +15,16 @@ type NpcSpell struct {
 }
 
 type NpcSpellEntry struct {
-	ID            int    `db:"id"`
-	Name          string `db:"name"`
-	Procchance    int    `db:"proc_chance"`
-	Attackproc    int    `db:"attack_proc"`
-	Rangeproc     int    `db:"range_proc"`
-	Rprocchance   int    `db:"rproc_chance"`
-	Defensiveproc int    `db:"defensive_proc"`
-	Dprocchance   int    `db:"dproc_chance"`
-	Npcspellid    int    `db:"npc_spells_id"`
-	Spellid       int    `db:"spellid"`
+	ID            uint32
+	Name          sql.NullString
+	ProcChance    int8
+	AttackProc    int16
+	RangeProc     int16
+	RprocChance   int16
+	DefensiveProc int16
+	DprocChance   int16
+	Npcspellid    int `db:"npc_spells_id"`
+	Spellid       int `db:"spellid"`
 }
 
 func (t *NpcSpell) Identifier() string {
@@ -66,34 +64,4 @@ func (t *NpcSpell) Deserialize(data string) error {
 		return fmt.Errorf("gob decode: %w", err)
 	}
 	return nil
-}
-
-func (t *NpcSpellEntry) Spell() *library.Spell {
-	return library.SpellByID(t.Spellid)
-}
-
-func (t *NpcSpellEntry) SpellInfo(level int) []string {
-	_, lines := library.SpellInfo(t.Spellid, level)
-	newLines := []string{}
-	isSlot := false
-	for _, line := range lines {
-		if strings.HasPrefix(line, "Spell Info") {
-			continue
-		}
-		if strings.HasPrefix(line, "Recovery Time: ") {
-			continue
-		}
-		if strings.HasPrefix(line, "Mana: ") {
-			continue
-		}
-		if strings.HasPrefix(line, "Slot") {
-			isSlot = true
-		}
-		if isSlot && !strings.HasPrefix(line, "Slot") {
-			break
-		}
-
-		newLines = append(newLines, line)
-	}
-	return newLines
 }

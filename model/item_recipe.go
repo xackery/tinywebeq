@@ -10,20 +10,40 @@ import (
 )
 
 type ItemRecipe struct {
+	ItemID          int64
 	Entries         []*ItemRecipeEntry
 	CacheKey        string `db:"key"`
 	CacheExpiration int64
 }
 
 type ItemRecipeEntry struct {
-	ItemID         int    `db:"item_id"`
-	RecipeID       int    `db:"recipe_id"`
-	RecipeName     string `db:"recipe_name"`
-	Tradeskill     int    `db:"tradeskill"`
-	Trivial        int    `db:"trivial"`
-	IsContainer    int    `db:"is_container"`
-	ComponentCount int    `db:"component_count"`
-	SuccessCount   int    `db:"success_count"`
+	RecipeID       int32
+	RecipeName     string
+	Tradeskill     int16
+	Trivial        int16
+	ItemID         int32
+	IsContainer    bool
+	ComponentCount int8
+	SuccessCount   int8
+}
+
+func (t *ItemRecipe) Serialize() string {
+	return serialize(t)
+}
+
+func (t *ItemRecipe) Deserialize(data string) error {
+	decoded, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return fmt.Errorf("base64 decode: %w", err)
+	}
+	buf := bytes.NewBuffer(decoded)
+	d := gob.NewDecoder(buf)
+
+	err = d.Decode(&t)
+	if err != nil {
+		return fmt.Errorf("gob decode: %w", err)
+	}
+	return nil
 }
 
 func (t *ItemRecipe) Identifier() string {
@@ -44,25 +64,6 @@ func (t *ItemRecipe) SetExpiration(expiration int64) {
 
 func (t *ItemRecipe) Expiration() int64 {
 	return t.CacheExpiration
-}
-
-func (t *ItemRecipe) Serialize() string {
-	return serialize(t)
-}
-
-func (t *ItemRecipe) Deserialize(data string) error {
-	decoded, err := base64.StdEncoding.DecodeString(data)
-	if err != nil {
-		return fmt.Errorf("base64 decode: %w", err)
-	}
-	buf := bytes.NewBuffer(decoded)
-	d := gob.NewDecoder(buf)
-
-	err = d.Decode(&t)
-	if err != nil {
-		return fmt.Errorf("gob decode: %w", err)
-	}
-	return nil
 }
 
 func (t *ItemRecipe) ComponentEntries() []*ItemRecipeEntry {

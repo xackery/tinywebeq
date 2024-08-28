@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/base64"
 	"encoding/gob"
 	"fmt"
@@ -14,14 +15,14 @@ type NpcSpawn struct {
 }
 
 type NpcSpawnEntry struct {
-	Spawngroupid int     `db:"spawngroupid"`
-	Spawngroup   string  `db:"spawngroup"`
-	LongName     string  `db:"long_name"`
-	ShortName    string  `db:"short_name"`
-	X            float32 `db:"x"`
-	Y            float32 `db:"y"`
-	Z            float32 `db:"z"`
-	Respawntime  int     `db:"respawntime"`
+	LongName     string
+	ShortName    sql.NullString
+	X            float64
+	Y            float64
+	Z            float64
+	Spawngroup   string
+	Spawngroupid int32
+	Respawntime  int32
 }
 
 func (t *NpcSpawn) Identifier() string {

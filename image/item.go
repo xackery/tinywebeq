@@ -11,8 +11,8 @@ import (
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/store"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
@@ -162,7 +162,8 @@ func GenerateItemPreview(item *model.Item, itemQuest *model.ItemQuest, itemRecip
 
 	// title
 	titleOffset := 10
-	iconImg := library.ItemIcon(item.Icon)
+
+	iconImg := store.ItemIcon(item.Icon)
 	if iconImg != nil {
 		draw.Draw(rgba, image.Rect(10, 10, 700, 600), iconImg, image.Pt(0, 0), draw.Over)
 		titleOffset = 60
@@ -355,7 +356,7 @@ func (e *ItemPreview) render4Left() {
 			if counter > 3 {
 				break
 			}
-			e.writeNoAlignLn("Quest", fmt.Sprintf("%s in %s", entry.NpcCleanName(), entry.ZoneLongName()))
+			e.writeNoAlignLn("Quest", fmt.Sprintf("%s in %s", entry.NpcCleanName(), store.ZoneLongNameByZoneIDNumber(int32(entry.ZoneID))))
 		}
 	}
 	if itemRecipe != nil {
@@ -414,7 +415,7 @@ func (e *ItemPreview) render5Left() {
 	e.newLine(1)
 
 	if item.Proceffect > 0 && item.Proceffect != 65535 {
-		e.writeNoAlignLn("Combat Effects:", fmt.Sprintf("%s (%d)", library.SpellName(item.Proceffect), item.Proceffect))
+		e.writeNoAlignLn("Combat Effects:", fmt.Sprintf("%s (%d)", store.SpellName(item.Proceffect), item.Proceffect))
 		if item.Proclevel2 > 0 {
 			e.writeNoAlignLn("Level for effect:", fmt.Sprintf("%d", item.Proclevel2))
 		}
@@ -423,7 +424,7 @@ func (e *ItemPreview) render5Left() {
 	}
 
 	if item.Worneffect > 0 && item.Worneffect != 65535 {
-		e.writeNoAlignLn("Worn Effect:", fmt.Sprintf("%s (%d)", library.SpellName(item.Worneffect), item.Worneffect))
+		e.writeNoAlignLn("Worn Effect:", fmt.Sprintf("%s (%d)", store.SpellName(item.Worneffect), item.Worneffect))
 		e.renderSpellInfo(item.Worneffect)
 	}
 	if item.Wornlevel > 0 {
@@ -431,7 +432,7 @@ func (e *ItemPreview) render5Left() {
 		e.renderSpellInfo(item.Worneffect)
 	}
 	if item.Focuseffect > 0 && item.Focuseffect != 65535 {
-		e.writeNoAlignLn("Focus Effect:", fmt.Sprintf("%s (%d)", library.SpellName(item.Focuseffect), item.Focuseffect))
+		e.writeNoAlignLn("Focus Effect:", fmt.Sprintf("%s (%d)", store.SpellName(item.Focuseffect), item.Focuseffect))
 		e.renderSpellInfo(item.Focuseffect)
 	}
 	if item.Focuslevel > 0 {
@@ -439,7 +440,7 @@ func (e *ItemPreview) render5Left() {
 	}
 
 	if item.Clickeffect > 0 && item.Clickeffect != 65535 {
-		details := library.SpellName(item.Clickeffect) + fmt.Sprintf(" (%d)", item.Clickeffect) + " ("
+		details := store.SpellName(item.Clickeffect) + fmt.Sprintf(" (%d)", item.Clickeffect) + " ("
 		if item.Clicktype == 4 {
 			details += "Must Equip. "
 		}
@@ -464,7 +465,7 @@ func (e *ItemPreview) render5Left() {
 	}
 
 	if item.Scrolleffect > 0 && item.Scrolleffect != 65535 {
-		e.writeNoAlignLn("Spell Scroll Effect:", fmt.Sprintf("%s (%d)", library.SpellName(item.Scrolleffect), item.Scrolleffect))
+		e.writeNoAlignLn("Spell Scroll Effect:", fmt.Sprintf("%s (%d)", store.SpellName(item.Scrolleffect), item.Scrolleffect))
 		e.renderSpellInfo(item.Scrolleffect)
 	}
 
@@ -488,28 +489,28 @@ func (e *ItemPreview) render5Left() {
 
 	out := ""
 
-	if item.Price > 1000 {
-		pp = int(item.Price / 1000)
+	if int(item.Price) > 1000 {
+		pp = int(int(item.Price) / 1000)
 		if pp > 0 {
 			out += fmt.Sprintf("%dp ", pp)
 		}
 	}
-	if item.Price-(pp*1000) > 100 {
-		gp = int((item.Price - (pp * 1000)) / 100)
+	if int(item.Price)-(pp*1000) > 100 {
+		gp = int((int(item.Price) - (pp * 1000)) / 100)
 		if gp > 0 {
 			out += fmt.Sprintf("%dg ", gp)
 		}
 	}
 
-	if item.Price-(pp*1000)-(gp*100) > 10 {
-		sp = int((item.Price - (pp * 1000) - (gp * 100)) / 10)
+	if int(item.Price)-(pp*1000)-(gp*100) > 10 {
+		sp = int((int(item.Price) - (pp * 1000) - (gp * 100)) / 10)
 		if sp > 0 {
 			out += fmt.Sprintf("%ds ", sp)
 		}
 	}
 
-	if item.Price-(pp*1000)-(gp*100)-(sp*10) > 0 {
-		cp = item.Price - (pp * 1000) - (gp * 100) - (sp * 10)
+	if int(item.Price)-(pp*1000)-(gp*100)-(sp*10) > 0 {
+		cp = int(item.Price) - (pp * 1000) - (gp * 100) - (sp * 10)
 		if cp > 0 {
 			out += fmt.Sprintf("%dc ", cp)
 		}
@@ -518,7 +519,7 @@ func (e *ItemPreview) render5Left() {
 		out = out[:len(out)-1]
 	}
 
-	if item.Price > 0 {
+	if int(item.Price) > 0 {
 		e.writeNoAlignLn("Value:", out)
 	}
 
@@ -650,8 +651,8 @@ func (e *ItemPreview) render3Right() {
 	}
 }
 
-func (e *ItemPreview) renderSpellInfo(id int) {
-	_, info := library.SpellInfo(id, 0)
+func (e *ItemPreview) renderSpellInfo(id int32) {
+	_, info := store.SpellInfo(id, 0)
 	for _, line := range info {
 		e.writeNoAlignLn("", line)
 	}

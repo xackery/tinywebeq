@@ -1,0 +1,121 @@
+
+/* Sidebar */
+#sidebar {
+    position: fixed;
+    flex: 0;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 20;
+    width: var(--docs-sidebar-width);
+    background-color: var(--docs-background-color);
+    border-right: solid var(--docs-border-width) var(--docs-border-color);
+    border-radius: 0;
+    padding: 2rem;
+    margin: 0;
+    overflow: auto;
+    scrollbar-width: thin;
+    transition: var(--docs-sidebar-transition-speed) translate ease-in-out;
+  }
+  
+  #sidebar::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  #sidebar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 9999px;
+  }
+  
+  #sidebar:hover::-webkit-scrollbar-thumb {
+    background: var(--sl-color-neutral-400);
+  }
+  
+  #sidebar:hover::-webkit-scrollbar-track {
+    background: var(--sl-color-neutral-100);
+  }
+  
+  #sidebar > header {
+    margin-bottom: 1.5rem;
+  }
+  
+  #sidebar > header h1 {
+    margin: 0;
+  }
+  
+  #sidebar > header a {
+    display: block;
+  }
+  
+  #sidebar nav a {
+    text-decoration: none;
+  }
+  
+  #sidebar nav h2 {
+    font-size: var(--sl-font-size-medium);
+    font-weight: var(--sl-font-weight-semibold);
+    border-bottom: solid var(--docs-border-width) var(--docs-border-color);
+    margin: 1.5rem 0 0.5rem 0;
+  }
+  
+  #sidebar ul {
+    padding: 0;
+    margin: 0;
+  }
+  
+  #sidebar ul li {
+    list-style: none;
+    padding: 0;
+    margin: 0.125rem 0.5rem;
+  }
+  
+  #sidebar ul ul ul {
+    margin-left: 0.75rem;
+  }
+  
+  #sidebar ul li a {
+    line-height: 1.33;
+    color: inherit;
+    display: inline-block;
+    padding: 0;
+  }
+  
+  #sidebar ul li a:not(.active-link):hover {
+    color: var(--sl-color-primary-700);
+  }
+  
+  #sidebar nav .active-link {
+    color: var(--sl-color-primary-700);
+    border-bottom: dashed 1px var(--sl-color-primary-700);
+  }
+  
+  #sidebar > header img {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
+  
+  @media screen and (max-width: 900px) {
+    #sidebar {
+      translate: -100%;
+    }
+  
+    .sidebar-open #sidebar {
+      translate: 0;
+    }
+  }
+  
+  .sidebar-version {
+    font-size: var(--sl-font-size-x-small);
+    color: var(--sl-color-neutral-500);
+    text-align: right;
+    margin-top: -0.5rem;
+    margin-right: 1rem;
+    margin-bottom: -0.5rem;
+  }
+  
+  .sidebar-buttons {
+    display: flex;
+    justify-content: space-between;
+  }

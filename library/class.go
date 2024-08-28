@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func ClassStr(in int) string {
+func ClassStr(in uint8) string {
 	switch in {
 	case 1:
 		return "Warrior"
@@ -44,7 +44,7 @@ func ClassStr(in int) string {
 }
 
 // ClassesFromMask returns a string of classes from a bitmask
-func ClassesFromMask(in int) string {
+func ClassesFromMask(in int32) string {
 	out := ""
 
 	if in == 65535 {

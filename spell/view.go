@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 
 	"github.com/xackery/tinywebeq/site"
@@ -26,6 +27,7 @@ func viewInit() error {
 		"spell/view.go.tpl",     // data
 		"head.go.tpl",           // head
 		"header.go.tpl",         // header
+		"sidebar.go.tpl",        // sidebar
 		"footer.go.tpl",         // footer
 		"layout/content.go.tpl", // layout (requires footer, header, head, data)
 	)
@@ -75,19 +77,19 @@ func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
 		return fmt.Errorf("id too low")
 	}
 
-	se := library.SpellByID(id)
+	se := store.SpellByID(int32(id))
 	if se == nil {
 		return fmt.Errorf("spell not found")
 	}
 
 	type TemplateData struct {
 		Site                 site.BaseData
-		Spell                *library.Spell
+		Spell                *model.Spell
 		SpellInfo            []string
 		IsSpellSearchEnabled bool
 	}
 
-	_, info := library.SpellInfo(id, 0)
+	_, info := store.SpellInfo(int32(id), 0)
 
 	data := TemplateData{
 		Site:                 site.BaseDataInit(se.Name),

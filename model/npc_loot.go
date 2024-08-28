@@ -16,13 +16,13 @@ type NpcLoot struct {
 }
 
 type NpcLootEntry struct {
-	ID          int     `db:"id"`
-	Name        string  `db:"name"`
-	Itemtype    int     `db:"itemtype"`
-	Chance      float32 `db:"chance"`
-	Probability int     `db:"probability"`
-	Lootdropid  int     `db:"lootdrop_id"`
-	Multiplier  int     `db:"multiplier"`
+	ID          int32
+	Name        string
+	Itemtype    int32
+	Chance      float64
+	Probability float64
+	LootdropID  uint32
+	Multiplier  uint8
 }
 
 func (t *NpcLoot) Identifier() string {
@@ -65,7 +65,7 @@ func (t *NpcLoot) Deserialize(data string) error {
 }
 
 func (t *NpcLootEntry) ChanceGlobal() int {
-	return int(t.Chance * float32(t.Probability) / 100)
+	return int(float32(t.Chance) * float32(t.Probability) / 100)
 }
 
 func (t *NpcLootEntry) ItemTypeStr() string {

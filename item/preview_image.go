@@ -2,19 +2,22 @@ package item
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/xackery/tinywebeq/image"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
 // Preview handles item preview requests
 func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var id int
+	var id int64
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
@@ -22,7 +25,7 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 
 	strID := r.URL.Query().Get("id")
 	if len(strID) > 0 {
-		id, err = strconv.Atoi(strID)
+		id, err = strconv.ParseInt(strID, 10, 64)
 		if err != nil {
 			tlog.Errorf("strconv.Atoi: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -43,24 +46,24 @@ func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("previewImageRender: id: %d done", id)
 }
 
-func previewImageRender(ctx context.Context, id int, w http.ResponseWriter) error {
+func previewImageRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 	if id <= 1000 {
 		return fmt.Errorf("invalid id")
 	}
 
-	item, err := FetchItem(ctx, id)
+	item, err := store.ItemByItemID(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchItem: %w", err)
+		return fmt.Errorf("store.ItemByItemID: %w", err)
 	}
 
-	itemQuest, err := fetchItemQuest(ctx, id)
-	if err != nil {
-		tlog.Debugf("Ignoring err fetchItemQuest: %v", err)
+	itemQuest, err := store.ItemQuestByItemID(ctx, id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		tlog.Debugf("Ignoring err store.ItemQuestByItemID: %v", err)
 	}
 
-	itemRecipe, err := fetchItemRecipe(ctx, id)
-	if err != nil {
-		tlog.Debugf("Ignoring err fetchItemRecipe: %v", err)
+	itemRecipe, err := store.ItemRecipeByItemID(ctx, id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		tlog.Debugf("Ignoring err store.ItemRecipeByItemID: %v", err)
 	}
 
 	data, err := image.GenerateItemPreview(item, itemQuest, itemRecipe)

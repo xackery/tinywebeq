@@ -2,6 +2,8 @@ package npc
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -12,6 +14,7 @@ import (
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/site"
+	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -26,6 +29,7 @@ func viewInit() error {
 		"npc/view.go.tpl",       // data
 		"head.go.tpl",           // head
 		"header.go.tpl",         // header
+		"sidebar.go.tpl",        // sidebar
 		"footer.go.tpl",         // footer
 		"layout/content.go.tpl", // layout (requires footer, header, head, data)
 	)
@@ -39,7 +43,7 @@ func viewInit() error {
 // View handles npc view requests
 func View(w http.ResponseWriter, r *http.Request) {
 	var err error
-	var id int
+	var id int64
 
 	if !config.Get().Npc.IsEnabled {
 		http.Error(w, "Not Found", http.StatusNotFound)
@@ -50,7 +54,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 
 	strID := r.URL.Query().Get("id")
 	if len(strID) > 0 {
-		id, err = strconv.Atoi(strID)
+		id, err = strconv.ParseInt(strID, 10, 64)
 		if err != nil {
 			tlog.Errorf("strconv.Atoi: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -75,52 +79,53 @@ func View(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("viewRender: id: %d done", id)
 }
 
-func viewRender(ctx context.Context, id int, w http.ResponseWriter) error {
+func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 
-	npc, err := FetchNpc(ctx, id)
+	npc, err := store.NpcByNpcID(ctx, id)
 	if err != nil {
-		return fmt.Errorf("fetchNpc: %w", err)
+		return fmt.Errorf("store.NpcByNpcID: %w", err)
 	}
 
 	var npcLoot *model.NpcLoot
-	if npc.Loottableid > 0 {
-		npcLoot, err = fetchNpcLoot(ctx, npc.Loottableid)
+	if npc.LoottableID > 0 {
+		npcLoot, err = store.NpcLootByNpcID(ctx, int64(npc.LoottableID))
 		if err != nil {
-			return fmt.Errorf("fetchNpcLoot: %w", err)
+			return fmt.Errorf("store.NpcLootByNpcID: %w", err)
 		}
+
 	}
 	var npcMerchant *model.NpcMerchant
-	if npc.Merchantid > 0 {
-		npcMerchant, err = fetchNpcMerchant(ctx, npc.Merchantid)
+	if npc.MerchantID > 0 {
+		npcMerchant, err = store.NpcMerchantByNpcID(ctx, int64(npc.MerchantID))
 		if err != nil {
-			return fmt.Errorf("fetchNpcMerchant: %w", err)
+			return fmt.Errorf("store.NpcMerchantByNpcID: %w", err)
 		}
 	}
 
 	var npcFaction *model.NpcFaction
-	if npc.Npcfactionid > 0 {
-		npcFaction, err = fetchNpcFaction(ctx, npc.Npcfactionid)
-		if err != nil {
-			return fmt.Errorf("fetchNpcFaction: %w", err)
+	if npc.NpcFactionID > 0 {
+		npcFaction, err = store.NpcFactionByFactionID(ctx, int64(npc.NpcFactionID))
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("store.NpcFactionByFactionID: %w", err)
 		}
 	}
 
 	var npcSpell *model.NpcSpell
-	if npc.Npcspellsid > 0 {
-		npcSpell, err = fetchNpcSpell(ctx, npc.Npcspellsid, npc.Level)
-		if err != nil {
-			return fmt.Errorf("fetchNpcSpell: %w", err)
+	if npc.NpcSpellsID > 0 {
+		npcSpell, err = store.NpcSpellByNpcSpellsID(ctx, int64(npc.NpcSpellsID))
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("store.NpcSpellByNpcSpellsID: %w", err)
 		}
 	}
 
-	npcQuest, err := fetchNpcQuest(ctx, id)
-	if err != nil && err.Error() != "not found" {
-		return fmt.Errorf("fetchNpcQuest: %w", err)
+	npcQuest, err := store.NpcQuestByNpcID(ctx, id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("store.NpcQuestByNpcID: %w", err)
 	}
 
-	npcSpawn, err := fetchNpcSpawn(ctx, id)
-	if err != nil {
-		return fmt.Errorf("fetchNpcSpawn: %w", err)
+	npcSpawn, err := store.NpcSpawnByNpcID(ctx, id)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("store.NpcSpawnByNpcID: %w", err)
 	}
 
 	type TemplateData struct {
