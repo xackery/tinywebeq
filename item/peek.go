@@ -12,13 +12,14 @@ import (
 	"time"
 
 	"github.com/jbsmith7741/toml"
+	"gopkg.in/yaml.v3"
+
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
-	"gopkg.in/yaml.v3"
 )
 
 var (

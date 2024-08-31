@@ -43,21 +43,21 @@ func viewInit() error {
 
 // View handles item view requests
 func View(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var id int
+	var (
+		err error
+		id  int
+	)
 
 	tlog.Debugf("view: %s", r.URL.String())
 
-	strID := r.URL.Query().Get("id")
-	if len(strID) > 0 {
-		id, err = strconv.Atoi(strID)
-		if err != nil {
-			tlog.Errorf("strconv.Atoi: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
+	id, err = strconv.Atoi(r.PathValue("itemID"))
+	if err != nil {
+		tlog.Errorf("strconv.Atoi: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
 	tlog.Debugf("viewRender: id: %d", id)
@@ -73,7 +73,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 
 func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 	if id <= 1000 {
-		return fmt.Errorf("id too low")
+		return ErrIDTooLow
 	}
 
 	item, err := store.ItemByItemID(ctx, id)
@@ -110,6 +110,7 @@ func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		ItemRecipe:          itemRecipe,
 		Store:               store.Instance(),
 	}
+
 	if config.Get().Item.Preview.IsEnabled {
 		data.Site.ImageURL = fmt.Sprintf("/item/preview.png?id=%d", id)
 	}
