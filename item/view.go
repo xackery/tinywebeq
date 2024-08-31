@@ -3,6 +3,7 @@ package item
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -45,15 +46,27 @@ func viewInit() error {
 func View(w http.ResponseWriter, r *http.Request) {
 	var (
 		err error
-		id  int
+		id  int64
 	)
 
 	tlog.Debugf("view: %s", r.URL.String())
 
-	id, err = strconv.Atoi(r.PathValue("itemID"))
+	id, err = strconv.ParseInt(r.PathValue("itemID"), 10, 64)
 	if err != nil {
-		tlog.Errorf("strconv.Atoi: %v", err)
+		tlog.Errorf("strconv.ParseInt: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	item, err := store.ItemByItemID(r.Context(), id)
+	if err != nil {
+		tlog.Errorf("store.ItemByItemID: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+
+	// JSON API Views
+	if r.Header.Get("Accept") == "application/json" {
+		viewJSON(w, nil, item)
 		return
 	}
 
@@ -62,7 +75,7 @@ func View(w http.ResponseWriter, r *http.Request) {
 
 	tlog.Debugf("viewRender: id: %d", id)
 
-	err = viewRender(ctx, int64(id), w)
+	err = viewRender(ctx, item, w)
 	if err != nil {
 		tlog.Errorf("viewRender: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -71,22 +84,22 @@ func View(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("viewRender: id: %d done", id)
 }
 
-func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
-	if id <= 1000 {
-		return ErrIDTooLow
+func viewJSON(w http.ResponseWriter, headers http.Header, data any) {
+	w.Header().Set("Content-Type", "application/json")
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(data); err != nil {
+		tlog.Errorf("json.Encode: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+}
 
-	item, err := store.ItemByItemID(ctx, id)
-	if err != nil {
-		return fmt.Errorf("store.ItemByItemID: %w", err)
-	}
-
-	itemQuest, err := store.ItemQuestByItemID(ctx, id)
+func viewRender(ctx context.Context, item *model.Item, w http.ResponseWriter) error {
+	itemQuest, err := store.ItemQuestByItemID(ctx, int64(item.ItemID))
 	if err != nil {
 		tlog.Debugf("Ignoring err store.ItemQuestByItemID: %v", err)
 	}
 
-	itemRecipe, err := store.ItemRecipeByItemID(ctx, id)
+	itemRecipe, err := store.ItemRecipeByItemID(ctx, int64(item.ItemID))
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		tlog.Debugf("Ignoring err store.ItemRecipeByItemID: %v", err)
 	}
@@ -112,7 +125,7 @@ func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 	}
 
 	if config.Get().Item.Preview.IsEnabled {
-		data.Site.ImageURL = fmt.Sprintf("/item/preview.png?id=%d", id)
+		data.Site.ImageURL = fmt.Sprintf("/item/preview.png?id=%d", item.ItemID)
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)
