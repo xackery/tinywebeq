@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.log("Search too short")
                 return;
             } 
-            fetch("/item/search?name=" + searchInput.value)
+            fetch("/items/search?name=" + searchInput.value)
                 .then(response => response.json())
                 .then(data => {
                     searchResults.innerHTML = data.message + "<br>";
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     for (let i = 0; i < items.length; i++) {
                         let item = items[i];
                         let link = document.createElement("a");
-                        link.href = "/item/view?id=" + item.id;
+                        link.href = "/items/view?id=" + item.id;
                         link.innerText = item.name;
                         searchResults.appendChild(link);
                         let suffix = " (Lvl "+item.level+", ID " + item.id + ")";

@@ -125,7 +125,7 @@ func viewRender(ctx context.Context, item *model.Item, w http.ResponseWriter) er
 	}
 
 	if config.Get().Item.Preview.IsEnabled {
-		data.Site.ImageURL = fmt.Sprintf("/item/preview.png?id=%d", item.ItemID)
+		data.Site.ImageURL = fmt.Sprintf("/items/preview.png?id=%d", item.ItemID)
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)

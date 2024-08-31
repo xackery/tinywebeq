@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function() {
 {{ end }}{{ end}}
 
 {{ if .NpcLoot }}{{ range .NpcLoot.Entries }}
-    <p><a href="/item/view?id={{ .ID }}">{{ .Name }}</a> ({{ .ItemTypeStr }}) - {{ .Chance }}% ({{ .ChanceGlobal }}% Global)</p>
+    <p><a href="/items/view?id={{ .ID }}">{{ .Name }}</a> ({{ .ItemTypeStr }}) - {{ .Chance }}% ({{ .ChanceGlobal }}% Global)</p>
 {{ end }}{{ end }}
 
 {{ if .NpcMerchant }} {{ range .NpcMerchant.Entries }}
