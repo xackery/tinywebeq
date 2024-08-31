@@ -63,7 +63,7 @@ type Item struct {
 	Combateffects       string         `json:"combat_effects,omitempty"`
 	Extradmgskill       int32          `json:"extra_damage_skill,omitempty"`
 	Extradmgamt         int32          `json:"extra_damage_race,omitempty"`
-	Price               int32          `json:"price,omitempty"`
+	Price               int32          `json:"-"`
 	Cr                  int32          `json:"cold_resist,omitempty"`
 	Damage              int32          `json:"damage,omitempty"`
 	Damageshield        int32          `json:"damage_shield,omitempty"`
@@ -310,14 +310,16 @@ func (t *Item) MarshalJSON() ([]byte, error) {
 	type Alias Item
 	i := struct {
 		Alias
-		Weight  float64 `json:"weight,omitempty"`
-		Classes string  `json:"classes,omitempty"`
-		Races   string  `json:"races,omitempty"`
+		Weight  float64         `json:"weight,omitempty"`
+		Classes library.Classes `json:"classes,omitempty"`
+		Races   library.Races   `json:"races,omitempty"`
+		Slots   library.Slots   `json:"slots"`
 	}{
 		Alias:   Alias(*t),
 		Weight:  float64(t.Weight) / 10,
-		Classes: library.ClassesFromMask(t.Classes),
-		Races:   library.RacesFromMask(t.Races),
+		Classes: library.ClassesFromBitmask(t.Classes),
+		Races:   library.RacesFromBitmask(t.Races),
+		Slots:   library.SlotsFromBitmask(t.Slots),
 	}
 
 	return json.Marshal(i)
@@ -363,11 +365,11 @@ func (t *Item) Deserialize(data string) error {
 }
 
 func (t *Item) ClassesStr() string {
-	return library.ClassesFromMask(t.Classes)
+	return library.ClassesFromBitmask(t.Classes).String()
 }
 
 func (t *Item) RaceStr() string {
-	return library.RacesFromMask(t.Races)
+	return library.RacesFromBitmask(t.Races).String()
 }
 
 func (t *Item) DeityStr() string {

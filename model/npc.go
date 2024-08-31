@@ -197,7 +197,7 @@ func (t *Npc) RaceStr() string {
 }
 
 func (t *Npc) ClassStr() string {
-	return library.ClassStr(t.Class)
+	return library.Class(t.Class).String()
 }
 
 func (t *Npc) NpcSpecialAttacksStr() string {
