@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/base64"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -29,17 +30,17 @@ type Item struct {
 	Attack              int32          `json:"attack,omitempty"`
 	Augrestrict         int32          `json:"augment_restrictions,omitempty"`
 	Augslot1type        int8           `json:"augment_slot_1_type,omitempty"`
-	Augslot1visible     int8           `json:"augment_slot_1_visible,omitempty"`
+	Augslot1visible     int8           `json:"-"`
 	Augslot2type        int8           `json:"augment_slot_2_type,omitempty"`
-	Augslot2visible     int8           `json:"augment_slot_2_visible,omitempty"`
+	Augslot2visible     int8           `json:"-"`
 	Augslot3type        int8           `json:"augment_slot_3_type,omitempty"`
-	Augslot3visible     int8           `json:"augment_slot_3_visible,omitempty"`
+	Augslot3visible     int8           `json:"-"`
 	Augslot4type        int8           `json:"augment_slot_4_type,omitempty"`
-	Augslot4visible     int8           `json:"augment_slot_4_visible,omitempty"`
+	Augslot4visible     int8           `json:"-"`
 	Augslot5type        int8           `json:"augment_slot_5_type,omitempty"`
-	Augslot5visible     int8           `json:"augment_slot_5_visible,omitempty"`
+	Augslot5visible     int8           `json:"-"`
 	Augslot6type        int8           `json:"augment_slot_6_type,omitempty"`
-	Augslot6visible     int8           `json:"augment_slot_6_visible,omitempty"`
+	Augslot6visible     int8           `json:"-"`
 	Augtype             int32          `json:"augment_type,omitempty"`
 	Avoidance           int32          `json:"avoidance,omitempty"`
 	Awis                int32          `json:"wis,omitempty"`
@@ -58,7 +59,7 @@ type Item struct {
 	Charmfile           string         `json:"-"`
 	Charmfileid         string         `json:"-"`
 	Classes             int32          `json:"classes,omitempty"`
-	Color               uint32         `json:"color,omitempty"`
+	Color               uint32         `json:"-"`
 	Combateffects       string         `json:"combat_effects,omitempty"`
 	Extradmgskill       int32          `json:"extra_damage_skill,omitempty"`
 	Extradmgamt         int32          `json:"extra_damage_race,omitempty"`
@@ -257,8 +258,8 @@ type Item struct {
 	Clairvoyance        int16          `json:"clairvoyance,omitempty"`
 	Backstabdmg         int16          `json:"backstab_damage,omitempty"`
 	Created             string         `json:"-"`
-	Elitematerial       int16          `json:"elite_material,omitempty"`
-	Ldonsellbackrate    int16          `json:"ldon_sellback_rate,omitempty"`
+	Elitematerial       int16          `json:"-"`
+	Ldonsellbackrate    int16          `json:"-"`
 	Scriptfileid        int32          `json:"-"`
 	Expendablearrow     int16          `json:"-"`
 	Powersourcecapacity int32          `json:"-"`
@@ -302,6 +303,24 @@ type Item struct {
 	CharName            string         `json:"-"`
 	DiscoveredDate      uint32         `json:"-"`
 	AccountStatus       int32          `json:"-"`
+}
+
+// MarshalJSON implements a custom item marshaler for displaying the item with JSON encoding.
+func (t *Item) MarshalJSON() ([]byte, error) {
+	type Alias Item
+	i := struct {
+		Alias
+		Weight  float64 `json:"weight,omitempty"`
+		Classes string  `json:"classes,omitempty"`
+		Races   string  `json:"races,omitempty"`
+	}{
+		Alias:   Alias(*t),
+		Weight:  float64(t.Weight) / 10,
+		Classes: library.ClassesFromMask(t.Classes),
+		Races:   library.RacesFromMask(t.Races),
+	}
+
+	return json.Marshal(i)
 }
 
 func (t *Item) Identifier() string {
@@ -348,60 +367,7 @@ func (t *Item) ClassesStr() string {
 }
 
 func (t *Item) RaceStr() string {
-	out := ""
-	if t.Races == 65535 {
-		return "ALL"
-	}
-	if t.Races&1 != 0 {
-		out += "HUM "
-	}
-	if t.Races&2 != 0 {
-		out += "BAR "
-	}
-	if t.Races&4 != 0 {
-		out += "ERU "
-	}
-	if t.Races&8 != 0 {
-		out += "WLF "
-	}
-	if t.Races&16 != 0 {
-		out += "HEF "
-	}
-	if t.Races&32 != 0 {
-		out += "DKE "
-	}
-	if t.Races&64 != 0 {
-		out += "HLF "
-	}
-	if t.Races&128 != 0 {
-		out += "DWF "
-	}
-	if t.Races&256 != 0 {
-		out += "TRL "
-	}
-	if t.Races&512 != 0 {
-		out += "OGR "
-	}
-	if t.Races&1024 != 0 {
-		out += "HFL "
-	}
-	if t.Races&2048 != 0 {
-		out += "GNM "
-	}
-	if t.Races&4096 != 0 {
-		out += "IKS "
-	}
-	if t.Races&8192 != 0 {
-		out += "VAH "
-	}
-	if t.Races&16384 != 0 {
-		out += "FRG "
-	}
-	if t.Races&32768 != 0 {
-		out += "DRK "
-	}
-	out = strings.TrimSuffix(out, " ")
-	return out
+	return library.RacesFromMask(t.Races)
 }
 
 func (t *Item) DeityStr() string {

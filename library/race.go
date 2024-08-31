@@ -1,6 +1,9 @@
 package library
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func RaceStr(in int32) string {
 	switch in {
@@ -1366,4 +1369,61 @@ func RaceStr(in int32) string {
 		return "Wurm Mount"
 	}
 	return fmt.Sprintf("Unknown race %d", in)
+}
+
+func RacesFromMask(in int32) string {
+	out := ""
+	if in == 65535 {
+		return "ALL"
+	}
+	if in&1 != 0 {
+		out += "HUM "
+	}
+	if in&2 != 0 {
+		out += "BAR "
+	}
+	if in&4 != 0 {
+		out += "ERU "
+	}
+	if in&8 != 0 {
+		out += "WLF "
+	}
+	if in&16 != 0 {
+		out += "HEF "
+	}
+	if in&32 != 0 {
+		out += "DKE "
+	}
+	if in&64 != 0 {
+		out += "HLF "
+	}
+	if in&128 != 0 {
+		out += "DWF "
+	}
+	if in&256 != 0 {
+		out += "TRL "
+	}
+	if in&512 != 0 {
+		out += "OGR "
+	}
+	if in&1024 != 0 {
+		out += "HFL "
+	}
+	if in&2048 != 0 {
+		out += "GNM "
+	}
+	if in&4096 != 0 {
+		out += "IKS "
+	}
+	if in&8192 != 0 {
+		out += "VAH "
+	}
+	if in&16384 != 0 {
+		out += "FRG "
+	}
+	if in&32768 != 0 {
+		out += "DRK "
+	}
+	out = strings.TrimSuffix(out, " ")
+	return out
 }
