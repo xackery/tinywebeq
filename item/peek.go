@@ -26,7 +26,7 @@ func peekInit() error {
 	var err error
 	peekTemplate = template.New("peek")
 	peekTemplate, err = peekTemplate.ParseFS(site.TemplateFS(),
-		"item/peek.go.tpl", // data
+		"item/peek.go.tmpl", // data
 	)
 	if err != nil {
 		return fmt.Errorf("template.ParseFS: %w", err)
@@ -113,7 +113,7 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 	}
 
 	//buf := &bytes.Buffer{}
-	err = peekTemplate.ExecuteTemplate(w, "peek.go.tpl", data)
+	err = peekTemplate.ExecuteTemplate(w, "peek.go.tmpl", data)
 	if err != nil {
 		return fmt.Errorf("peekTemplate.Execute: %w", err)
 	}

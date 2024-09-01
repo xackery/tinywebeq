@@ -29,12 +29,12 @@ func viewInit() error {
 	var err error
 	viewTemplate = template.New("view")
 	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
-		"item/view.go.tpl",      // data
-		"head.go.tpl",           // head
-		"header.go.tpl",         // header
-		"sidebar.go.tpl",        // sidebar
-		"footer.go.tpl",         // footer
-		"layout/content.go.tpl", // layout (requires footer, header, head, data)
+		"item/view.go.tmpl",      // data
+		"head.go.tmpl",           // head
+		"header.go.tmpl",         // header
+		"sidebar.go.tmpl",        // sidebar
+		"footer.go.tmpl",         // footer
+		"layout/content.go.tmpl", // layout (requires footer, header, head, data)
 	)
 	if err != nil {
 		return fmt.Errorf("template.ParseFS: %w", err)
@@ -128,7 +128,7 @@ func viewRender(ctx context.Context, item *model.Item, w http.ResponseWriter) er
 		data.Site.ImageURL = fmt.Sprintf("/items/preview.png?id=%d", item.ItemID)
 	}
 
-	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)
+	err = viewTemplate.ExecuteTemplate(w, "content.go.tmpl", data)
 	if err != nil {
 		return fmt.Errorf("viewTemplate.Execute: %w", err)
 	}
