@@ -35,7 +35,7 @@
         <li>
             <h2>Items</h2>
                 <ul>
-                    <li><a href="/item/view?id=1001">Item Search</a></li>            
+                    <li><a href="/items/view?id=1001">Item Search</a></li>
                 </ul>
             </li>
         <li>

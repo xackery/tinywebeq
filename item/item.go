@@ -5,14 +5,14 @@ import (
 )
 
 var (
-	isInitialied bool
+	isInitialized bool
 )
 
 func Init() error {
-	if isInitialied {
+	if isInitialized {
 		return nil
 	}
-	isInitialied = true
+	isInitialized = true
 	err := viewInit()
 	if err != nil {
 		return fmt.Errorf("viewInit: %w", err)

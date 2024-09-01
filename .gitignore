@@ -24,3 +24,12 @@ bin/
 *.png
 *.yaml
 __debug_bin*
+
+# IDE Settings
+.idea
+
+# Cache
+cache
+
+# Misc Logs
+*.log

@@ -1,101 +1,108 @@
 package library
 
 import (
-	"fmt"
+	"encoding/json"
 	"strings"
 )
 
-func ClassStr(in uint8) string {
-	switch in {
-	case 1:
-		return "Warrior"
-	case 2:
-		return "Cleric"
-	case 3:
-		return "Paladin"
-	case 4:
-		return "Ranger"
-	case 5:
-		return "Shadow Knight"
-	case 6:
-		return "Druid"
-	case 7:
-		return "Monk"
-	case 8:
-		return "Bard"
-	case 9:
-		return "Rogue"
-	case 10:
-		return "Shaman"
-	case 11:
-		return "Necromancer"
-	case 12:
-		return "Wizard"
-	case 13:
-		return "Magician"
-	case 14:
-		return "Enchanter"
-	case 15:
-		return "Beastlord"
-	case 16:
-		return "Berserker"
-	}
-	return fmt.Sprintf("Unknown %d", in)
+type (
+	Class   int
+	Classes []Class
+)
+
+const (
+	ClassWarrior Class = 1 << iota
+	ClassCleric
+	ClassPaladin
+	ClassRanger
+	ClassShadowKnight
+	ClassDruid
+	ClassMonk
+	ClassBard
+	ClassRogue
+	ClassShaman
+	ClassNecromancer
+	ClassWizard
+	ClassMagician
+	ClassEnchanter
+	ClassBeastlord
+	ClassBerserker
+)
+
+var classToString = map[Class]string{
+	ClassWarrior:      "Warrior",
+	ClassCleric:       "Cleric",
+	ClassPaladin:      "Paladin",
+	ClassRanger:       "Ranger",
+	ClassShadowKnight: "Shadow Knight",
+	ClassDruid:        "Druid",
+	ClassMonk:         "Monk",
+	ClassBard:         "Bard",
+	ClassRogue:        "Rogue",
+	ClassShaman:       "Shaman",
+	ClassNecromancer:  "Necromancer",
+	ClassWizard:       "Wizard",
+	ClassMagician:     "Magician",
+	ClassEnchanter:    "Enchanter",
+	ClassBeastlord:    "Beastlord",
+	ClassBerserker:    "Berserker",
 }
 
-// ClassesFromMask returns a string of classes from a bitmask
-func ClassesFromMask(in int32) string {
-	out := ""
+var classToShortString = map[Class]string{
+	ClassWarrior:      "WAR",
+	ClassCleric:       "CLR",
+	ClassPaladin:      "PAL",
+	ClassRanger:       "RNG",
+	ClassShadowKnight: "SHD",
+	ClassDruid:        "DRU",
+	ClassMonk:         "MNK",
+	ClassBard:         "BRD",
+	ClassRogue:        "ROG",
+	ClassShaman:       "SHM",
+	ClassNecromancer:  "NEC",
+	ClassWizard:       "WIZ",
+	ClassMagician:     "MAG",
+	ClassEnchanter:    "ENC",
+	ClassBeastlord:    "BST",
+	ClassBerserker:    "BER",
+}
 
-	if in == 65535 {
+func (c Class) String() string {
+	return classToString[c]
+}
+
+func (c Class) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c.String())
+}
+
+func (c Classes) String() string {
+	str := &strings.Builder{}
+
+	if len(c) == 16 {
 		return "ALL"
 	}
-	if in&1 != 0 {
-		out += "WAR "
-	}
-	if in&2 != 0 {
-		out += "CLR "
-	}
-	if in&4 != 0 {
-		out += "PAL "
-	}
-	if in&8 != 0 {
-		out += "RNG "
-	}
-	if in&16 != 0 {
-		out += "SHD "
-	}
-	if in&32 != 0 {
-		out += "DRU "
-	}
-	if in&64 != 0 {
-		out += "MNK "
-	}
-	if in&128 != 0 {
-		out += "BRD "
-	}
-	if in&256 != 0 {
-		out += "ROG "
-	}
-	if in&512 != 0 {
-		out += "SHM "
-	}
-	if in&1024 != 0 {
-		out += "NEC "
-	}
-	if in&2048 != 0 {
-		out += "WIZ "
-	}
-	if in&4096 != 0 {
-		out += "MAG "
-	}
-	if in&8192 != 0 {
-		out += "ENC "
-	}
-	if in&16384 != 0 {
-		out += "BST "
-	}
 
-	out = strings.TrimSuffix(out, " ")
-	return out
+	for i, class := range c {
+		str.WriteString(classToShortString[class])
+		if i != len(c)-1 {
+			str.WriteString(" ")
+		}
+	}
+	return str.String()
+}
+
+func (c Classes) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + c.String() + `"`), nil
+}
+
+func ClassesFromBitmask(mask int32) Classes {
+	var classes Classes
+	var i int32
+
+	for i = 1; i <= mask; i <<= 1 {
+		if i&mask != 0 {
+			classes = append(classes, Class(i))
+		}
+	}
+	return classes
 }

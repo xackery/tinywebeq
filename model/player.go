@@ -140,7 +140,7 @@ func (t *Player) Expiration() int64 {
 }
 
 func (t *Player) ClassStr() string {
-	return library.ClassStr(t.Class)
+	return library.Class(t.Class).String()
 }
 
 func (t *Player) RaceStr() string {

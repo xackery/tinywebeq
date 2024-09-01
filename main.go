@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"crypto"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -20,6 +18,8 @@ import (
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
 	"github.com/rs/zerolog"
+	"golang.org/x/crypto/acme/autocert"
+
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/image"
@@ -34,7 +34,6 @@ import (
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 	"github.com/xackery/tinywebeq/zone"
-	"golang.org/x/crypto/acme/autocert"
 )
 
 // Version is the build version
@@ -179,52 +178,7 @@ func run() error {
 		server.Addr = fmt.Sprintf("%s:%d", config.Get().Site.Host, config.Get().Site.Port)
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, world!"))
-	})
-	mux.HandleFunc("/item/view/", item.View)
-	mux.HandleFunc("/item/peek", item.Peek)
-	mux.HandleFunc("/item/search", item.Search)
-	mux.HandleFunc("/item/preview.png", item.PreviewImage)
-	mux.HandleFunc("/player/view/", player.View)
-	mux.HandleFunc("/spell/view", spell.View)
-	mux.HandleFunc("/spell/search", spell.Search)
-	mux.HandleFunc("/spell/preview.png", spell.PreviewImage)
-	mux.HandleFunc("/npc/view/", npc.View)
-	mux.HandleFunc("/npc/peek/", npc.Peek)
-	mux.HandleFunc("/npc/search", npc.Search)
-	mux.HandleFunc("/npc/preview.png", npc.PreviewImage)
-	mux.HandleFunc("/quest/view/", quest.View)
-	mux.HandleFunc("/quest/search", quest.Search)
-	mux.HandleFunc("/quest/preview.png", quest.PreviewImage)
-	// mux.HandleFunc("/recipe/view/", recipe.View)
-	// mux.HandleFunc("/recipe/search", recipe.Search)
-	// mux.HandleFunc("/recipe/preview.png", recipe.PreviewImage)
-	mux.HandleFunc("/zone/view/", zone.View)
-	mux.HandleFunc("/zone/search", zone.Search)
-	mux.HandleFunc("/zone/preview.png", zone.PreviewImage)
-	mux.HandleFunc("/css/style.css", func(w http.ResponseWriter, r *http.Request) {
-		fi, err := site.TemplateFS().Open("style.css")
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-		defer fi.Close()
-		data, err := io.ReadAll(fi)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		http.ServeContent(w, r, "style.css", time.Now(), bytes.NewReader(data))
-	})
-
-	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
-		http.StripPrefix("/static/", http.FileServer(http.Dir("static"))).ServeHTTP(w, r)
-	})
-
-	server.Handler = mux
+	server.Handler = routes()
 
 	tlog.Infof("Listening on %s", server.Addr)
 	if config.Get().Site.LetsEncrypt.IsEnabled {
@@ -251,7 +205,7 @@ func (u *LetsEncryptUser) GetEmail() string {
 }
 
 // GetRegistration returns the registration
-func (u LetsEncryptUser) GetRegistration() *registration.Resource {
+func (u *LetsEncryptUser) GetRegistration() *registration.Resource {
 	return u.Registration
 }
 
@@ -300,7 +254,7 @@ func letsencrypt() error {
 	keyPath := config.Get().Site.LetsEncrypt.CertPath + "/key.pem"
 	if _, err := os.Stat(keyPath); err == nil {
 		tlog.Infof("%s exists, doing renew instead", keyPath)
-		return letsencryptRenew()
+		return letsEncryptRenew()
 	}
 	tlog.Infof("%s does not exist, generating", keyPath)
 
@@ -407,7 +361,7 @@ func questParse(ctx context.Context) error {
 	return nil
 }
 
-func letsencryptRenew() error {
+func letsEncryptRenew() error {
 	certPath := config.Get().Site.LetsEncrypt.CertPath
 	keyPath := certPath + "/key.pem"
 	data, err := os.ReadFile(keyPath)

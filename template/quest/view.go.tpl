@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <p>Level: {{ .Quest.Level }}</p>
 <p>Expansion: {{ .Quest.Expansion }}</p>
 {{ range .Quest.Entries }}
-<a href="/npc/view?id={{ .NpcID }}">{{ .NpcName }}</a> {{ .UseCase }} <a href="/item/view?id={{ .ItemID }}">{{ .ItemName }}</a><br>
+<a href="/npc/view?id={{ .NpcID }}">{{ .NpcName }}</a> {{ .UseCase }} <a href="/items/view?id={{ .ItemID }}">{{ .ItemName }}</a><br>
 {{ end }}
 
 {{ end }}
