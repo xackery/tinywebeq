@@ -1,27 +1,37 @@
-{{ .Npc.ID }}:
-- "Level: {{ .Npc.Level }}"
-- "Race: {{ .Npc.RaceStr }}"
-- "Class: {{ .Npc.ClassStr }}"
-- "Health points: {{ .Npc.Hp }}"
-- "Damage: {{ .Npc.Mindmg }} to {{ .Npc.Maxdmg }}"
-- "Attack speed: {{ .Npc.AttackSpeed }}%"
-- "{{ if .Npc.NpcSpecialAttacksStr }}Special attacks: {{ .Npc.NpcSpecialAttacksStr }}{{ end }}"
-- "{{ if .NpcQuest }} {{ range .NpcQuest.Entries }}{{ .QuestName }} in {{ .ZoneLongName }}{{ end }}{{ end }}"
-{{ if .NpcSpawn }} {{ range .NpcSpawn.Entries }}
-- "{{ .Spawngroup }} ({{ .Spawngroupid }}) {{ .LongName }} ({{ .ShortName.Value}}) {{ .X }}, {{ .Y }}, {{ .Z }} {{ .Respawntime }}"
-{{ end }}{{ end }}
-- "{{ if .NpcFaction }} {{ range .NpcFaction.Entries }}{{ .Name }} {{ .Value }}{{ end }}{{ end}}"
-- "{{ if .NpcLoot }}{{ range .NpcLoot.Entries }}{{ .Name }} ({{ .ItemTypeStr }}) - "{{ .Chance }}% ({{ .ChanceGlobal }}% Global){{ end }}{{ end }}"
-{{ if .NpcMerchant }} {{ range .NpcMerchant.Entries }}
-- "{{ .Name }}"
-- "Price: {{ .Price }}"
-- "{{ if .Ldonprice }}LDoN Price: {{ .Ldonprice }}{{ end }}"
-{{ end }}{{ end}}
+{{ .Npc.ID }}: 
+  - |
+    <p>Name: {{ .Npc.Name }}</p>
+    <p>Level: {{ .Npc.Level }}</p>
+    <p>Race: {{ .Npc.RaceStr }}</p>
+    <p>Class: {{ .Npc.ClassStr }}</p>
+    <p>Health points: {{ .Npc.Hp }}</p>
+    <p>Damage: {{ .Npc.Mindmg }} to {{ .Npc.Maxdmg }}</p>
+    <p>Attack speed: {{ .Npc.AttackSpeed }}%</p>
+    {{ if .Npc.NpcSpecialAttacksStr }}<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>{{ end }}
 
-{{ $level := .Npc.Level }}
-{{ if .NpcSpell }} {{ range .NpcSpell.Entries }}
-- "{{ .Name }} - "{{ .Spell.Name }}"
-    {{ range .SpellInfo $level }}
-- "{{ . }}"
-    {{ end }}
-{{ end }}{{ end}}
+    {{ if .NpcQuest }} {{ range .NpcQuest.Entries }}
+        <p><a href="/quest/view?id={{ .QuestID }}">{{ .QuestName }}</a> in {{ .ZoneID }}</p>
+    {{ end }}{{ end }}
+
+
+    {{ if .NpcSpawn }} {{ range .NpcSpawn.Entries }}
+        <p>{{ .Spawngroup }} ({{ .Spawngroupid }}) {{ .LongName }} ({{ .ShortName}}) {{ .X }}, {{ .Y }}, {{ .Z }} {{ .Respawntime }} </p>
+    {{ end }}{{ end }}
+
+    {{ if .NpcFaction }} {{ range .NpcFaction.Entries }}
+        <p><a href="/faction/view?id={{ .ID }}">{{ .Name }}</a> {{ .Value }}</p>
+    {{ end }}{{ end}}
+
+    {{ if .NpcMerchant }} {{ range .NpcMerchant.Entries }}
+        <p>{{ .Name }}</p>
+        <p>Price: {{ .Price }}</p>
+        {{ if .Ldonprice }}<p>LDoN Price: {{ .Ldonprice }}</p>{{ end }}
+    {{ end }}{{ end}}
+
+    {{ $level := .Npc.Level }}
+    {{ if .NpcSpell }} {{ range .NpcSpell.Entries }}
+        <p>{{ .Name }} - {{ .Spell.Name }} </p>
+        {{ range .SpellInfo $level }}
+            <p>{{ . }}</p>
+        {{ end }}
+    {{ end }}{{ end}}

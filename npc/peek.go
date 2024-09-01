@@ -1,7 +1,6 @@
 package npc
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"errors"
@@ -11,14 +10,12 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/jbsmith7741/toml"
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
 	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
-	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -84,6 +81,13 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		return fmt.Errorf("store.NpcByNpcID: %w", err)
 	}
 
+	if npc.AttackSpeed == 0 {
+		npc.AttackSpeed = 100
+	}
+	if npc.AttackSpeed < 0 {
+		npc.AttackSpeed = 100 - npc.AttackSpeed
+	}
+
 	var npcLoot *model.NpcLoot
 	if npc.LoottableID > 0 {
 		npcLoot, err = store.NpcLootByNpcID(ctx, int64(npc.LoottableID))
@@ -129,6 +133,7 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		Site               site.BaseData
 		Library            *library.Library
 		NpcInfo            []string
+		Store              *store.Store
 		IsNpcSearchEnabled bool
 		Npc                *model.Npc
 		NpcLoot            *model.NpcLoot
@@ -143,6 +148,7 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		Site:               site.BaseDataInit("NPC"),
 		Library:            library.Instance(),
 		IsNpcSearchEnabled: config.Get().Npc.Search.IsEnabled,
+		Store:              store.Instance(),
 		Npc:                npc,
 		NpcLoot:            npcLoot,
 		NpcMerchant:        npcMerchant,
@@ -152,33 +158,34 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		NpcSpawn:           npcSpawn,
 	}
 
-	buf := &bytes.Buffer{}
-	err = peekTemplate.ExecuteTemplate(buf, "peek.go.tpl", data)
+	//buf := &bytes.Buffer{}
+	err = peekTemplate.ExecuteTemplate(w, "peek.go.tpl", data)
 	if err != nil {
 		return fmt.Errorf("peekTemplate.Execute: %w", err)
 	}
+	/*
+		var tomlMap map[string][]string
 
-	var tomlMap map[string][]string
-
-	err = yaml.NewDecoder(buf).Decode(&tomlMap)
-	if err != nil {
-		return fmt.Errorf("yaml.NewDecoder: %w", err)
-	}
-
-	for k, lines := range tomlMap {
-		newLines := []string{}
-		for _, line := range lines {
-			if line == "" {
-				continue
-			}
-			newLines = append(newLines, line)
+		err = yaml.NewDecoder(buf).Decode(&tomlMap)
+		if err != nil {
+			return fmt.Errorf("%s\nyaml.NewDecoder: %w", buf.String(), err)
 		}
-		tomlMap[k] = newLines
-	}
 
-	err = toml.NewEncoder(w).Encode(tomlMap)
-	if err != nil {
-		return fmt.Errorf("toml.NewEncoder: %w", err)
-	}
+		for k, lines := range tomlMap {
+			newLines := []string{}
+			for _, line := range lines {
+				if line == "" {
+					continue
+				}
+				newLines = append(newLines, line)
+			}
+			tomlMap[k] = newLines
+		}
+
+		err = toml.NewEncoder(w).Encode(tomlMap)
+		if err != nil {
+			return fmt.Errorf("toml.NewEncoder: %w", err)
+		} */
+
 	return nil
 }
