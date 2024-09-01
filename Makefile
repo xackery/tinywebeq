@@ -5,7 +5,7 @@ NAME := tinywebeq
 run:
 	@echo "run: building"
 	mkdir -p bin
-	go build -o bin/${NAME} main.go
+	go build -o bin/${NAME} *.go
 # ifeq (,$(wildcard bin/template))
 # 	cd bin && ln -s ../template template
 # endif
