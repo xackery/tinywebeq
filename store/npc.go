@@ -13,5 +13,6 @@ func NpcByNpcID(ctx context.Context, npcID int64) (*model.Npc, error) {
 	if err != nil {
 		return nil, fmt.Errorf("query npc: %w", err)
 	}
+
 	return npc, nil
 }

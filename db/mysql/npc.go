@@ -17,6 +17,8 @@ func (b *Mysql) NpcByNpcID(ctx context.Context, npcID int64) (*model.Npc, error)
 	npc.ID = int32(row.ID)
 	npc.Name = row.Name
 	npc.Level = row.Level
+	npc.DecodeNpcType(row)
+
 	return npc, nil
 }
 

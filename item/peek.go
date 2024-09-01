@@ -1,7 +1,6 @@
 package item
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"errors"
@@ -100,49 +99,50 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		Library             *library.Library
 		ItemInfo            []string
 		IsItemSearchEnabled bool
-
-		Item       *model.Item
-		ItemRecipe *model.ItemRecipe
-		ItemQuest  *model.ItemQuest
+		Store               *store.Store
+		Item                *model.Item
+		ItemRecipe          *model.ItemRecipe
+		ItemQuest           *model.ItemQuest
 	}
 
 	data := TemplateData{
 		Site:                site.BaseDataInit("ITEM"),
 		Library:             library.Instance(),
 		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
+		Store:               store.Instance(),
 		Item:                item,
 		ItemRecipe:          itemRecipe,
 		ItemQuest:           itemQuest,
 	}
 
-	buf := &bytes.Buffer{}
-	err = peekTemplate.ExecuteTemplate(buf, "peek.go.tpl", data)
+	//buf := &bytes.Buffer{}
+	err = peekTemplate.ExecuteTemplate(w, "peek.go.tpl", data)
 	if err != nil {
 		return fmt.Errorf("peekTemplate.Execute: %w", err)
 	}
+	/*
+		var tomlMap map[string][]string
 
-	var tomlMap map[string][]string
-
-	err = yaml.NewDecoder(buf).Decode(&tomlMap)
-	if err != nil {
-		return fmt.Errorf("yaml.NewDecoder: %w", err)
-	}
-
-	for k, lines := range tomlMap {
-		newLines := []string{}
-		for _, line := range lines {
-			if line == "" {
-				continue
-			}
-			newLines = append(newLines, line)
+		err = yaml.NewDecoder(buf).Decode(&tomlMap)
+		if err != nil {
+			return fmt.Errorf("yaml.NewDecoder: %w", err)
 		}
-		tomlMap[k] = newLines
-	}
 
-	err = toml.NewEncoder(w).Encode(tomlMap)
-	if err != nil {
-		return fmt.Errorf("toml.NewEncoder: %w", err)
-	}
+		for k, lines := range tomlMap {
+			newLines := []string{}
+			for _, line := range lines {
+				if line == "" {
+					continue
+				}
+				newLines = append(newLines, line)
+			}
+			tomlMap[k] = newLines
+		}
 
+		err = toml.NewEncoder(w).Encode(tomlMap)
+		if err != nil {
+			return fmt.Errorf("toml.NewEncoder: %w", err)
+		}
+	*/
 	return nil
 }
