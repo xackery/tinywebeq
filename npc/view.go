@@ -19,28 +19,6 @@ import (
 	"github.com/xackery/tinywebeq/tlog"
 )
 
-//var (
-//	viewTemplate *template.Template
-//)
-//
-//func viewInit() error {
-//	var err error
-//	viewTemplate = template.New("view")
-//	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
-//		"npc/view.go.tmpl",       // data
-//		"head.go.tmpl",           // head
-//		"header.go.tmpl",         // header
-//		"sidebar.go.tmpl",        // sidebar
-//		"footer.go.tmpl",         // footer
-//		"layout/content.go.tmpl", // layout (requires footer, header, head, data)
-//	)
-//	if err != nil {
-//		return fmt.Errorf("template.ParseFS: %w", err)
-//	}
-//
-//	return nil
-//}
-
 // View handles npc view requests
 func View(templates fs.FS) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
