@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"strconv"
-	"text/template"
 	"time"
 
 	"github.com/xackery/tinywebeq/config"
@@ -15,66 +15,52 @@ import (
 	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
+	"github.com/xackery/tinywebeq/template"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
-var (
-	peekTemplate *template.Template
-)
-
-//func peekInit() error {
-//	var err error
-//	peekTemplate = template.New("peek")
-//	peekTemplate, err = peekTemplate.ParseFS(site.TemplateFS(),
-//		"item/peek.go.tmpl", // data
-//	)
-//	if err != nil {
-//		return fmt.Errorf("template.ParseFS: %w", err)
-//	}
-//
-//	return nil
-//}
-
 // Peek handles item peek requests
-func Peek(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var id int64
+func Peek(templates fs.FS) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		var id int64
 
-	if !config.Get().Item.IsEnabled {
-		http.Error(w, "Not Found", http.StatusNotFound)
-		return
-	}
+		if !config.Get().Item.IsEnabled {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
 
-	tlog.Debugf("peek: %s", r.URL.String())
+		tlog.Debugf("peek: %s", r.URL.String())
 
-	strID := r.URL.Query().Get("id")
-	if len(strID) > 0 {
-		id, err = strconv.ParseInt(strID, 10, 64)
+		strID := r.URL.Query().Get("id")
+		if len(strID) > 0 {
+			id, err = strconv.ParseInt(strID, 10, 64)
+			if err != nil {
+				tlog.Errorf("strconv.Atoi: %v", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		tlog.Debugf("peekRender: id: %d", id)
+
+		err = peekRender(ctx, id, w)
 		if err != nil {
-			tlog.Errorf("strconv.Atoi: %v", err)
+			if err.Error() == "item not found" {
+				http.Error(w, "Not Found", http.StatusNotFound)
+				return
+			}
+			tlog.Errorf("peekRender: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	tlog.Debugf("peekRender: id: %d", id)
-
-	err = peekRender(ctx, id, w)
-	if err != nil {
-		if err.Error() == "item not found" {
-			http.Error(w, "Not Found", http.StatusNotFound)
-			return
-		}
-		tlog.Errorf("peekRender: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
 }
 
-func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
+func peekRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseWriter) error {
 
 	item, err := store.ItemByItemID(ctx, id)
 	if err != nil {
@@ -91,7 +77,7 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		return fmt.Errorf("store.ItemRecipeByItemID: %w", err)
 	}
 
-	type TemplateData struct {
+	data := struct {
 		Site                site.BaseData
 		Library             *library.Library
 		ItemInfo            []string
@@ -100,9 +86,7 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		Item                *model.Item
 		ItemRecipe          *model.ItemRecipe
 		ItemQuest           *model.ItemQuest
-	}
-
-	data := TemplateData{
+	}{
 		Site:                site.BaseDataInit("ITEM"),
 		Library:             library.Instance(),
 		IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
@@ -112,34 +96,14 @@ func peekRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		ItemQuest:           itemQuest,
 	}
 
-	//buf := &bytes.Buffer{}
-	err = peekTemplate.ExecuteTemplate(w, "peek.go.tmpl", data)
+	view, err := template.Compile("item", "item/peek.go.tmpl", templates)
 	if err != nil {
+		return fmt.Errorf("template.Compile: %w", err)
+	}
+
+	if err = view.ExecuteTemplate(w, "peek.go.tmpl", data); err != nil {
 		return fmt.Errorf("peekTemplate.Execute: %w", err)
 	}
-	/*
-		var tomlMap map[string][]string
 
-		err = yaml.NewDecoder(buf).Decode(&tomlMap)
-		if err != nil {
-			return fmt.Errorf("yaml.NewDecoder: %w", err)
-		}
-
-		for k, lines := range tomlMap {
-			newLines := []string{}
-			for _, line := range lines {
-				if line == "" {
-					continue
-				}
-				newLines = append(newLines, line)
-			}
-			tomlMap[k] = newLines
-		}
-
-		err = toml.NewEncoder(w).Encode(tomlMap)
-		if err != nil {
-			return fmt.Errorf("toml.NewEncoder: %w", err)
-		}
-	*/
 	return nil
 }
