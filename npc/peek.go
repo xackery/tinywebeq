@@ -19,23 +19,6 @@ import (
 	"github.com/xackery/tinywebeq/tlog"
 )
 
-//var (
-//	peekTemplate *template.Template
-//)
-//
-//func peekInit() error {
-//	var err error
-//	peekTemplate = template.New("peek")
-//	peekTemplate, err = peekTemplate.ParseFS(site.TemplateFS(),
-//		"npc/peek.go.tmpl", // data
-//	)
-//	if err != nil {
-//		return fmt.Errorf("template.ParseFS: %w", err)
-//	}
-//
-//	return nil
-//}
-
 // Peek handles npc peek requests
 func Peek(templates fs.FS) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
