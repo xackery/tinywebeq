@@ -47,7 +47,7 @@ func Peek(templates fs.FS) http.HandlerFunc {
 
 		tlog.Debugf("peekRender: id: %d", id)
 
-		err = peekRender(ctx, id, w)
+		err = peekRender(ctx, templates, id, w)
 		if err != nil {
 			if err.Error() == "item not found" {
 				http.Error(w, "Not Found", http.StatusNotFound)
