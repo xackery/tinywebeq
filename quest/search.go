@@ -8,15 +8,12 @@ import (
 	"time"
 
 	"github.com/go-jose/go-jose/v4/json"
+
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
-
-func searchInit() error {
-	return nil
-}
 
 // Search handles quest search requests
 func Search(w http.ResponseWriter, r *http.Request) {
