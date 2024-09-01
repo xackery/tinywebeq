@@ -49,8 +49,8 @@
         <li>
         <h2>Bestiary</h2>
         <ul>
-            <li><a href="/npc/view?id=1001">NPC Search</a></li>
-            <li><a href="/npc/view?id=1001">Advanced Npc Search</a></li>
+            <li><a href="/npcs/view?id=1001">NPC Search</a></li>
+            <li><a href="/npcs/view?id=1001">Advanced Npc Search</a></li>
             </ul>
         </li>
         <li>

@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.log("Search too short")
                 return;
             } 
-            fetch("/npc/search?name=" + searchInput.value)
+            fetch("/npcs/search?name=" + searchInput.value)
                 .then(response => response.json())
                 .then(data => {
                     searchResults.innerHTML = data.message + "<br>";
@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     for (let i = 0; i < npcs.length; i++) {
                         let npc = npcs[i];
                         let link = document.createElement("a");
-                        link.href = "/npc/view?id=" + npc.id;
+                        link.href = "/npcs/view?id=" + npc.id;
                         link.innerText = npc.name;
                         searchResults.appendChild(link);
                         let suffix = " (Lvl "+npc.level+", ID " + npc.id + ")";

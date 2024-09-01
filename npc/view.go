@@ -155,7 +155,7 @@ func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		NpcQuest:           npcQuest,
 	}
 	if config.Get().Npc.Preview.IsEnabled {
-		data.Site.ImageURL = fmt.Sprintf("/npc/preview.png?id=%d", id)
+		data.Site.ImageURL = fmt.Sprintf("/npcs/preview.png?id=%d", id)
 	}
 
 	err = viewTemplate.ExecuteTemplate(w, "content.go.tpl", data)
