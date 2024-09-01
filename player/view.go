@@ -19,26 +19,26 @@ var (
 	isInitialized bool
 )
 
-func Init() error {
-	if isInitialized {
-		return nil
-	}
-	isInitialized = true
-	var err error
-	viewTemplate = template.New("view")
-	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
-		"player/view.go.tmpl",    // data
-		"head.go.tmpl",           // head
-		"header.go.tmpl",         // header
-		"sidebar.go.tmpl",        // sidebar
-		"footer.go.tmpl",         // footer
-		"layout/content.go.tmpl", // layout (requires footer, header, head, data)
-	)
-	if err != nil {
-		return fmt.Errorf("template.ParseFS: %w", err)
-	}
-	return nil
-}
+//func Init() error {
+//	if isInitialized {
+//		return nil
+//	}
+//	isInitialized = true
+//	var err error
+//	viewTemplate = template.New("view")
+//	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
+//		"player/view.go.tmpl",    // data
+//		"head.go.tmpl",           // head
+//		"header.go.tmpl",         // header
+//		"sidebar.go.tmpl",        // sidebar
+//		"footer.go.tmpl",         // footer
+//		"layout/content.go.tmpl", // layout (requires footer, header, head, data)
+//	)
+//	if err != nil {
+//		return fmt.Errorf("template.ParseFS: %w", err)
+//	}
+//	return nil
+//}
 
 // View handles player view requests
 func View(w http.ResponseWriter, r *http.Request) {

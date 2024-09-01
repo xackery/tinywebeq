@@ -13,7 +13,7 @@ import (
 	"github.com/xackery/tinywebeq/tlog"
 )
 
-// Preview handles zone preview rezones
+// PreviewImage handles zone preview rezones
 func PreviewImage(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var id int

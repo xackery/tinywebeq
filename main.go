@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -23,21 +24,19 @@ import (
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/image"
-	"github.com/xackery/tinywebeq/item"
-	"github.com/xackery/tinywebeq/npc"
-	"github.com/xackery/tinywebeq/player"
-	"github.com/xackery/tinywebeq/quest"
 	"github.com/xackery/tinywebeq/quest/parse"
 	"github.com/xackery/tinywebeq/recipe"
-	"github.com/xackery/tinywebeq/site"
-	"github.com/xackery/tinywebeq/spell"
 	"github.com/xackery/tinywebeq/store"
+	"github.com/xackery/tinywebeq/template"
 	"github.com/xackery/tinywebeq/tlog"
-	"github.com/xackery/tinywebeq/zone"
 )
 
 // Version is the build version
 var Version string
+
+type application struct {
+	templates fs.FS
+}
 
 func main() {
 	err := run()
@@ -48,6 +47,10 @@ func main() {
 }
 
 func run() error {
+	app := &application{
+		templates: template.FS,
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go func() {
@@ -98,11 +101,6 @@ func run() error {
 	}
 	tlog.Infof("Starting tinywebeq %s", Version)
 
-	err = site.Init()
-	if err != nil {
-		return fmt.Errorf("site.Init: %w", err)
-	}
-
 	if isCacheFlush {
 		err = os.RemoveAll("cache")
 		if err != nil {
@@ -132,33 +130,6 @@ func run() error {
 		return fmt.Errorf("image.Init: %w", err)
 	}
 
-	err = item.Init()
-	if err != nil {
-		return fmt.Errorf("item.Init: %w", err)
-	}
-	err = player.Init()
-	if err != nil {
-		return fmt.Errorf("player.Init: %w", err)
-	}
-	err = spell.Init()
-	if err != nil {
-		return fmt.Errorf("spell.Init: %w", err)
-	}
-	err = npc.Init()
-	if err != nil {
-		return fmt.Errorf("npc.Init: %w", err)
-	}
-
-	err = quest.Init()
-	if err != nil {
-		return fmt.Errorf("quest.Init: %w", err)
-	}
-
-	err = zone.Init()
-	if err != nil {
-		return fmt.Errorf("zone.Init: %w", err)
-	}
-
 	certPath := config.Get().Site.LetsEncrypt.CertPath
 	server := &http.Server{
 		ReadTimeout:  15 * time.Second,
@@ -178,7 +149,7 @@ func run() error {
 		server.Addr = fmt.Sprintf("%s:%d", config.Get().Site.Host, config.Get().Site.Port)
 	}
 
-	server.Handler = routes()
+	server.Handler = app.routes()
 
 	tlog.Infof("Listening on %s", server.Addr)
 	if config.Get().Site.LetsEncrypt.IsEnabled {

@@ -22,18 +22,18 @@ var (
 	peekTemplate *template.Template
 )
 
-func peekInit() error {
-	var err error
-	peekTemplate = template.New("peek")
-	peekTemplate, err = peekTemplate.ParseFS(site.TemplateFS(),
-		"item/peek.go.tmpl", // data
-	)
-	if err != nil {
-		return fmt.Errorf("template.ParseFS: %w", err)
-	}
-
-	return nil
-}
+//func peekInit() error {
+//	var err error
+//	peekTemplate = template.New("peek")
+//	peekTemplate, err = peekTemplate.ParseFS(site.TemplateFS(),
+//		"item/peek.go.tmpl", // data
+//	)
+//	if err != nil {
+//		return fmt.Errorf("template.ParseFS: %w", err)
+//	}
+//
+//	return nil
+//}
 
 // Peek handles item peek requests
 func Peek(w http.ResponseWriter, r *http.Request) {
