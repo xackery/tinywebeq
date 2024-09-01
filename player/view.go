@@ -3,74 +3,51 @@ package player
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"strconv"
-	"text/template"
 	"time"
 
 	"github.com/xackery/tinywebeq/model"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
+	"github.com/xackery/tinywebeq/template"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
-var (
-	viewTemplate  *template.Template
-	isInitialized bool
-)
-
-//func Init() error {
-//	if isInitialized {
-//		return nil
-//	}
-//	isInitialized = true
-//	var err error
-//	viewTemplate = template.New("view")
-//	viewTemplate, err = viewTemplate.ParseFS(site.TemplateFS(),
-//		"player/view.go.tmpl",    // data
-//		"head.go.tmpl",           // head
-//		"header.go.tmpl",         // header
-//		"sidebar.go.tmpl",        // sidebar
-//		"footer.go.tmpl",         // footer
-//		"layout/content.go.tmpl", // layout (requires footer, header, head, data)
-//	)
-//	if err != nil {
-//		return fmt.Errorf("template.ParseFS: %w", err)
-//	}
-//	return nil
-//}
-
 // View handles player view requests
-func View(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var id int64
+func View(templates fs.FS) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		var id int64
 
-	tlog.Debugf("view: %s", r.URL.String())
+		tlog.Debugf("view: %s", r.URL.String())
 
-	strID := r.URL.Query().Get("id")
-	if len(strID) > 0 {
-		id, err = strconv.ParseInt(strID, 10, 64)
+		strID := r.URL.Query().Get("id")
+		if len(strID) > 0 {
+			id, err = strconv.ParseInt(strID, 10, 64)
+			if err != nil {
+				tlog.Errorf("strconv.Atoi: %v", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		tlog.Debugf("viewRender: id: %d", id)
+
+		err = viewRender(ctx, templates, id, w)
 		if err != nil {
-			tlog.Errorf("strconv.Atoi: %v", err)
+			tlog.Errorf("viewRender: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+		tlog.Debugf("viewRender: id: %d done", id)
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	tlog.Debugf("viewRender: id: %d", id)
-
-	err = viewRender(ctx, id, w)
-	if err != nil {
-		tlog.Errorf("viewRender: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-	tlog.Debugf("viewRender: id: %d done", id)
 }
 
-func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
+func viewRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseWriter) error {
 	if id < 1 {
 		return fmt.Errorf("id too low")
 	}
@@ -90,8 +67,12 @@ func viewRender(ctx context.Context, id int64, w http.ResponseWriter) error {
 		Player: player,
 	}
 
-	err = viewTemplate.ExecuteTemplate(w, "content.go.tmpl", data)
+	view, err := template.Compile("player", "player/view.go.tmpl", templates)
 	if err != nil {
+		return fmt.Errorf("template.Compile: %w", err)
+	}
+
+	if err = view.ExecuteTemplate(w, "content.go.tmpl", data); err != nil {
 		return fmt.Errorf("viewTemplate.Execute: %w", err)
 	}
 
