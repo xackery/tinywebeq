@@ -9,6 +9,9 @@ import (
 )
 
 func (b *Mysql) ItemByID(ctx context.Context, id int32) (*model.Item, error) {
+	if b.query == nil {
+		return nil, fmt.Errorf("query is nil")
+	}
 	var err error
 	item := &model.Item{}
 	cItem, err := b.query.ItemByID(ctx, id)

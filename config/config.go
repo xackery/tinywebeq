@@ -266,6 +266,15 @@ func NewConfig(ctx context.Context) (*Config, error) {
 	return &cfg, nil
 }
 
+func NewTestConfig(ctx context.Context) (*Config, error) {
+	cfg = defaultLabel()
+	err := cfg.Verify()
+	if err != nil {
+		return nil, fmt.Errorf("verify: %w", err)
+	}
+	return &cfg, nil
+}
+
 // Verify returns an error if configuration appears off
 func (c *Config) Verify() error {
 
