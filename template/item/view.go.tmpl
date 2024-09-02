@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <table width="100%"><tr><td valign="top">
 <h4 style="margin-top:0">{{ .Item.Name }}</h4></td>
-<td><img src="{{ .Item.IconUrl }}item_{{ .Item.Icon }}.Item.png" align="right" valign="top"/></td></tr><tr><td>
+<td><img src="{{ .Item.IconUrl }}item_{{ .Item.Icon }}.Item.png" align="right" alt="item_{{ .Item.Name }}" /></td></tr><tr><td>
 
 <table width="100%" cellpadding="0" cellspacing="0">
 
@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", function() {
     {{ if (gt .Item.Augslot3type 0)  }}<tr><td width="0%" nowrap="1" colspan="2"><img src="" style="width:auto;height:10px"> <b>Slot 3: </b>Type {{ .Item.Augslot3type }}</td></tr>{{ end }}
     {{ if (gt .Item.Augslot4type 0)  }}<tr><td width="0%" nowrap="1" colspan="2"><img src="" style="width:auto;height:10px"> <b>Slot 4: </b>Type {{ .Item.Augslot4type }}</td></tr>{{ end }}
     {{ if (gt .Item.Augslot5type 0)  }}<tr><td width="0%" nowrap="1" colspan="2"><img src="" style="width:auto;height:10px"> <b>Slot 5: </b>Type {{ .Item.Augslot5type }}</td></tr>{{ end }}
-    <td><td>&nbsp;</td><td></tr>
+    <td><td>&nbsp;</td></td></tr>
     {{ if and (gt .Item.Proceffect 0) (ne .Item.Proceffect 65535) }}
         <tr><td colspan="2" nowrap="1">
         <b>Combat Effects: </b>{{ .Store.SpellName .Item.Proceffect }}
