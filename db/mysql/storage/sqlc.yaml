@@ -1,0 +1,11 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "mysql-queries.sql"
+    schema: "mysql-schemas.sql"
+    gen:
+      go:
+        package: "mysqlc"
+        out: "mysqlc"
+        rename:
+          casttime_: "CastTime2"
