@@ -11,11 +11,12 @@ import (
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/xackery/tinywebeq/model"
-	"github.com/xackery/tinywebeq/store"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
+
+	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/store"
 )
 
 var (
@@ -297,7 +298,7 @@ func (e *ItemPreview) render2Left() {
 	if item.Slots > 0 {
 		e.writeLn(item.TypeStr(), "Inventory")
 	} else {
-		e.writeLn(item.TypeStr(), item.ItemTypeStr())
+		e.writeLn(item.TypeStr(), item.Itemtype.String())
 	}
 	if item.Reclevel > 0 {
 		e.writeLn("Rec Level:", fmt.Sprintf("%d", item.Reclevel))

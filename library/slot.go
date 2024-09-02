@@ -34,34 +34,34 @@ const (
 	SlotLegs
 	SlotFeet
 	SlotWaist
-	SlotAmmo
 	SlotPowerSource
+	SlotAmmo
 )
 
 var slotToString = map[Slot]string{
-	SlotCharm:       "CHARM",
-	SlotEarL:        "EAR",
-	SlotHead:        "HEAD",
-	SlotFace:        "FACE",
-	SlotEarR:        "EAR",
-	SlotNeck:        "NECK",
-	SlotShoulders:   "SHOULDERS",
-	SlotArms:        "ARMS",
-	SlotBack:        "BACK",
-	SlotWristL:      "WRIST",
-	SlotWristR:      "WRIST",
-	SlotRange:       "RANGE",
-	SlotHands:       "HANDS",
-	SlotSecondary:   "SECONDARY",
-	SlotPrimary:     "PRIMARY",
-	SlotFingerL:     "FINGER",
-	SlotFingerR:     "FINGER",
-	SlotChest:       "CHEST",
-	SlotLegs:        "LEGS",
-	SlotFeet:        "FEET",
-	SlotWaist:       "WAIST",
-	SlotAmmo:        "AMMO",
-	SlotPowerSource: "POWER SOURCE",
+	SlotCharm:       "Charm",
+	SlotEarL:        "Ear",
+	SlotHead:        "Head",
+	SlotFace:        "Face",
+	SlotEarR:        "Ear",
+	SlotNeck:        "Neck",
+	SlotShoulders:   "Shoulders",
+	SlotArms:        "Arms",
+	SlotBack:        "Back",
+	SlotWristL:      "Wrist",
+	SlotWristR:      "Wrist",
+	SlotRange:       "Range",
+	SlotHands:       "Hands",
+	SlotSecondary:   "Secondary",
+	SlotPrimary:     "Primary",
+	SlotFingerL:     "Finger",
+	SlotFingerR:     "Finger",
+	SlotChest:       "Chest",
+	SlotLegs:        "Legs",
+	SlotFeet:        "Feet",
+	SlotWaist:       "Waist",
+	SlotPowerSource: "Power Source",
+	SlotAmmo:        "Ammo",
 }
 
 func (s Slot) String() string {

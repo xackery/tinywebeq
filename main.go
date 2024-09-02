@@ -23,6 +23,7 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
+	"github.com/xackery/tinywebeq/handlers"
 	"github.com/xackery/tinywebeq/image"
 	"github.com/xackery/tinywebeq/quest/parse"
 	"github.com/xackery/tinywebeq/recipe"
@@ -36,6 +37,7 @@ var Version string
 
 type application struct {
 	templates fs.FS
+	handlers  *handlers.Handlers
 }
 
 func main() {
@@ -47,10 +49,6 @@ func main() {
 }
 
 func run() error {
-	app := &application{
-		templates: template.FS,
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go func() {
@@ -66,6 +64,13 @@ func run() error {
 
 	if config.Get().IsDebugEnabled {
 		tlog.SetLevel(zerolog.DebugLevel)
+	}
+
+	tlog.Init(nil, os.Stdout)
+
+	app := &application{
+		templates: template.FS,
+		handlers:  handlers.New(tlog.Sugar, template.FS),
 	}
 
 	args := os.Args

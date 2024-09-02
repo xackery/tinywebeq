@@ -1,11 +1,14 @@
 package model
 
-import "github.com/xackery/tinywebeq/db/mysql/storage/mysqlc"
+import (
+	"github.com/xackery/tinywebeq/db/mysql/storage/mysqlc"
+	"github.com/xackery/tinywebeq/library"
+)
 
 func (t *NpcLootEntry) DecodeNpcLootsDiscoveredOnly(in mysqlc.NpcLootsDiscoveredOnlyByLootTableIDRow) {
 	t.ID = in.ID
 	t.Name = in.Name
-	t.Itemtype = in.Itemtype
+	t.Itemtype = library.ItemType(in.Itemtype)
 	t.Chance = in.Chance
 	t.Probability = in.Probability
 	t.LootdropID = in.LootdropID
@@ -15,7 +18,7 @@ func (t *NpcLootEntry) DecodeNpcLootsDiscoveredOnly(in mysqlc.NpcLootsDiscovered
 func (t *NpcLootEntry) DecodeNpcLoots(in mysqlc.NpcLootsByLootTableIDRow) {
 	t.ID = in.ID
 	t.Name = in.Name
-	t.Itemtype = in.Itemtype
+	t.Itemtype = library.ItemType(in.Itemtype)
 	t.Chance = in.Chance
 	t.Probability = in.Probability
 	t.LootdropID = in.LootdropID

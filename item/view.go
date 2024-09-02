@@ -84,7 +84,7 @@ func viewRender(ctx context.Context, templates fs.FS, item *model.Item, w http.R
 		tlog.Debugf("Ignoring err store.ItemRecipeByItemID: %v", err)
 	}
 
-	type TemplateData struct {
+	data := struct {
 		Site                site.BaseData
 		Item                *model.Item
 		Library             *library.Library
@@ -92,9 +92,7 @@ func viewRender(ctx context.Context, templates fs.FS, item *model.Item, w http.R
 		IsItemSearchEnabled bool
 		ItemQuest           *model.ItemQuest
 		ItemRecipe          *model.ItemRecipe
-	}
-
-	data := TemplateData{
+	}{
 		Site:                site.BaseDataInit(item.Name),
 		Item:                item,
 		Library:             library.Instance(),

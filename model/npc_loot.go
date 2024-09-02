@@ -18,7 +18,7 @@ type NpcLoot struct {
 type NpcLootEntry struct {
 	ID          int32
 	Name        string
-	Itemtype    int32
+	Itemtype    library.ItemType
 	Chance      float64
 	Probability float64
 	LootdropID  uint32
@@ -69,5 +69,5 @@ func (t *NpcLootEntry) ChanceGlobal() int {
 }
 
 func (t *NpcLootEntry) ItemTypeStr() string {
-	return library.ItemTypeStr(t.Itemtype)
+	return t.Itemtype.String()
 }

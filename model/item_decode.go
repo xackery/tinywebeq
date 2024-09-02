@@ -1,6 +1,9 @@
 package model
 
-import "github.com/xackery/tinywebeq/db/mysql/storage/mysqlc"
+import (
+	"github.com/xackery/tinywebeq/db/mysql/storage/mysqlc"
+	"github.com/xackery/tinywebeq/library"
+)
 
 func (t *Item) DecodeDiscoveredItem(in mysqlc.ItemDiscoveredOnlyByIDRow) {
 	t.ID = in.ID
@@ -84,7 +87,7 @@ func (t *Item) DecodeDiscoveredItem(in mysqlc.ItemDiscoveredOnlyByIDRow) {
 	t.Icon = in.Icon
 	t.Idfile = in.Idfile
 	t.Itemclass = in.Itemclass
-	t.Itemtype = in.Itemtype
+	t.Itemtype = library.ItemType(in.Itemtype)
 	t.Ldonprice = in.Ldonprice
 	t.Ldontheme = in.Ldontheme
 	t.Ldonsold = in.Ldonsold
@@ -370,7 +373,7 @@ func (t *Item) DecodeItem(in mysqlc.Item) {
 	t.Icon = in.Icon
 	t.Idfile = in.Idfile
 	t.Itemclass = in.Itemclass
-	t.Itemtype = in.Itemtype
+	t.Itemtype = library.ItemType(in.Itemtype)
 	t.Ldonprice = in.Ldonprice
 	t.Ldontheme = in.Ldontheme
 	t.Ldonsold = in.Ldonsold

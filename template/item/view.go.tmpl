@@ -50,6 +50,88 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 {{end}}
+
+  <div class="flex flex-col space-y-4 max-w-xl">
+    <div class="flex flex-row space-x-4">
+      <div class="p-2">
+        <img class="w-10 h-10" src="{{ .Item.IconUrl }}item_{{ .Item.Icon }}.png" alt="image-icon">
+      </div>
+      <div class="flex flex-col spacing-y-1">
+        <div class="tracking-wide text-lg">
+          {{ .Item.Name }}
+        </div>
+        <div>
+          {{ .Item.TagStr }}
+        </div>
+        <div>
+          <span>Class:</span> {{ .Item.ClassesStr }}
+        </div>
+        <div>
+          <span>Race:</span> {{ .Item.RaceStr }}
+        </div>
+        <div>
+            {{ .Item.DeityStr }}
+        </div>
+        <div>
+            {{ .Item.SlotStr }}
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-8">
+      <div>
+        <dl>
+          <div class="flex justify-between">
+            <dt>Size:</dt>
+            <dd>{{ .Item.SizeStr }}</dd>
+          </div>
+        {{ if .Item.Weight }}
+          <div class="flex justify-between">
+            <dt>Weight:</dt>
+            <dd>{{ .Item.Weight }}</dd>
+          </div>
+        {{ end }}
+        {{ if .Item.Itemtype.IsWeapon }}
+          <div class="flex justify-between">
+            <dt>Skill</dt>
+            <dd>{{ .Item.Itemtype.WeaponSkillName }}</dd>
+          </div>
+        {{ end }}
+        </dl>
+      </div>
+      <div>
+        <dl>
+        {{ if .Item.Ac }}
+            <div class="flex justify-between">
+                <dt>AC:</dt>
+                <dd>{{ .Item.Ac }}</dd>
+            </div>
+        {{ end }}
+        </dl>
+      </div>
+      <div>
+        <dl>
+            {{ if .Item.Damage }}
+              <div class="flex justify-between">
+                <dt>Base Dmg:</dt>
+                <dd>{{ .Item.Damage }}</dd>
+              </div>
+            {{ end }}
+            {{ if .Item.Delay }}
+              <div class="flex justify-between">
+                <dt>Delay:</dt>
+                <dd>{{ .Item.Delay }}</dd>
+              </div>
+            {{ end }}
+        </dl>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-8">
+      <div></div><!-- Stat Fields -->
+      <div></div><!-- Resist Fields -->
+      <div></div><!-- Modifier Fields -->
+    </div>
+  </div>
+
 <br>
 
 <table width="100%"><tr><td valign="top">
@@ -81,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function() {
             {{ if (eq .Item.Slots 0)}}
                 <tr><td><b>{{ .Item.TypeStr }}: </b></td><td>Inventory
             {{else}}
-                <tr><td><b>{{ .Item.TypeStr }}: </b></td><td><td style='text-align:right'>{{ .Item.ItemTypeStr }}
+                <tr><td><b>{{ .Item.TypeStr }}: </b></td><td><td style='text-align:right'>{{ .Item.Itemtype }}
             {{ end }}
             {{ if (gt .Item.Stackable 0)}} (stackable){{ end }}
             </td></tr>
@@ -160,29 +242,29 @@ document.addEventListener("DOMContentLoaded", function() {
     {{ end }}
     </table>
 
-    {{ if .ItemRecipe }}
+    {{ if .Recipes }}
         <br><b>Used in tradeskills:</b><br>
-        {{ range .ItemRecipe.ComponentEntries }}
+        {{ range .Recipes.ComponentEntries }}
             {{ .RecipeName }}{{ if ne .ComponentCount 1}} ({{ .ComponentCount }}){{ end }}<br>
         {{ end }}
         <br><b>Result of tradeskills:</b><br>
-        {{ range .ItemRecipe.SuccessEntries }}
+        {{ range .Recipes.SuccessEntries }}
             {{ .RecipeName }}{{ if ne .SuccessCount 1}} ({{ .SuccessCount }}){{ end }}<br>
         {{ end }}
     {{ end }}
 
 
-    {{ if .ItemQuest }}
-        {{ if len .ItemQuest.RewardEntries}}
+    {{ if .Quests }}
+        {{ if len .Quests.RewardEntries}}
             <r><td><b>Result of Quests:</b><br>
-            {{ range .ItemQuest.RewardEntries }}
+            {{ range .Quests.RewardEntries }}
                 <a href="/quest/view?id={{ .QuestID }}">Quest {{ .QuestName }}</a> - {{ .NpcCleanName }} in {{ .Zone.LongName }}<br>
             {{ end}}
         {{ end }}
 
-        {{ if len .ItemQuest.ComponentEntries}}
+        {{ if len .Quests.ComponentEntries}}
             <r><td><b>Used in Quests:</b><br>
-            {{ range .ItemQuest.ComponentEntries }}
+            {{ range .Quests.ComponentEntries }}
                 <a href="/quest/view?id={{ .QuestID }}">Quest {{ .QuestName }}</a> - {{ .NpcCleanName }} in {{ .Zone.LongName }}<br>
             {{ end }}
         {{ end}}
