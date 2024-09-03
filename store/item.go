@@ -10,7 +10,6 @@ import (
 )
 
 func ItemByItemID(ctx context.Context, itemID int64) (*models.Item, error) {
-
 	if config.Get().Item.IsDiscoveredOnly {
 		item, err := db.Mysql.ItemDiscoveredOnlyByID(ctx, uint32(itemID))
 		if err != nil {

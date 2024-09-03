@@ -90,12 +90,12 @@ type ItemDecorated struct {
 }
 
 func decorateItem(ctx context.Context, item *models.Item) (*ItemDecorated, error) {
-	itemQuest, err := store.ItemQuestByItemID(ctx, int64(item.ItemID))
+	itemQuest, err := store.ItemQuestByItemID(ctx, int64(item.ID))
 	if err != nil {
 		// TODO: better error handling here
 	}
 
-	itemRecipe, err := store.ItemRecipeByItemID(ctx, int64(item.ItemID))
+	itemRecipe, err := store.ItemRecipeByItemID(ctx, int64(item.ID))
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		// TODO: better error handling here
 	}
@@ -107,8 +107,8 @@ func decorateItem(ctx context.Context, item *models.Item) (*ItemDecorated, error
 	}, nil
 }
 
-// ItemIndex returns the index page for item functionality.
-func (h *Handlers) ItemIndex() http.HandlerFunc {
+// IndexItems returns the index page for item functionality.
+func (h *Handlers) IndexItems() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view, err := template.Compile("item", "item/index.go.tmpl", h.templates)
 		if err != nil {
@@ -135,9 +135,16 @@ func (h *Handlers) ItemIndex() http.HandlerFunc {
 	}
 }
 
-func (h *Handlers) ItemView() http.HandlerFunc {
+func (h *Handlers) ViewItem() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		item := r.Context().Value(ContextKeyItem).(*models.Item)
+		var item *models.Item
+
+		switch r.Context().Value(ContextKeyItem).(type) {
+		case *models.Item:
+			item = r.Context().Value(ContextKeyItem).(*models.Item)
+		case *models.DiscoveredItem:
+			item = r.Context().Value(ContextKeyItem).(*models.DiscoveredItem).Item
+		}
 
 		// JSON API Views
 		if r.Header.Get("Accept") == "application/json" {
@@ -164,15 +171,11 @@ func (h *Handlers) ItemView() http.HandlerFunc {
 			ItemDecorated:       dItem,
 		}
 
-		if config.Get().Item.Preview.IsEnabled {
-			data.Site.ImageURL = fmt.Sprintf("/items/preview.png?id=%d", item.ItemID)
-		}
-
 		h.render(w, "item", "view.go.tmpl", "content.go.tmpl", data)
 	}
 }
 
-func (h *Handlers) ItemPeek() http.HandlerFunc {
+func (h *Handlers) PeekItem() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !config.Get().Item.IsEnabled {
 			http.Error(w, "Not Found", http.StatusNotFound)
@@ -205,8 +208,8 @@ func (h *Handlers) ItemPeek() http.HandlerFunc {
 	}
 }
 
-// ItemImage handles item preview requests
-func (h *Handlers) ItemImage() http.HandlerFunc {
+// GenerateItemImage handles item preview requests
+func (h *Handlers) GenerateItemImage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		var id int64

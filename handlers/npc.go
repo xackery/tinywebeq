@@ -32,7 +32,7 @@ type NpcDecorated struct {
 	NpcQuest    *models.NpcQuest
 }
 
-func decorateNPC(ctx context.Context, npc *models.Npc) (*NpcDecorated, error) {
+func decorateNpc(ctx context.Context, npc *models.Npc) (*NpcDecorated, error) {
 	var (
 		err         error
 		npcLoot     *models.NpcLoot
@@ -93,7 +93,7 @@ func decorateNPC(ctx context.Context, npc *models.Npc) (*NpcDecorated, error) {
 	return &data, nil
 }
 
-func (h *Handlers) NPCIndex() http.HandlerFunc {
+func (h *Handlers) IndexNpcs() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var name string
 		var err error
@@ -159,7 +159,7 @@ func (h *Handlers) NPCIndex() http.HandlerFunc {
 	}
 }
 
-func (h *Handlers) NPCView() http.HandlerFunc {
+func (h *Handlers) ViewNpc() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
@@ -172,7 +172,7 @@ func (h *Handlers) NPCView() http.HandlerFunc {
 			npc.AttackSpeed = 100 - npc.AttackSpeed
 		}
 
-		dNPC, err := decorateNPC(r.Context(), npc)
+		dNPC, err := decorateNpc(r.Context(), npc)
 		if err != nil {
 			h.serverErrorResponse(w, err)
 		}
@@ -198,13 +198,13 @@ func (h *Handlers) NPCView() http.HandlerFunc {
 	}
 }
 
-func (h *Handlers) NPCPeek() http.HandlerFunc {
+func (h *Handlers) PeekNpc() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
 		npc := r.Context().Value(ContextKeyNPC).(*models.Npc)
 
-		dNPC, err := decorateNPC(r.Context(), npc)
+		dNPC, err := decorateNpc(r.Context(), npc)
 		if err != nil {
 			h.serverErrorResponse(w, err)
 		}
@@ -228,11 +228,11 @@ func (h *Handlers) NPCPeek() http.HandlerFunc {
 	}
 }
 
-func (h *Handlers) NPCImage() http.HandlerFunc {
+func (h *Handlers) GenerateNpcImage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		npc := r.Context().Value(ContextKeyNPC).(*models.Npc)
-		dNPC, err := decorateNPC(r.Context(), npc)
+		dNPC, err := decorateNpc(r.Context(), npc)
 		if err != nil {
 			h.serverErrorResponse(w, err)
 		}

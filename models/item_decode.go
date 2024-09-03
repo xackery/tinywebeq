@@ -285,10 +285,6 @@ func (t *Item) DecodeDiscoveredItem(in mysqlc.ItemDiscoveredOnlyByIDRow) {
 	t.Unk240 = in.Unk240
 	t.Unk241 = in.Unk241
 	t.Epicitem = in.Epicitem
-	t.ItemID = in.ItemID
-	t.CharName = in.CharName
-	t.DiscoveredDate = in.DiscoveredDate
-	t.AccountStatus = in.AccountStatus
 }
 
 func (t *Item) DecodeItem(in mysqlc.Item) {

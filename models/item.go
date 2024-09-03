@@ -15,138 +15,138 @@ import (
 type Item struct {
 	CacheKey            string           `json:"-"`
 	CacheExpiration     int64            `json:"-"`
-	ID                  int32            `json:"id"`
-	Minstatus           int16            `json:"-"`
-	Name                string           `json:"name"`
-	Aagi                int32            `json:"agi,omitempty"`
-	Ac                  int32            `json:"ac,omitempty"`
-	Accuracy            int32            `json:"accuracy,omitempty"`
-	Acha                int32            `json:"cha,omitempty"`
-	Adex                int32            `json:"dex,omitempty"`
-	Aint                int32            `json:"int,omitempty"`
-	Artifactflag        uint8            `json:"artifact_flag,omitempty"`
-	Asta                int32            `json:"sta,omitempty"`
-	Astr                int32            `json:"str,omitempty"`
-	Attack              int32            `json:"attack,omitempty"`
-	Augrestrict         int32            `json:"augment_restrictions,omitempty"`
-	Augslot1type        int8             `json:"augment_slot_1_type,omitempty"`
-	Augslot1visible     int8             `json:"-"`
-	Augslot2type        int8             `json:"augment_slot_2_type,omitempty"`
-	Augslot2visible     int8             `json:"-"`
-	Augslot3type        int8             `json:"augment_slot_3_type,omitempty"`
-	Augslot3visible     int8             `json:"-"`
-	Augslot4type        int8             `json:"augment_slot_4_type,omitempty"`
-	Augslot4visible     int8             `json:"-"`
-	Augslot5type        int8             `json:"augment_slot_5_type,omitempty"`
-	Augslot5visible     int8             `json:"-"`
-	Augslot6type        int8             `json:"augment_slot_6_type,omitempty"`
-	Augslot6visible     int8             `json:"-"`
-	Augtype             int32            `json:"augment_type,omitempty"`
-	Avoidance           int32            `json:"avoidance,omitempty"`
-	Awis                int32            `json:"wis,omitempty"`
-	Bagsize             int32            `json:"bag_size,omitempty"`
-	Bagslots            int32            `json:"bag_slots,omitempty"`
-	Bagtype             int32            `json:"bag_type,omitempty"`
-	Bagwr               int32            `json:"bag_weight_reduction,omitempty"`
-	Banedmgamt          int32            `json:"bane_damage_amount,omitempty"`
-	Banedmgraceamt      int32            `json:"bane_damage_race_amount,omitempty"`
-	Banedmgbody         int32            `json:"bane_damage_body_amount,omitempty"`
-	Banedmgrace         int32            `json:"bane_damage_race,omitempty"`
-	Bardtype            int32            `json:"bard_type,omitempty"`
-	Bardvalue           int32            `json:"bard_value,omitempty"`
-	Book                int32            `json:"book,omitempty"`
-	Casttime            int32            `json:"cast_time,omitempty"`
-	Charmfile           string           `json:"-"`
-	Charmfileid         string           `json:"-"`
-	Classes             int32            `json:"classes,omitempty"`
-	Color               uint32           `json:"-"`
-	Combateffects       string           `json:"combat_effects,omitempty"`
-	Extradmgskill       int32            `json:"extra_damage_skill,omitempty"`
-	Extradmgamt         int32            `json:"extra_damage_race,omitempty"`
-	Price               int32            `json:"-"`
-	Cr                  int32            `json:"cold_resist,omitempty"`
-	Damage              int32            `json:"damage,omitempty"`
-	Damageshield        int32            `json:"damage_shield,omitempty"`
-	Deity               int32            `json:"deity,omitempty"`
-	Delay               int32            `json:"delay,omitempty"`
-	Augdistiller        uint32           `json:"augment_distiller,omitempty"`
-	Dotshielding        int32            `json:"dot_shielding,omitempty"`
-	Dr                  int32            `json:"disease_resist,omitempty"`
-	Clicktype           int32            `json:"click_type,omitempty"`
-	Clicklevel2         int32            `json:"click_level_2,omitempty"`
-	Elemdmgtype         int32            `json:"elemental_damage_type,omitempty"`
-	Elemdmgamt          int32            `json:"elemental_damage_race,omitempty"`
-	Endur               int32            `json:"endurance,omitempty"`
-	Factionamt1         int32            `json:"faction_amount_1,omitempty"`
-	Factionamt2         int32            `json:"faction_amount_2,omitempty"`
-	Factionamt3         int32            `json:"faction_amount_3,omitempty"`
-	Factionamt4         int32            `json:"faction_amount_4,omitempty"`
-	Factionmod1         int32            `json:"faction_mod_1,omitempty"`
-	Factionmod2         int32            `json:"faction_mod_2,omitempty"`
-	Factionmod3         int32            `json:"faction_mod_3,omitempty"`
-	Factionmod4         int32            `json:"faction_mod_4,omitempty"`
-	Filename            string           `json:"-"`
-	Focuseffect         int32            `json:"focus_effect,omitempty"`
-	Fr                  int32            `json:"fire_resist,omitempty"`
-	Fvnodrop            int32            `json:"fv_no_drop,omitempty"`
-	Haste               int32            `json:"haste,omitempty"`
-	Clicklevel          int32            `json:"click_level,omitempty"`
-	Hp                  int32            `json:"hp,omitempty"`
-	Regen               int32            `json:"regen,omitempty"`
-	Icon                int32            `json:"icon,omitempty"`
-	Idfile              string           `json:"-"`
-	Itemclass           int32            `json:"item_class,omitempty"`
-	Itemtype            library.ItemType `json:"item_type,omitempty"`
-	Ldonprice           int32            `json:"-"`
-	Ldontheme           int32            `json:"-"`
-	Ldonsold            int32            `json:"-"`
-	Light               int32            `json:"light,omitempty"`
-	Lore                string           `json:"lore,omitempty"`
-	Loregroup           int32            `json:"-"`
-	Magic               int32            `json:"magic,omitempty"`
-	Mana                int32            `json:"mana,omitempty"`
-	Manaregen           int32            `json:"mana_regen,omitempty"`
-	Enduranceregen      int32            `json:"endurance_regen,omitempty"`
-	Material            int32            `json:"-"`
-	Herosforgemodel     int32            `json:"-"`
-	Maxcharges          int32            `json:"maxcharges,omitempty"`
-	Mr                  int32            `json:"magic_resist,omitempty"`
-	Nodrop              int32            `json:"no_drop,omitempty"`
-	Norent              int32            `json:"no_rent,omitempty"`
-	Pendingloreflag     uint8            `json:"pending_lore_flag,omitempty"`
-	Pr                  int32            `json:"poison_resist,omitempty"`
-	Procrate            int32            `json:"-"`
-	Races               int32            `json:"races,omitempty"`
-	Range               int32            `json:"range,omitempty"`
-	Reclevel            int32            `json:"rec_level,omitempty"`
-	Recskill            int32            `json:"rec_skill,omitempty"`
-	Reqlevel            int32            `json:"req_level,omitempty"`
-	Sellrate            float64          `json:"-"`
-	Shielding           int32            `json:"shielding,omitempty"`
-	Size                int32            `json:"size"`
-	Skillmodtype        int32            `json:"skill_mod_type,omitempty"`
-	Skillmodvalue       int32            `json:"skill_mod_value,omitempty"`
-	Slots               int32            `json:"slots,omitempty"`
-	Clickeffect         int32            `json:"click_effect,omitempty"`
-	Spellshield         int32            `json:"spellshield,omitempty"`
-	Strikethrough       int32            `json:"strikethrough,omitempty"`
-	Stunresist          int32            `json:"stunresist,omitempty"`
-	Summonedflag        uint8            `json:"summoned_flag,omitempty"`
-	Tradeskills         int32            `json:"tradeskills,omitempty"`
-	Favor               int32            `json:"-"`
-	Weight              int32            `json:"weight,omitempty"`
-	Unk012              int32            `json:"-"`
-	Unk013              int32            `json:"-"`
-	Benefitflag         int32            `json:"benefit_flag,omitempty"`
-	Unk054              int32            `json:"-"`
-	Unk059              int32            `json:"-"`
-	Booktype            int32            `json:"book_type,omitempty"`
-	Recastdelay         int32            `json:"recast_delay,omitempty"`
-	Recasttype          int32            `json:"recast_type,omitempty"`
-	Guildfavor          int32            `json:"-"`
-	Unk123              int32            `json:"-"`
-	Unk124              int32            `json:"-"`
-	Attuneable          int32            `json:"attuneable,omitempty"`
+	ID                  int32            `json:"id" db:"items.id"`
+	Minstatus           int16            `json:"-" db:"items.minstatus"`
+	Name                string           `json:"name" db:"items.name"`
+	Aagi                int32            `json:"agi,omitempty" db:"items.aagi"`
+	Ac                  int32            `json:"ac,omitempty" db:"items.ac"`
+	Accuracy            int32            `json:"accuracy,omitempty" db:"items.accuracy"`
+	Acha                int32            `json:"cha,omitempty" db:"items.acha"`
+	Adex                int32            `json:"dex,omitempty" db:"items.adex"`
+	Aint                int32            `json:"int,omitempty" db:"items.aint"`
+	Artifactflag        uint8            `json:"artifact_flag,omitempty" db:"items.artifactflag"`
+	Asta                int32            `json:"sta,omitempty" db:"items.asta"`
+	Astr                int32            `json:"str,omitempty" db:"items.astr"`
+	Attack              int32            `json:"attack,omitempty" db:"items.attack"`
+	Augrestrict         int32            `json:"augment_restrictions,omitempty" db:"items.augrestrict"`
+	Augslot1type        int8             `json:"augment_slot_1_type,omitempty" db:"items.augslot1type"`
+	Augslot1visible     int8             `json:"-" db:"items.augslot1visible"`
+	Augslot2type        int8             `json:"augment_slot_2_type,omitempty" db:"items.augslot2type"`
+	Augslot2visible     int8             `json:"-" db:"items.augslot2visible"`
+	Augslot3type        int8             `json:"augment_slot_3_type,omitempty" db:"items.augslot3type"`
+	Augslot3visible     int8             `json:"-" db:"items.augslot3visible"`
+	Augslot4type        int8             `json:"augment_slot_4_type,omitempty" db:"items.augslot4type"`
+	Augslot4visible     int8             `json:"-" db:"items.augslot4visible"`
+	Augslot5type        int8             `json:"augment_slot_5_type,omitempty" db:"items.augslot5type"`
+	Augslot5visible     int8             `json:"-" db:"items.augslot5visible"`
+	Augslot6type        int8             `json:"augment_slot_6_type,omitempty" db:"items.augslot6type"`
+	Augslot6visible     int8             `json:"-" db:"items.augslot6visible"`
+	Augtype             int32            `json:"augment_type,omitempty" db:"items.augtype"`
+	Avoidance           int32            `json:"avoidance,omitempty" db:"items.avoidance"`
+	Awis                int32            `json:"wis,omitempty" db:"items.awis"`
+	Bagsize             int32            `json:"bag_size,omitempty" db:"items.bagsize"`
+	Bagslots            int32            `json:"bag_slots,omitempty" db:"items.bagslots"`
+	Bagtype             int32            `json:"bag_type,omitempty" db:"items.bagtype"`
+	Bagwr               int32            `json:"bag_weight_reduction,omitempty" db:"items.bagwr"`
+	Banedmgamt          int32            `json:"bane_damage_amount,omitempty" db:"items.banedmgamt"`
+	Banedmgraceamt      int32            `json:"bane_damage_race_amount,omitempty" db:"items.banedmgraceamt"`
+	Banedmgbody         int32            `json:"bane_damage_body_amount,omitempty" db:"items.banedmgbody"`
+	Banedmgrace         int32            `json:"bane_damage_race,omitempty" db:"items.banedmgrace"`
+	Bardtype            int32            `json:"bard_type,omitempty" db:"items.bardtype"`
+	Bardvalue           int32            `json:"bard_value,omitempty" db:"items.bardvalue"`
+	Book                int32            `json:"book,omitempty" db:"items.book"`
+	Casttime            int32            `json:"cast_time,omitempty" db:"items.casttime"`
+	Charmfile           string           `json:"-" db:"items.charmfile"`
+	Charmfileid         string           `json:"-" db:"items.charmfileid"`
+	Classes             int32            `json:"classes,omitempty" db:"items.classes"`
+	Color               uint32           `json:"-" db:"items.color"`
+	Combateffects       string           `json:"combat_effects,omitempty" db:"items.combateffects"`
+	Extradmgskill       int32            `json:"extra_damage_skill,omitempty" db:"items.extradmgskill"`
+	Extradmgamt         int32            `json:"extra_damage_race,omitempty" db:"items.extradmgamt"`
+	Price               int32            `json:"-" db:"items.price"`
+	Cr                  int32            `json:"cold_resist,omitempty" db:"items.cr"`
+	Damage              int32            `json:"damage,omitempty" db:"items.damage"`
+	Damageshield        int32            `json:"damage_shield,omitempty" db:"items.damageshield"`
+	Deity               int32            `json:"deity,omitempty" db:"items.deity"`
+	Delay               int32            `json:"delay,omitempty" db:"items.delay"`
+	Augdistiller        uint32           `json:"augment_distiller,omitempty" db:"items.augdistiller"`
+	Dotshielding        int32            `json:"dot_shielding,omitempty" db:"items.dotshielding"`
+	Dr                  int32            `json:"disease_resist,omitempty" db:"items.dr"`
+	Clicktype           int32            `json:"click_type,omitempty" db:"items.clicktype"`
+	Clicklevel2         int32            `json:"click_level_2,omitempty" db:"items.clicklevel2"`
+	Elemdmgtype         int32            `json:"elemental_damage_type,omitempty" db:"items.elemdmgtype"`
+	Elemdmgamt          int32            `json:"elemental_damage_race,omitempty" db:"items.elemdmgamt"`
+	Endur               int32            `json:"endurance,omitempty" db:"items.endurance"`
+	Factionamt1         int32            `json:"faction_amount_1,omitempty" db:"items.factionamt1"`
+	Factionamt2         int32            `json:"faction_amount_2,omitempty" db:"items.factionamt2"`
+	Factionamt3         int32            `json:"faction_amount_3,omitempty" db:"items.factionamt3"`
+	Factionamt4         int32            `json:"faction_amount_4,omitempty" db:"items.factionamt4"`
+	Factionmod1         int32            `json:"faction_mod_1,omitempty" db:"items.factionmod1"`
+	Factionmod2         int32            `json:"faction_mod_2,omitempty" db:"items.factionmod2"`
+	Factionmod3         int32            `json:"faction_mod_3,omitempty" db:"items.factionmod3"`
+	Factionmod4         int32            `json:"faction_mod_4,omitempty" db:"items.factionmod4"`
+	Filename            string           `json:"-" db:"items.filename"`
+	Focuseffect         int32            `json:"focus_effect,omitempty" db:"items.focuseffect"`
+	Fr                  int32            `json:"fire_resist,omitempty" db:"items.fr"`
+	Fvnodrop            int32            `json:"fv_no_drop,omitempty" db:"items.fvnodrop"`
+	Haste               int32            `json:"haste,omitempty" db:"items.haste"`
+	Clicklevel          int32            `json:"click_level,omitempty" db:"items.clicklevel"`
+	Hp                  int32            `json:"hp,omitempty" db:"items.hp"`
+	Regen               int32            `json:"regen,omitempty" db:"items.regen"`
+	Icon                int32            `json:"icon,omitempty" db:"items.icon"`
+	Idfile              string           `json:"-" db:"items.idfile"`
+	Itemclass           int32            `json:"item_class,omitempty" db:"items.itemclass"`
+	Itemtype            library.ItemType `json:"item_type,omitempty" db:"items.itemtype"`
+	Ldonprice           int32            `json:"-" db:"items.ldonprice"`
+	Ldontheme           int32            `json:"-" db:"items.ldontheme"`
+	Ldonsold            int32            `json:"-" db:"items.ldonsold"`
+	Light               int32            `json:"light,omitempty" db:"items.light"`
+	Lore                string           `json:"lore,omitempty" db:"items.lore"`
+	Loregroup           int32            `json:"-" db:"items.loregroup"`
+	Magic               int32            `json:"magic,omitempty" db:"items.magic"`
+	Mana                int32            `json:"mana,omitempty" db:"items.mana"`
+	Manaregen           int32            `json:"mana_regen,omitempty" db:"items.manaregen"`
+	Enduranceregen      int32            `json:"endurance_regen,omitempty" db:"items.enduranceregen"`
+	Material            int32            `json:"-" db:"items.material"`
+	Herosforgemodel     int32            `json:"-" db:"items.herosforgemodel"`
+	Maxcharges          int32            `json:"maxcharges,omitempty" db:"items.maxcharges"`
+	Mr                  int32            `json:"magic_resist,omitempty" db:"items.mr"`
+	Nodrop              int32            `json:"no_drop,omitempty" db:"items.nodrop"`
+	Norent              int32            `json:"no_rent,omitempty" db:"items.norent"`
+	Pendingloreflag     uint8            `json:"pending_lore_flag,omitempty" db:"items.pendingloreflag"`
+	Pr                  int32            `json:"poison_resist,omitempty" db:"items.pr"`
+	Procrate            int32            `json:"-" db:"items.procrate"`
+	Races               int32            `json:"races,omitempty" db:"items.races"`
+	Range               int32            `json:"range,omitempty" db:"items.range"`
+	Reclevel            int32            `json:"rec_level,omitempty" db:"items.reclevel"`
+	Recskill            int32            `json:"rec_skill,omitempty" db:"items.recskill"`
+	Reqlevel            int32            `json:"req_level,omitempty" db:"items.reqlevel"`
+	Sellrate            float64          `json:"-" db:"items.sellrate"`
+	Shielding           int32            `json:"shielding,omitempty" db:"items.shielding"`
+	Size                int32            `json:"size" db:"items.size"`
+	Skillmodtype        int32            `json:"skill_mod_type,omitempty" db:"items.skillmodtype"`
+	Skillmodvalue       int32            `json:"skill_mod_value,omitempty" db:"items.skillmodvalue"`
+	Slots               int32            `json:"slots,omitempty" db:"items.slots"`
+	Clickeffect         int32            `json:"click_effect,omitempty" db:"items.clickeffect"`
+	Spellshield         int32            `json:"spellshield,omitempty" db:"items.spellshield"`
+	Strikethrough       int32            `json:"strikethrough,omitempty" db:"items.strikethrough"`
+	Stunresist          int32            `json:"stunresist,omitempty" db:"items.stunresist"`
+	Summonedflag        uint8            `json:"summoned_flag,omitempty" db:"items.summonedflag"`
+	Tradeskills         int32            `json:"tradeskills,omitempty" db:"items.tradeskills"`
+	Favor               int32            `json:"-" db:"items.favor"`
+	Weight              int32            `json:"weight,omitempty" db:"items.weight"`
+	Unk012              int32            `json:"-" db:"items.unk012"`
+	Unk013              int32            `json:"-" db:"items.unk013"`
+	Benefitflag         int32            `json:"benefit_flag,omitempty" db:"items.benefitflag"`
+	Unk054              int32            `json:"-" db:"items.unk054"`
+	Unk059              int32            `json:"-" db:"items.unk059"`
+	Booktype            int32            `json:"book_type,omitempty" db:"items.booktype"`
+	Recastdelay         int32            `json:"recast_delay,omitempty" db:"items.recastdelay"`
+	Recasttype          int32            `json:"recast_type,omitempty" db:"items.recasttype"`
+	Guildfavor          int32            `json:"-" db:"items.guildfavor"`
+	Unk123              int32            `json:"-" db:"items.unk123"`
+	Unk124              int32            `json:"-" db:"items.unk124"`
+	Attuneable          int32            `json:"attuneable,omitempty" db:"items.attuneable"`
 	Nopet               int32            `json:"-"`
 	Updated             sql.NullTime     `json:"-"`
 	Comment             string           `json:"-"`
@@ -299,10 +299,14 @@ type Item struct {
 	Unk240              int32            `json:"-"`
 	Unk241              int32            `json:"-"`
 	Epicitem            int32            `json:"-"`
-	ItemID              uint32           `json:"item_id,omitempty"`
-	CharName            string           `json:"-"`
-	DiscoveredDate      uint32           `json:"-"`
-	AccountStatus       int32            `json:"-"`
+}
+
+type DiscoveredItem struct {
+	*Item
+	ItemID         uint32 `json:"item_id,omitempty"`
+	CharName       string `json:"-"`
+	DiscoveredDate uint32 `json:"-"`
+	AccountStatus  int32  `json:"-"`
 }
 
 // MarshalJSON implements a custom item marshaler for displaying the item with JSON encoding.

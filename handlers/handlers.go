@@ -15,8 +15,12 @@ import (
 type ContextKey string
 
 const (
-	ContextKeyItem ContextKey = "item"
-	ContextKeyNPC  ContextKey = "npc"
+	ContextKeyItem   ContextKey = "item"
+	ContextKeyNPC    ContextKey = "npc"
+	ContextKeyPlayer ContextKey = "player"
+	ContextKeyQuest  ContextKey = "quest"
+	ContextKeySpell  ContextKey = "spell"
+	ContextKeyZone   ContextKey = "zone"
 )
 
 type Logger interface {

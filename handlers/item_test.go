@@ -43,7 +43,7 @@ func TestItemPeek(t *testing.T) {
 	h := New(tlog.Sugar, template.FS)
 
 	rr := httptest.NewRecorder()
-	h.ItemPeek().ServeHTTP(rr, req)
+	h.PeekItem().ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)

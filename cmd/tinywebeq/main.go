@@ -19,13 +19,16 @@ import (
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
 	"github.com/rs/zerolog"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/acme/autocert"
+
+	"github.com/xackery/tinywebeq/questparse"
+	"github.com/xackery/tinywebeq/repo"
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/handlers"
 	"github.com/xackery/tinywebeq/image"
-	"github.com/xackery/tinywebeq/quest/parse"
 	"github.com/xackery/tinywebeq/recipe"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/template"
@@ -37,7 +40,9 @@ var Version string
 
 type application struct {
 	templates fs.FS
+	logger    *zap.SugaredLogger
 	handlers  *handlers.Handlers
+	db        *repo.Repo
 }
 
 func main() {
@@ -68,9 +73,16 @@ func run() error {
 
 	tlog.Init(nil, os.Stdout)
 
+	dbNew, err := repo.New(tlog.Sugar, "peqdb:peqdb@tcp(192.168.2.10:3306)/peq?parseTime=true&columnsWithAlias=true")
+	if err != nil {
+		return fmt.Errorf("repo.New: %w", err)
+	}
+
 	app := &application{
 		templates: template.FS,
+		logger:    tlog.Sugar,
 		handlers:  handlers.New(tlog.Sugar, template.FS),
+		db:        dbNew,
 	}
 
 	args := os.Args
@@ -330,7 +342,7 @@ func questParse(ctx context.Context) error {
 		return fmt.Errorf("store.Init: %w", err)
 	}
 
-	err = parse.Parse(ctx, config.Get().Quest.ActiveConcurrency)
+	err = questparse.Parse(ctx, config.Get().Quest.ActiveConcurrency)
 	if err != nil {
 		return fmt.Errorf("questParse: %w", err)
 	}
