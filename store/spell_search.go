@@ -8,12 +8,12 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
 var (
 	spellSearchMux sync.RWMutex
-	spellSearch    = map[string]*model.SpellSearch{}
+	spellSearch    = map[string]*models.SpellSearch{}
 )
 
 func initSpellSearch(ctx context.Context) error {
@@ -28,7 +28,7 @@ func initSpellSearch(ctx context.Context) error {
 	spellSearchMux.Lock()
 	defer spellSearchMux.Unlock()
 
-	spellSearch = make(map[string]*model.SpellSearch)
+	spellSearch = make(map[string]*models.SpellSearch)
 
 	rows, err := db.Mysql.SpellsAll(ctx)
 	if err != nil {
@@ -48,7 +48,7 @@ func initSpellSearch(ctx context.Context) error {
 			}
 		}
 
-		spellSearch[sp.Name] = &model.SpellSearch{
+		spellSearch[sp.Name] = &models.SpellSearch{
 			ID:    int64(sp.ID),
 			Name:  sp.Name,
 			Level: int64(level),
@@ -57,14 +57,14 @@ func initSpellSearch(ctx context.Context) error {
 	return nil
 }
 
-func SpellSearchByName(ctx context.Context, name string) ([]*model.SpellSearch, error) {
+func SpellSearchByName(ctx context.Context, name string) ([]*models.SpellSearch, error) {
 	if !config.Get().Spell.Search.IsEnabled {
 		return nil, fmt.Errorf("spell search is disabled")
 	}
 
 	names := strings.Split(name, " ")
 	if !config.Get().Spell.Search.IsMemorySearchEnabled {
-		results := []*model.SpellSearch{}
+		results := []*models.SpellSearch{}
 
 		rows, err := db.Mysql.SpellSearchByName(ctx, "%"+strings.Join(names, "%")+"%")
 		if err != nil {
@@ -82,7 +82,7 @@ func SpellSearchByName(ctx context.Context, name string) ([]*model.SpellSearch, 
 					level = newLevel
 				}
 			}
-			spell := &model.SpellSearch{
+			spell := &models.SpellSearch{
 				ID:    int64(sp.ID),
 				Name:  sp.Name,
 				Level: int64(level),
@@ -95,7 +95,7 @@ func SpellSearchByName(ctx context.Context, name string) ([]*model.SpellSearch, 
 	spellSearchMux.RLock()
 	defer spellSearchMux.RUnlock()
 
-	var spells []*model.SpellSearch
+	var spells []*models.SpellSearch
 
 	spell, ok := spellSearch[name]
 	if ok {

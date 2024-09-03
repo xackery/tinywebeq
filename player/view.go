@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/template"
@@ -59,7 +59,7 @@ func viewRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseW
 
 	type TemplateData struct {
 		Site   site.BaseData
-		Player *model.Player
+		Player *models.Player
 	}
 
 	data := TemplateData{

@@ -5,7 +5,7 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -85,7 +85,7 @@ func SpellInfo(id int32, level int32) (int32, []string) {
 	return se.SpellIcon, lines
 }
 
-func spellEffect(se *model.Spell, index int) string {
+func spellEffect(se *models.Spell, index int) string {
 	spa := se.Attribs[index]
 	base := se.Bases[index]
 	base2 := se.Limits[index]

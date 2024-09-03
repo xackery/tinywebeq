@@ -16,6 +16,7 @@ type ContextKey string
 
 const (
 	ContextKeyItem ContextKey = "item"
+	ContextKeyNPC  ContextKey = "npc"
 )
 
 type Logger interface {

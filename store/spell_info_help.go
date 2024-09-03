@@ -5,7 +5,7 @@ import (
 	"math"
 
 	"github.com/xackery/tinywebeq/library"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
 func spellEffectNameByID(id int32) string {
@@ -266,7 +266,7 @@ func calcMaxSpellLevel(calc int32, base int32, max int32, tick int32, minLevel i
 	return level
 }
 
-func spellDuration(se *model.Spell, level int32) int32 {
+func spellDuration(se *models.Spell, level int32) int32 {
 	val := spellDurationCalc(se.DurationCalc, level)
 	if val > 0 && val < se.DurationCap {
 		return se.DurationCap

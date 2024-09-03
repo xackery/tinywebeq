@@ -13,7 +13,7 @@ import (
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/image"
 	"github.com/xackery/tinywebeq/library"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/template"
@@ -119,7 +119,7 @@ func (h *Handlers) ItemView() http.HandlerFunc {
 			err error
 		)
 
-		item := r.Context().Value(ContextKeyItem).(*model.Item)
+		item := r.Context().Value(ContextKeyItem).(*models.Item)
 
 		// JSON API Views
 		if r.Header.Get("Accept") == "application/json" {
@@ -142,12 +142,12 @@ func (h *Handlers) ItemView() http.HandlerFunc {
 
 		data := struct {
 			Site                site.BaseData
-			Item                *model.Item
+			Item                *models.Item
 			Library             *library.Library
 			Store               *store.Store
 			IsItemSearchEnabled bool
-			Quests              *model.ItemQuest
-			Recipes             *model.ItemRecipe
+			Quests              *models.ItemQuest
+			Recipes             *models.ItemRecipe
 		}{
 			Site:                site.BaseDataInit(item.Name),
 			Item:                item,
@@ -176,7 +176,7 @@ func (h *Handlers) ItemPeek() http.HandlerFunc {
 			return
 		}
 
-		item := r.Context().Value(ContextKeyItem).(*model.Item)
+		item := r.Context().Value(ContextKeyItem).(*models.Item)
 
 		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 		defer cancel()
@@ -200,9 +200,9 @@ func (h *Handlers) ItemPeek() http.HandlerFunc {
 			ItemInfo            []string
 			IsItemSearchEnabled bool
 			Store               *store.Store
-			Item                *model.Item
-			ItemRecipe          *model.ItemRecipe
-			ItemQuest           *model.ItemQuest
+			Item                *models.Item
+			ItemRecipe          *models.ItemRecipe
+			ItemQuest           *models.ItemQuest
 		}{
 			Site:                site.BaseDataInit("ITEM"),
 			Library:             library.Instance(),
@@ -225,7 +225,7 @@ func (h *Handlers) ItemImage() http.HandlerFunc {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-		item := r.Context().Value(ContextKeyItem).(*model.Item)
+		item := r.Context().Value(ContextKeyItem).(*models.Item)
 
 		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 		defer cancel()

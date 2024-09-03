@@ -12,7 +12,7 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/template"
@@ -73,7 +73,7 @@ func peekRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseW
 		npc.AttackSpeed = 100 - npc.AttackSpeed
 	}
 
-	var npcLoot *model.NpcLoot
+	var npcLoot *models.NpcLoot
 	if npc.LoottableID > 0 {
 		npcLoot, err = store.NpcLootByNpcID(ctx, int64(npc.LoottableID))
 		if err != nil {
@@ -81,7 +81,7 @@ func peekRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseW
 		}
 
 	}
-	var npcMerchant *model.NpcMerchant
+	var npcMerchant *models.NpcMerchant
 	if npc.MerchantID > 0 {
 		npcMerchant, err = store.NpcMerchantByNpcID(ctx, int64(npc.MerchantID))
 		if err != nil {
@@ -89,7 +89,7 @@ func peekRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseW
 		}
 	}
 
-	var npcFaction *model.NpcFaction
+	var npcFaction *models.NpcFaction
 	if npc.NpcFactionID > 0 {
 		npcFaction, err = store.NpcFactionByFactionID(ctx, int64(npc.NpcFactionID))
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -97,7 +97,7 @@ func peekRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseW
 		}
 	}
 
-	var npcSpell *model.NpcSpell
+	var npcSpell *models.NpcSpell
 	if npc.NpcSpellsID > 0 {
 		npcSpell, err = store.NpcSpellByNpcSpellsID(ctx, int64(npc.NpcSpellsID))
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -121,13 +121,13 @@ func peekRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseW
 		NpcInfo            []string
 		Store              *store.Store
 		IsNpcSearchEnabled bool
-		Npc                *model.Npc
-		NpcLoot            *model.NpcLoot
-		NpcMerchant        *model.NpcMerchant
-		NpcFaction         *model.NpcFaction
-		NpcSpell           *model.NpcSpell
-		NpcQuest           *model.NpcQuest
-		NpcSpawn           *model.NpcSpawn
+		Npc                *models.Npc
+		NpcLoot            *models.NpcLoot
+		NpcMerchant        *models.NpcMerchant
+		NpcFaction         *models.NpcFaction
+		NpcSpell           *models.NpcSpell
+		NpcQuest           *models.NpcQuest
+		NpcSpawn           *models.NpcSpawn
 	}{
 		Site:               site.BaseDataInit("NPC"),
 		Library:            library.Instance(),

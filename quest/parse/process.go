@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
@@ -176,12 +176,12 @@ func writeNpcQuest(ctx context.Context, questID int64, zoneID int32, npcID int64
 		if !strings.Contains(err.Error(), "no rows in result set") {
 			return fmt.Errorf("npc quest by npc id: %w", err)
 		}
-		npcQuest = &model.NpcQuest{
+		npcQuest = &models.NpcQuest{
 			ID: npcID,
 		}
 	}
 
-	entry := &model.NpcQuestEntry{
+	entry := &models.NpcQuestEntry{
 		QuestID:   questID,
 		QuestName: questName,
 		ZoneID:    zoneID,
@@ -208,13 +208,13 @@ func writeQuest(ctx context.Context, questID int64, zoneID int32, npcID int64, q
 		if !strings.Contains(err.Error(), "no rows in result set") {
 			return fmt.Errorf("quest by id: %w", err)
 		}
-		quest = &model.Quest{
+		quest = &models.Quest{
 			ID:   questID,
 			Name: questName,
 		}
 	}
 
-	entry := &model.QuestEntry{
+	entry := &models.QuestEntry{
 		ItemID:    item.ItemID,
 		ItemName:  item.ItemName,
 		Score:     0,
@@ -245,12 +245,12 @@ func writeItemQuest(ctx context.Context, questID int64, zoneID int32, npcID int6
 		if !strings.Contains(err.Error(), "no rows in result set") {
 			return fmt.Errorf("item quest by item id: %w", err)
 		}
-		itemQuest = &model.ItemQuest{
+		itemQuest = &models.ItemQuest{
 			ItemID: item.ItemID,
 		}
 	}
 
-	entry := &model.ItemQuestEntry{
+	entry := &models.ItemQuestEntry{
 		QuestID:   questID,
 		QuestName: questName,
 		ItemID:    item.ItemID,

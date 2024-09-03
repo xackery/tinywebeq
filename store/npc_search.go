@@ -8,12 +8,12 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
 var (
 	npcSearchMux sync.RWMutex
-	npcSearch    = map[string]*model.NpcSearch{}
+	npcSearch    = map[string]*models.NpcSearch{}
 )
 
 func initNpcSearch(ctx context.Context) error {
@@ -28,7 +28,7 @@ func initNpcSearch(ctx context.Context) error {
 	npcSearchMux.Lock()
 	defer npcSearchMux.Unlock()
 
-	npcSearch = make(map[string]*model.NpcSearch)
+	npcSearch = make(map[string]*models.NpcSearch)
 
 	rows, err := db.Mysql.NpcsAll(ctx)
 	if err != nil {
@@ -36,7 +36,7 @@ func initNpcSearch(ctx context.Context) error {
 	}
 
 	for _, row := range rows {
-		npcSearch[row.Name] = &model.NpcSearch{
+		npcSearch[row.Name] = &models.NpcSearch{
 			ID:    int64(row.ID),
 			Name:  row.Name,
 			Level: int64(row.Level),
@@ -45,20 +45,20 @@ func initNpcSearch(ctx context.Context) error {
 	return nil
 }
 
-func NpcSearchByName(ctx context.Context, name string) ([]*model.NpcSearch, error) {
+func NpcSearchByName(ctx context.Context, name string) ([]*models.NpcSearch, error) {
 	if !config.Get().Npc.Search.IsEnabled {
 		return nil, fmt.Errorf("npc search is disabled")
 	}
 
 	if !config.Get().Npc.Search.IsMemorySearchEnabled {
-		results := []*model.NpcSearch{}
+		results := []*models.NpcSearch{}
 
 		rows, err := db.Mysql.NpcSearchByName(ctx, name)
 		if err != nil {
 			return nil, fmt.Errorf("npc search by name: %w", err)
 		}
 		for _, row := range rows {
-			npc := &model.NpcSearch{
+			npc := &models.NpcSearch{
 				ID:    int64(row.ID),
 				Name:  row.Name,
 				Level: int64(row.Level),
@@ -71,7 +71,7 @@ func NpcSearchByName(ctx context.Context, name string) ([]*model.NpcSearch, erro
 	npcSearchMux.RLock()
 	defer npcSearchMux.RUnlock()
 
-	var npcs []*model.NpcSearch
+	var npcs []*models.NpcSearch
 
 	npc, ok := npcSearch[name]
 	if ok {

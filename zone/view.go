@@ -10,7 +10,7 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/template"
@@ -67,7 +67,7 @@ func viewRender(ctx context.Context, templates fs.FS, id int, w http.ResponseWri
 
 	data := struct {
 		Site                site.BaseData
-		Zone                *model.Zone
+		Zone                *models.Zone
 		Library             *library.Library
 		ZoneInfo            []string
 		IsZoneSearchEnabled bool

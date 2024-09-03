@@ -8,12 +8,12 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
 var (
 	itemSearchMux sync.RWMutex
-	itemSearch    map[string]*model.ItemSearch
+	itemSearch    map[string]*models.ItemSearch
 )
 
 func InitItemSearch(ctx context.Context) error {
@@ -35,7 +35,7 @@ func initItemSearch(ctx context.Context, isForcedEnabled bool) error {
 	itemSearchMux.Lock()
 	defer itemSearchMux.Unlock()
 
-	itemSearch = make(map[string]*model.ItemSearch)
+	itemSearch = make(map[string]*models.ItemSearch)
 
 	rows, err := db.Mysql.ItemsAll(ctx)
 	if err != nil {
@@ -82,7 +82,7 @@ func initItemSearch(ctx context.Context, isForcedEnabled bool) error {
 			continue
 		}
 
-		itemSearch[row.Name] = &model.ItemSearch{
+		itemSearch[row.Name] = &models.ItemSearch{
 			ID:    int64(row.ID),
 			Name:  row.Name,
 			Level: int64(level),
@@ -92,7 +92,7 @@ func initItemSearch(ctx context.Context, isForcedEnabled bool) error {
 	return nil
 }
 
-func ItemSearchByName(ctx context.Context, name string) ([]*model.ItemSearch, error) {
+func ItemSearchByName(ctx context.Context, name string) ([]*models.ItemSearch, error) {
 	if !config.Get().Item.Search.IsEnabled {
 		return nil, fmt.Errorf("item search is disabled")
 	}
@@ -104,7 +104,7 @@ func ItemSearchByName(ctx context.Context, name string) ([]*model.ItemSearch, er
 	itemSearchMux.RLock()
 	defer itemSearchMux.RUnlock()
 
-	var items []*model.ItemSearch
+	var items []*models.ItemSearch
 
 	item, ok := itemSearch[name]
 	if ok {

@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
 // NpcSpawnByNpcID fetches item spawn by item id, first by memory, then by cache, then by database
-func NpcSpawnByNpcID(ctx context.Context, npcID int64) (*model.NpcSpawn, error) {
+func NpcSpawnByNpcID(ctx context.Context, npcID int64) (*models.NpcSpawn, error) {
 
 	npcSpawn, err := db.Mysql.NpcSpawnByNpcID(ctx, npcID)
 	if err != nil {

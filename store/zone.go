@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -27,7 +27,7 @@ func ZoneLongNameByZoneIDNumber(id int32) string {
 	return zone.LongName
 }
 
-func ZoneByShortName(shortName string) *model.Zone {
+func ZoneByShortName(shortName string) *models.Zone {
 	zone, err := db.Mysql.ZoneByShortName(context.Background(), shortName)
 	if err != nil {
 		tlog.Debugf("ZoneByShortName %s: %v", shortName, err)
@@ -37,7 +37,7 @@ func ZoneByShortName(shortName string) *model.Zone {
 	return zone
 }
 
-func ZoneByZoneIDNumber(ctx context.Context, zoneID int64) (*model.Zone, error) {
+func ZoneByZoneIDNumber(ctx context.Context, zoneID int64) (*models.Zone, error) {
 	zone, err := db.Mysql.ZoneByZoneIDNumber(ctx, zoneID)
 	if err != nil {
 		return nil, fmt.Errorf("zoneByZoneIDNumber: %w", err)

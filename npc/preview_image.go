@@ -12,7 +12,7 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/image"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
@@ -60,7 +60,7 @@ func previewImageRender(ctx context.Context, id int64, w http.ResponseWriter) er
 		return fmt.Errorf("store.NpcByNpcID: %w", err)
 	}
 
-	var npcLoot *model.NpcLoot
+	var npcLoot *models.NpcLoot
 	if npc.LoottableID > 0 {
 		npcLoot, err = store.NpcLootByNpcID(ctx, int64(npc.LoottableID))
 		if err != nil {
@@ -68,7 +68,7 @@ func previewImageRender(ctx context.Context, id int64, w http.ResponseWriter) er
 		}
 
 	}
-	var npcMerchant *model.NpcMerchant
+	var npcMerchant *models.NpcMerchant
 	if npc.MerchantID > 0 {
 		npcMerchant, err = store.NpcMerchantByNpcID(ctx, int64(npc.MerchantID))
 		if err != nil {
@@ -76,7 +76,7 @@ func previewImageRender(ctx context.Context, id int64, w http.ResponseWriter) er
 		}
 	}
 
-	var npcSpell *model.NpcSpell
+	var npcSpell *models.NpcSpell
 	if npc.NpcSpellsID > 0 {
 		npcSpell, err = store.NpcSpellByNpcSpellsID(ctx, int64(npc.NpcSpellsID))
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {

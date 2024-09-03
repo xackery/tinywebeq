@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -28,7 +29,7 @@ var (
 	jobCount      int
 	oldQuestIndex map[string]int64
 	itemNames     map[int64]string
-	zones         map[string]*model.Zone
+	zones         map[string]*models.Zone
 	npcs          map[string][]int64
 )
 
@@ -134,7 +135,7 @@ func Parse(ctx context.Context, concurrency int) error {
 		oldQuestIndex[quest.Name] = quest.ID
 	}
 
-	zones = make(map[string]*model.Zone)
+	zones = make(map[string]*models.Zone)
 	zoneRows, err := db.Mysql.ZonesAll(ctx)
 	if err != nil {
 		return fmt.Errorf("zones all: %w", err)

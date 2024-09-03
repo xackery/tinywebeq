@@ -7,17 +7,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/xackery/tinywebeq/model"
 	bolt "go.etcd.io/bbolt"
+
+	"github.com/xackery/tinywebeq/models"
 )
 
-func (b *BBolt) QuestByQuestID(ctx context.Context, questID int64) (*model.Quest, error) {
+func (b *BBolt) QuestByQuestID(ctx context.Context, questID int64) (*models.Quest, error) {
 	db, err := b.Open()
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}
 	defer db.Close()
-	quest := &model.Quest{}
+	quest := &models.Quest{}
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("quest"))
 		if b == nil {
@@ -35,7 +36,7 @@ func (b *BBolt) QuestByQuestID(ctx context.Context, questID int64) (*model.Quest
 	return quest, nil
 }
 
-func (b *BBolt) QuestReplace(ctx context.Context, questID int64, quest *model.Quest) error {
+func (b *BBolt) QuestReplace(ctx context.Context, questID int64, quest *models.Quest) error {
 	db, err := b.Open()
 	if err != nil {
 		return fmt.Errorf("open: %w", err)
@@ -60,20 +61,20 @@ func (b *BBolt) QuestReplace(ctx context.Context, questID int64, quest *model.Qu
 
 }
 
-func (b *BBolt) QuestsAll(ctx context.Context) (map[int64]*model.Quest, error) {
+func (b *BBolt) QuestsAll(ctx context.Context) (map[int64]*models.Quest, error) {
 	db, err := b.Open()
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}
 	defer db.Close()
-	quests := map[int64]*model.Quest{}
+	quests := map[int64]*models.Quest{}
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("quest"))
 		if b == nil {
 			return fmt.Errorf("bucket not found")
 		}
 		return b.ForEach(func(k, v []byte) error {
-			quest := &model.Quest{}
+			quest := &models.Quest{}
 			err := gob.NewDecoder(bytes.NewReader(v)).Decode(quest)
 			if err != nil {
 				return fmt.Errorf("decode: %w", err)
@@ -111,13 +112,13 @@ func (b *BBolt) QuestTruncate(ctx context.Context) error {
 	return nil
 }
 
-func (b *BBolt) QuestSearchByName(ctx context.Context, name string) ([]*model.Quest, error) {
+func (b *BBolt) QuestSearchByName(ctx context.Context, name string) ([]*models.Quest, error) {
 	db, err := b.Open()
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}
 	defer db.Close()
-	quests := []*model.Quest{}
+	quests := []*models.Quest{}
 	names := strings.Split(name, " ")
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("quest"))
@@ -125,7 +126,7 @@ func (b *BBolt) QuestSearchByName(ctx context.Context, name string) ([]*model.Qu
 			return fmt.Errorf("bucket not found")
 		}
 		return b.ForEach(func(k, v []byte) error {
-			quest := &model.Quest{}
+			quest := &models.Quest{}
 			err := gob.NewDecoder(bytes.NewReader(v)).Decode(quest)
 			if err != nil {
 				return fmt.Errorf("decode: %w", err)

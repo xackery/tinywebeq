@@ -8,12 +8,12 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
 var (
 	zoneSearchMux sync.RWMutex
-	zoneSearch    = map[string]*model.ZoneSearch{}
+	zoneSearch    = map[string]*models.ZoneSearch{}
 )
 
 func initZoneSearch(ctx context.Context) error {
@@ -28,7 +28,7 @@ func initZoneSearch(ctx context.Context) error {
 	zoneSearchMux.Lock()
 	defer zoneSearchMux.Unlock()
 
-	zoneSearch = make(map[string]*model.ZoneSearch)
+	zoneSearch = make(map[string]*models.ZoneSearch)
 
 	rows, err := db.Mysql.ZonesAll(ctx)
 	if err != nil {
@@ -36,7 +36,7 @@ func initZoneSearch(ctx context.Context) error {
 	}
 
 	for _, row := range rows {
-		zoneSearch[row.ShortName] = &model.ZoneSearch{
+		zoneSearch[row.ShortName] = &models.ZoneSearch{
 			ID:        int64(row.ID),
 			ShortName: row.ShortName,
 			LongName:  row.LongName,
@@ -46,20 +46,20 @@ func initZoneSearch(ctx context.Context) error {
 	return nil
 }
 
-func ZoneSearchByName(ctx context.Context, name string) ([]*model.ZoneSearch, error) {
+func ZoneSearchByName(ctx context.Context, name string) ([]*models.ZoneSearch, error) {
 	if !config.Get().Zone.Search.IsEnabled {
 		return nil, fmt.Errorf("zone search is disabled")
 	}
 
 	if !config.Get().Zone.Search.IsMemorySearchEnabled {
-		results := []*model.ZoneSearch{}
+		results := []*models.ZoneSearch{}
 
 		rows, err := db.Mysql.ZoneSearchByName(ctx, name)
 		if err != nil {
 			return nil, fmt.Errorf("zone search by name: %w", err)
 		}
 		for _, row := range rows {
-			zone := &model.ZoneSearch{
+			zone := &models.ZoneSearch{
 				ID:        int64(row.ID),
 				ShortName: row.ShortName,
 				LongName:  row.LongName,
@@ -73,7 +73,7 @@ func ZoneSearchByName(ctx context.Context, name string) ([]*model.ZoneSearch, er
 	zoneSearchMux.RLock()
 	defer zoneSearchMux.RUnlock()
 
-	var zones []*model.ZoneSearch
+	var zones []*models.ZoneSearch
 
 	zone, ok := zoneSearch[name]
 	if ok {

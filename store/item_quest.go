@@ -7,11 +7,11 @@ import (
 	"fmt"
 
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
 // ItemQuestByItemID fetches item quest by item id, first by memory, then by file
-func ItemQuestByItemID(ctx context.Context, itemID int64) (*model.ItemQuest, error) {
+func ItemQuestByItemID(ctx context.Context, itemID int64) (*models.ItemQuest, error) {
 	itemQuest, err := itemQuestByItemID(ctx, itemID)
 	if err != nil {
 		return nil, fmt.Errorf("fetch: %w", err)
@@ -27,7 +27,7 @@ func ItemQuestByItemID(ctx context.Context, itemID int64) (*model.ItemQuest, err
 	return itemQuest, nil
 }
 
-func itemQuestByItemID(ctx context.Context, itemID int64) (*model.ItemQuest, error) {
+func itemQuestByItemID(ctx context.Context, itemID int64) (*models.ItemQuest, error) {
 	itemQuest, err := db.BBolt.ItemQuestByItemID(ctx, itemID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("query item: %w", err)

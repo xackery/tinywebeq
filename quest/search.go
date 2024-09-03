@@ -10,7 +10,7 @@ import (
 	"github.com/go-jose/go-jose/v4/json"
 
 	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/tlog"
 )
@@ -30,9 +30,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	tlog.Debugf("search: %s", r.URL.String())
 
 	type Response struct {
-		Code    int                  `json:"code"`
-		Message string               `json:"message"`
-		Quests  []*model.QuestSearch `json:"quests,omitempty"`
+		Code    int                   `json:"code"`
+		Message string                `json:"message"`
+		Quests  []*models.QuestSearch `json:"quests,omitempty"`
 	}
 
 	name = r.URL.Query().Get("name")

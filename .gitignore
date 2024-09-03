@@ -28,6 +28,9 @@ __debug_bin*
 # IDE Settings
 .idea
 
+# Air config
+.air.toml
+
 # Cache
 cache
 

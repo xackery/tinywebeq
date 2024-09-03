@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/template"
 	"github.com/xackery/tinywebeq/tlog"
@@ -67,7 +67,7 @@ func viewRender(ctx context.Context, templates fs.FS, id int, w http.ResponseWri
 
 	data := struct {
 		Site                 site.BaseData
-		Spell                *model.Spell
+		Spell                *models.Spell
 		SpellInfo            []string
 		IsSpellSearchEnabled bool
 	}{

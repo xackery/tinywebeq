@@ -6,10 +6,10 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
-func ItemByItemID(ctx context.Context, itemID int64) (*model.Item, error) {
+func ItemByItemID(ctx context.Context, itemID int64) (*models.Item, error) {
 
 	if config.Get().Item.IsDiscoveredOnly {
 		item, err := db.Mysql.ItemDiscoveredOnlyByID(ctx, uint32(itemID))

@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
-func (b *Mysql) NpcByNpcID(ctx context.Context, npcID int64) (*model.Npc, error) {
-	npc := &model.Npc{}
+func (b *Mysql) NpcByNpcID(ctx context.Context, npcID int64) (*models.Npc, error) {
+	npc := &models.Npc{}
 
 	row, err := b.query.NpcByNpcID(ctx, int32(npcID))
 	if err != nil {
@@ -22,14 +22,14 @@ func (b *Mysql) NpcByNpcID(ctx context.Context, npcID int64) (*model.Npc, error)
 	return npc, nil
 }
 
-func (b *Mysql) NpcsAll(ctx context.Context) ([]*model.Npc, error) {
-	npcs := []*model.Npc{}
+func (b *Mysql) NpcsAll(ctx context.Context) ([]*models.Npc, error) {
+	npcs := []*models.Npc{}
 	rows, err := b.query.NpcsAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("npcs all: %w", err)
 	}
 	for _, row := range rows {
-		npc := &model.Npc{
+		npc := &models.Npc{
 			ID:    int32(row.ID),
 			Name:  row.Name,
 			Level: row.Level,
@@ -39,15 +39,15 @@ func (b *Mysql) NpcsAll(ctx context.Context) ([]*model.Npc, error) {
 	return npcs, nil
 }
 
-func (b *Mysql) NpcSearchByName(ctx context.Context, name string) ([]*model.Npc, error) {
-	npcs := []*model.Npc{}
+func (b *Mysql) NpcSearchByName(ctx context.Context, name string) ([]*models.Npc, error) {
+	npcs := []*models.Npc{}
 
 	rows, err := b.query.NpcSearchByName(ctx, name)
 	if err != nil {
 		return nil, fmt.Errorf("npc search by name: %w", err)
 	}
 	for _, row := range rows {
-		npc := &model.Npc{
+		npc := &models.Npc{
 			ID:    int32(row.ID),
 			Name:  row.Name,
 			Level: row.Level,

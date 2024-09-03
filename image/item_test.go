@@ -4,13 +4,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/xackery/tinywebeq/model"
 	"gopkg.in/yaml.v3"
+
+	"github.com/xackery/tinywebeq/models"
 )
 
 func TestItemPreview(t *testing.T) {
 
-	item := &model.Item{
+	item := &models.Item{
 		Name:    "Singing Short Sword",
 		Classes: 1,
 		Races:   1,

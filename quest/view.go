@@ -10,7 +10,7 @@ import (
 
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/library"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/site"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/template"
@@ -67,7 +67,7 @@ func viewRender(ctx context.Context, templates fs.FS, id int64, w http.ResponseW
 
 	data := struct {
 		Site                 site.BaseData
-		Quest                *model.Quest
+		Quest                *models.Quest
 		Library              *library.Library
 		QuestInfo            []string
 		IsQuestSearchEnabled bool
