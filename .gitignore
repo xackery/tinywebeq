@@ -30,6 +30,7 @@ __debug_bin*
 
 # Air config
 .air.toml
+tmp
 
 # Cache
 cache
