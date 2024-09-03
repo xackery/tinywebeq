@@ -24,7 +24,7 @@
             {{- if (eq .Item.Slots 0)}}
                 <tr><td><b>{{ .Item.TypeStr }}: </b></td><td>Inventory
             {{else}}
-                <tr><td><b>{{ .Item.TypeStr }}: </b></td><td><td style='text-align:right'>{{ .Item.ItemTypeStr }}
+                <tr><td><b>{{ .Item.TypeStr }}: </b></td><td><td style='text-align:right'>{{ .Item.ItemType }}
             {{- end }}
             {{- if (gt .Item.Stackable 0)}} (stackable){{- end }}
             </td></tr>

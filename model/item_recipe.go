@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"fmt"
-
-	"github.com/xackery/tinywebeq/tlog"
 )
 
 type ItemRecipe struct {
@@ -73,7 +71,6 @@ func (t *ItemRecipe) ComponentEntries() []*ItemRecipeEntry {
 			used = append(used, entry)
 		}
 	}
-	tlog.Debugf("used requested")
 	return used
 }
 
