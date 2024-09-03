@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/xackery/tinywebeq/npc"
 	"github.com/xackery/tinywebeq/player"
 	"github.com/xackery/tinywebeq/quest"
 	"github.com/xackery/tinywebeq/spell"
@@ -57,9 +56,8 @@ func (app *application) routes() *chi.Mux {
 		r.Route("/{npcID}", func(r chi.Router) {
 			r.Use(app.npcContext)
 			r.Get("/", app.handlers.NPCView())
-			r.Get("/peek", npc.Peek(template.FS))
-			r.Get("/search", npc.Search)
-			r.Get("/preview.png", npc.PreviewImage)
+			r.Get("/peek", app.handlers.NPCPeek())
+			r.Get("/image", app.handlers.NPCImage())
 		})
 	})
 

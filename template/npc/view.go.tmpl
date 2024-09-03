@@ -1,9 +1,9 @@
 {{ define "data" }}
-<h1>Npc</h1>
+<h1 class="text-4xl font-bold">NPC</h1>
+
 {{ if .IsNpcSearchEnabled }}
 <input type="text" name="name" autocomplete="off" placeholder="Search by name">
 <div id="searchResults"></div>
-
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     let searchTimeout = null;
@@ -50,13 +50,12 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 {{end}}
-<br>
-<sl-button disabled>Click me</sl-button>
+
 <p>Name: {{ .Npc.Name }}</p>
 <p>Level: {{ .Npc.Level }}</p>
 <p>Race: {{ .Npc.RaceStr }}</p>
 <p>Class: {{ .Npc.ClassStr }}</p>
-<p>Health points: {{ .Npc.Hp }}</p>
+<p>Hitpoints: {{ .Npc.Hp }}</p>
 <p>Damage: {{ .Npc.Mindmg }} to {{ .Npc.Maxdmg }}</p>
 <p>Attack speed: {{ .Npc.AttackSpeed }}%</p>
 {{ if .Npc.NpcSpecialAttacksStr }}<p>Special attacks: {{ .Npc.NpcSpecialAttacksStr }}</p>{{ end }}
@@ -75,7 +74,7 @@ document.addEventListener("DOMContentLoaded", function() {
 {{ end }}{{ end}}
 
 {{ if .NpcLoot }}{{ range .NpcLoot.Entries }}
-    <p><a href="/items/view?id={{ .ID }}">{{ .Name }}</a> ({{ .ItemTypeStr }}) - {{ .Chance }}% ({{ .ChanceGlobal }}% Global)</p>
+    <p><a href="/items/{{ .ID }}">{{ .Name }}</a> {{ .Chance }}% ({{ .ChanceGlobal }}% Global)</p>
 {{ end }}{{ end }}
 
 {{ if .NpcMerchant }} {{ range .NpcMerchant.Entries }}

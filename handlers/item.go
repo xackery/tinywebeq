@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"go.uber.org/zap"
-
 	"github.com/xackery/tinywebeq/config"
 	"github.com/xackery/tinywebeq/image"
 	"github.com/xackery/tinywebeq/library"
@@ -85,6 +83,30 @@ import (
 //
 //}
 
+type ItemDecorated struct {
+	Item    *models.Item
+	Quests  *models.ItemQuest
+	Recipes *models.ItemRecipe
+}
+
+func decorateItem(ctx context.Context, item *models.Item) (*ItemDecorated, error) {
+	itemQuest, err := store.ItemQuestByItemID(ctx, int64(item.ItemID))
+	if err != nil {
+		// TODO: better error handling here
+	}
+
+	itemRecipe, err := store.ItemRecipeByItemID(ctx, int64(item.ItemID))
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		// TODO: better error handling here
+	}
+
+	return &ItemDecorated{
+		Item:    item,
+		Quests:  itemQuest,
+		Recipes: itemRecipe,
+	}, nil
+}
+
 // ItemIndex returns the index page for item functionality.
 func (h *Handlers) ItemIndex() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -115,10 +137,6 @@ func (h *Handlers) ItemIndex() http.HandlerFunc {
 
 func (h *Handlers) ItemView() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var (
-			err error
-		)
-
 		item := r.Context().Value(ContextKeyItem).(*models.Item)
 
 		// JSON API Views
@@ -127,35 +145,23 @@ func (h *Handlers) ItemView() http.HandlerFunc {
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-		defer cancel()
-
-		itemQuest, err := store.ItemQuestByItemID(ctx, int64(item.ItemID))
+		dItem, err := decorateItem(r.Context(), item)
 		if err != nil {
-			h.logger.Debug("Ignoring err store.ItemQuestByItemID", zap.Error(err))
-		}
-
-		itemRecipe, err := store.ItemRecipeByItemID(ctx, int64(item.ItemID))
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			h.logger.Debug("Ignoring err store.ItemRecipeByItemID: %v", zap.Error(err))
+			h.serverErrorResponse(w, err)
 		}
 
 		data := struct {
 			Site                site.BaseData
-			Item                *models.Item
 			Library             *library.Library
 			Store               *store.Store
 			IsItemSearchEnabled bool
-			Quests              *models.ItemQuest
-			Recipes             *models.ItemRecipe
+			*ItemDecorated
 		}{
 			Site:                site.BaseDataInit(item.Name),
-			Item:                item,
 			Library:             library.Instance(),
 			IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
-			Quests:              itemQuest,
-			Recipes:             itemRecipe,
 			Store:               store.Instance(),
+			ItemDecorated:       dItem,
 		}
 
 		if config.Get().Item.Preview.IsEnabled {
@@ -168,9 +174,6 @@ func (h *Handlers) ItemView() http.HandlerFunc {
 
 func (h *Handlers) ItemPeek() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		var id int64
-
 		if !config.Get().Item.IsEnabled {
 			http.Error(w, "Not Found", http.StatusNotFound)
 			return
@@ -178,20 +181,9 @@ func (h *Handlers) ItemPeek() http.HandlerFunc {
 
 		item := r.Context().Value(ContextKeyItem).(*models.Item)
 
-		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-		defer cancel()
-
-		itemQuest, err := store.ItemQuestByItemID(ctx, id)
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			fmt.Printf("error: %v\n", err)
-			h.serverErrorResponse(w, fmt.Errorf("store.ItemQuestByItemID: %w", err))
-			return
-		}
-
-		itemRecipe, err := store.ItemRecipeByItemID(ctx, id)
-		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			h.serverErrorResponse(w, fmt.Errorf("store.ItemRecipeByItemID: %w", err))
-			return
+		dItem, err := decorateItem(r.Context(), item)
+		if err != nil {
+			h.serverErrorResponse(w, err)
 		}
 
 		data := struct {
@@ -200,17 +192,13 @@ func (h *Handlers) ItemPeek() http.HandlerFunc {
 			ItemInfo            []string
 			IsItemSearchEnabled bool
 			Store               *store.Store
-			Item                *models.Item
-			ItemRecipe          *models.ItemRecipe
-			ItemQuest           *models.ItemQuest
+			*ItemDecorated
 		}{
 			Site:                site.BaseDataInit("ITEM"),
 			Library:             library.Instance(),
 			IsItemSearchEnabled: config.Get().Item.Search.IsEnabled,
 			Store:               store.Instance(),
-			Item:                item,
-			ItemRecipe:          itemRecipe,
-			ItemQuest:           itemQuest,
+			ItemDecorated:       dItem,
 		}
 
 		h.render(w, "item", "peek.go.tmpl", "peek.go.tmpl", data)

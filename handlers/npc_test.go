@@ -1,4 +1,4 @@
-package npc
+package handlers
 
 import (
 	"context"
@@ -11,9 +11,10 @@ import (
 	"github.com/xackery/tinywebeq/db"
 	"github.com/xackery/tinywebeq/store"
 	"github.com/xackery/tinywebeq/template"
+	"github.com/xackery/tinywebeq/tlog"
 )
 
-func TestPeek(t *testing.T) {
+func TestNPCPeek(t *testing.T) {
 	if os.Getenv("SINGLE_TEST") != "1" {
 		t.Skip("skipping test; SINGLE_TEST not set")
 	}
@@ -38,8 +39,10 @@ func TestPeek(t *testing.T) {
 		t.Fatalf("http.NewRequest: %s", err)
 	}
 
+	h := New(tlog.Sugar, template.FS)
+
 	rr := httptest.NewRecorder()
-	Peek(template.FS).ServeHTTP(rr, req)
+	h.NPCPeek().ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
