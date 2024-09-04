@@ -6,17 +6,18 @@ import (
 	"encoding/gob"
 	"fmt"
 
-	"github.com/xackery/tinywebeq/model"
 	bolt "go.etcd.io/bbolt"
+
+	"github.com/xackery/tinywebeq/models"
 )
 
-func (b *BBolt) ItemQuestByItemID(ctx context.Context, itemID int64) (*model.ItemQuest, error) {
+func (b *BBolt) ItemQuestByItemID(ctx context.Context, itemID int64) (*models.ItemQuest, error) {
 	db, err := b.Open()
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}
 	defer db.Close()
-	itemQuest := &model.ItemQuest{}
+	itemQuest := &models.ItemQuest{}
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("item_quest"))
 		if b == nil {
@@ -34,7 +35,7 @@ func (b *BBolt) ItemQuestByItemID(ctx context.Context, itemID int64) (*model.Ite
 	return itemQuest, nil
 }
 
-func (b *BBolt) ItemQuestReplace(ctx context.Context, itemID int64, itemQuest *model.ItemQuest) error {
+func (b *BBolt) ItemQuestReplace(ctx context.Context, itemID int64, itemQuest *models.ItemQuest) error {
 	db, err := b.Open()
 	if err != nil {
 		return fmt.Errorf("open: %w", err)
@@ -81,7 +82,7 @@ func (b *BBolt) ItemQuestTruncate(ctx context.Context) error {
 	return nil
 }
 
-func (b *BBolt) ItemRecipeReplace(ctx context.Context, itemID int64, itemRecipe *model.ItemRecipe) error {
+func (b *BBolt) ItemRecipeReplace(ctx context.Context, itemID int64, itemRecipe *models.ItemRecipe) error {
 	db, err := b.Open()
 	if err != nil {
 		return fmt.Errorf("open: %w", err)
@@ -105,13 +106,13 @@ func (b *BBolt) ItemRecipeReplace(ctx context.Context, itemID int64, itemRecipe 
 	return nil
 }
 
-func (b *BBolt) ItemRecipeByItemID(ctx context.Context, itemID int64) (*model.ItemRecipe, error) {
+func (b *BBolt) ItemRecipeByItemID(ctx context.Context, itemID int64) (*models.ItemRecipe, error) {
 	db, err := b.Open()
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}
 	defer db.Close()
-	itemRecipe := &model.ItemRecipe{}
+	itemRecipe := &models.ItemRecipe{}
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("item_recipe"))
 		if b == nil {

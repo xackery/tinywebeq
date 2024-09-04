@@ -6,17 +6,18 @@ import (
 	"encoding/gob"
 	"fmt"
 
-	"github.com/xackery/tinywebeq/model"
 	bolt "go.etcd.io/bbolt"
+
+	"github.com/xackery/tinywebeq/models"
 )
 
-func (b *BBolt) NpcQuestByNpcID(ctx context.Context, npcID int64) (*model.NpcQuest, error) {
+func (b *BBolt) NpcQuestByNpcID(ctx context.Context, npcID int64) (*models.NpcQuest, error) {
 	db, err := b.Open()
 	if err != nil {
 		return nil, fmt.Errorf("open: %w", err)
 	}
 	defer db.Close()
-	npcQuest := &model.NpcQuest{}
+	npcQuest := &models.NpcQuest{}
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("npc_quest"))
 		if b == nil {
@@ -34,7 +35,7 @@ func (b *BBolt) NpcQuestByNpcID(ctx context.Context, npcID int64) (*model.NpcQue
 	return npcQuest, nil
 }
 
-func (b *BBolt) NpcQuestReplace(ctx context.Context, npcID int64, npcQuest *model.NpcQuest) error {
+func (b *BBolt) NpcQuestReplace(ctx context.Context, npcID int64, npcQuest *models.NpcQuest) error {
 	db, err := b.Open()
 	if err != nil {
 		return fmt.Errorf("open: %w", err)

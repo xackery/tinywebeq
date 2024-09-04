@@ -5,11 +5,11 @@ import (
 	"database/sql"
 
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
 // NpcMerchantByNpcID fetches item merchant by item id, first by memory, then by cache, then by database
-func NpcMerchantByNpcID(ctx context.Context, npcID int64) (*model.NpcMerchant, error) {
+func NpcMerchantByNpcID(ctx context.Context, npcID int64) (*models.NpcMerchant, error) {
 	npcMerchant, err := db.Mysql.NpcMerchantByNpcID(ctx, npcID)
 	if err != nil {
 		return nil, err

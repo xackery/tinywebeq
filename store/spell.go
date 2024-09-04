@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 	"github.com/xackery/tinywebeq/tlog"
 )
 
@@ -17,7 +17,7 @@ func SpellName(id int32) string {
 	return spell.Name
 }
 
-func SpellByID(id int32) *model.Spell {
+func SpellByID(id int32) *models.Spell {
 	spell, err := db.Mysql.SpellByID(context.Background(), int64(id))
 	if err != nil {
 		tlog.Debugf("SpellByID %d: %v", id, err)

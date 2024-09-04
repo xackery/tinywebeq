@@ -11,11 +11,12 @@ import (
 
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/xackery/tinywebeq/model"
-	"github.com/xackery/tinywebeq/store"
 	"golang.org/x/image/font/gofont/gobold"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/math/fixed"
+
+	"github.com/xackery/tinywebeq/models"
+	"github.com/xackery/tinywebeq/store"
 )
 
 var (
@@ -32,9 +33,9 @@ type ItemPreview struct {
 	cb          *freetype.Context
 	cbFont      *truetype.Font
 	cTitle      *freetype.Context
-	item        *model.Item
-	itemQuest   *model.ItemQuest
-	itemRecipe  *model.ItemRecipe
+	item        *models.Item
+	itemQuest   *models.ItemQuest
+	itemRecipe  *models.ItemRecipe
 	fontSize    float64
 	pt          fixed.Point26_6
 	lineStart   int
@@ -104,7 +105,7 @@ func (e *ItemPreview) writeNoAlignLn(field string, value string) {
 	e.newLine(1)
 }
 
-func GenerateItemPreview(item *model.Item, itemQuest *model.ItemQuest, itemRecipe *model.ItemRecipe) ([]byte, error) {
+func GenerateItemPreview(item *models.Item, itemQuest *models.ItemQuest, itemRecipe *models.ItemRecipe) ([]byte, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 	var newPos fixed.Point26_6
@@ -252,10 +253,10 @@ func (e *ItemPreview) render1Left() {
 
 	e.writeNoAlignLn("", item.TagStr())
 	if item.Classes > 0 {
-		e.writeNoAlignLn("Class:", item.ClassesStr())
+		e.writeNoAlignLn("Class:", item.Classes.String())
 	}
 	if item.Races > 0 {
-		e.writeNoAlignLn("Race:", item.RaceStr())
+		e.writeNoAlignLn("Race:", item.Races.String())
 	}
 	if item.Deity > 0 {
 		e.writeNoAlignLn("Deity:", item.DeityStr())
@@ -297,7 +298,7 @@ func (e *ItemPreview) render2Left() {
 	if item.Slots > 0 {
 		e.writeLn(item.TypeStr(), "Inventory")
 	} else {
-		e.writeLn(item.TypeStr(), item.ItemTypeStr())
+		e.writeLn(item.TypeStr(), item.Itemtype.String())
 	}
 	if item.Reclevel > 0 {
 		e.writeLn("Rec Level:", fmt.Sprintf("%d", item.Reclevel))

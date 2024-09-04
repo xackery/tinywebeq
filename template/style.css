@@ -145,9 +145,9 @@ h6 {
   margin: 3rem 0 1.5rem 0;
 }
 
-h1:first-of-type {
-  margin-top: 1rem;
-}
+/*h1:first-of-type {*/
+/*  margin-top: 1rem;*/
+/*}*/
 
 h1 {
   font-size: 2.5rem;

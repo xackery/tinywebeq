@@ -9,3 +9,7 @@ sql:
         out: "mysqlc"
         rename:
           casttime_: "CastTime2"
+        overrides:
+          - column: items.itemtype
+            go_type:
+              import: "github.com/xackery/tinywebeq/library"

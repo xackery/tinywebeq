@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/xackery/tinywebeq/db"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
-func PlayerByCharacterID(ctx context.Context, playerID int64) (*model.Player, error) {
+func PlayerByCharacterID(ctx context.Context, playerID int64) (*models.Player, error) {
 
 	player, err := db.Mysql.PlayerByCharacterID(ctx, playerID)
 	if err != nil {

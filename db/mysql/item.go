@@ -5,52 +5,27 @@ import (
 	"fmt"
 
 	"github.com/xackery/tinywebeq/config"
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
-func (b *Mysql) ItemByID(ctx context.Context, id int32) (*model.Item, error) {
-	if b.query == nil {
-		return nil, fmt.Errorf("query is nil")
-	}
+func (b *Mysql) ItemsAll(ctx context.Context) ([]*models.Item, error) {
 	var err error
-	item := &model.Item{}
-	cItem, err := b.query.ItemByID(ctx, id)
-	if err != nil {
-		return nil, fmt.Errorf("item by id: %w", err)
-	}
-	item.DecodeItem(cItem)
-	return item, nil
-}
-
-func (b *Mysql) ItemDiscoveredOnlyByID(ctx context.Context, itemID uint32) (*model.Item, error) {
-	var err error
-	item := &model.Item{}
-	cItem, err := b.query.ItemDiscoveredOnlyByID(ctx, itemID)
-	if err != nil {
-		return nil, fmt.Errorf("item discovered only by id: %w", err)
-	}
-	item.DecodeDiscoveredItem(cItem)
-	return item, nil
-}
-
-func (b *Mysql) ItemsAll(ctx context.Context) ([]*model.Item, error) {
-	var err error
-	var items []*model.Item
+	var items []*models.Item
 	cItems, err := b.query.ItemsAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("items all: %w", err)
 	}
 	for _, cItem := range cItems {
-		item := &model.Item{}
+		item := &models.Item{}
 		item.DecodeItemsAll(cItem)
 		items = append(items, item)
 	}
 	return items, nil
 }
 
-func (b *Mysql) ItemSearchByName(ctx context.Context, name string) ([]*model.ItemSearch, error) {
+func (b *Mysql) ItemSearchByName(ctx context.Context, name string) ([]*models.ItemSearch, error) {
 	var err error
-	items := []*model.ItemSearch{}
+	items := []*models.ItemSearch{}
 	cItems, err := b.query.ItemSearchByName(ctx, name)
 	if err != nil {
 		return nil, fmt.Errorf("item search by name: %w", err)
@@ -93,7 +68,7 @@ func (b *Mysql) ItemSearchByName(ctx context.Context, name string) ([]*model.Ite
 			continue
 		}
 
-		item := &model.ItemSearch{
+		item := &models.ItemSearch{
 			ID:    int64(row.ID),
 			Name:  row.Name,
 			Level: 0,

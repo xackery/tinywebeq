@@ -23,6 +23,7 @@ require (
 require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/go-chi/chi/v5 v5.1.0 // indirect
 	github.com/miekg/dns v1.1.62 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/mod v0.20.0 // indirect

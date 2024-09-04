@@ -4,21 +4,21 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/xackery/tinywebeq/model"
+	"github.com/xackery/tinywebeq/models"
 )
 
-func (b *Mysql) ItemRecipeAll(ctx context.Context) ([]*model.ItemRecipe, error) {
+func (b *Mysql) ItemRecipeAll(ctx context.Context) ([]*models.ItemRecipe, error) {
 	var err error
-	var itemRecipes []*model.ItemRecipe
+	var itemRecipes []*models.ItemRecipe
 	cItemRecipes, err := b.query.ItemRecipeAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("item recipe all: %w", err)
 	}
 
-	itemRecipe := &model.ItemRecipe{}
+	itemRecipe := &models.ItemRecipe{}
 	itemID := int32(0)
 	for _, row := range cItemRecipes {
-		ire := &model.ItemRecipeEntry{}
+		ire := &models.ItemRecipeEntry{}
 		ire.DecodeItemRecipeEntry(row)
 
 		if itemID == 0 {
@@ -33,7 +33,7 @@ func (b *Mysql) ItemRecipeAll(ctx context.Context) ([]*model.ItemRecipe, error) 
 
 		// start a new recipe entry
 		itemID = ire.ItemID
-		itemRecipe = &model.ItemRecipe{
+		itemRecipe = &models.ItemRecipe{
 			ItemID: int64(ire.ItemID),
 		}
 		itemRecipe.Entries = append(itemRecipe.Entries, ire)
