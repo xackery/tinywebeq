@@ -8,31 +8,6 @@ import (
 	"github.com/xackery/tinywebeq/models"
 )
 
-func (b *Mysql) ItemByID(ctx context.Context, id int32) (*models.Item, error) {
-	if b.query == nil {
-		return nil, fmt.Errorf("query is nil")
-	}
-	var err error
-	item := &models.Item{}
-	cItem, err := b.query.ItemByID(ctx, id)
-	if err != nil {
-		return nil, fmt.Errorf("item by id: %w", err)
-	}
-	item.DecodeItem(cItem)
-	return item, nil
-}
-
-func (b *Mysql) ItemDiscoveredOnlyByID(ctx context.Context, itemID uint32) (*models.Item, error) {
-	var err error
-	item := &models.Item{}
-	cItem, err := b.query.ItemDiscoveredOnlyByID(ctx, itemID)
-	if err != nil {
-		return nil, fmt.Errorf("item discovered only by id: %w", err)
-	}
-	item.DecodeDiscoveredItem(cItem)
-	return item, nil
-}
-
 func (b *Mysql) ItemsAll(ctx context.Context) ([]*models.Item, error) {
 	var err error
 	var items []*models.Item

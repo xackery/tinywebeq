@@ -1,114 +1,8 @@
-package library
+package types
 
-import (
-	"encoding/json"
-	"fmt"
-	"strings"
-)
+type NPCRace int32
 
-type (
-	Race  int
-	Races []Race
-)
-
-const (
-	RaceHuman Race = 1 << iota
-	RaceBarbarian
-	RaceErudite
-	RaceWoodElf
-	RaceHighElf
-	RaceDarkElf
-	RaceHalfElf
-	RaceDwarf
-	RaceTroll
-	RaceOgre
-	RaceHalfling
-	RaceGnome
-	RaceIksar
-	RaceVahShir
-	RaceFroglok
-	RaceDrakkin
-)
-
-var raceToString = map[Race]string{
-	RaceHuman:     "Human",
-	RaceBarbarian: "Barbarian",
-	RaceErudite:   "Erudite",
-	RaceWoodElf:   "Wood Elf",
-	RaceHighElf:   "High Elf",
-	RaceDarkElf:   "Dark Elf",
-	RaceHalfElf:   "Half Elf",
-	RaceDwarf:     "Dwarf",
-	RaceTroll:     "Troll",
-	RaceOgre:      "Ogre",
-	RaceHalfling:  "Halfling",
-	RaceGnome:     "Gnome",
-	RaceIksar:     "Iksar",
-	RaceVahShir:   "Vah Shir",
-	RaceFroglok:   "Froglok",
-	RaceDrakkin:   "Drakkin",
-}
-
-var raceToShortString = map[Race]string{
-	RaceHuman:     "HUM",
-	RaceBarbarian: "BAR",
-	RaceErudite:   "ERU",
-	RaceWoodElf:   "ELF",
-	RaceHighElf:   "HIE",
-	RaceDarkElf:   "DEF",
-	RaceHalfElf:   "HEF",
-	RaceDwarf:     "DWF",
-	RaceTroll:     "TRL",
-	RaceOgre:      "OGR",
-	RaceHalfling:  "HFL",
-	RaceGnome:     "GNM",
-	RaceIksar:     "IKS",
-	RaceVahShir:   "VAH",
-	RaceFroglok:   "FRG",
-	RaceDrakkin:   "DRK",
-}
-
-func (r Race) String() string {
-	return raceToString[r]
-}
-
-func (r Race) MarshalJSON() ([]byte, error) {
-	return json.Marshal(r.String())
-}
-
-func (r Races) String() string {
-	str := &strings.Builder{}
-
-	if len(r) == 16 {
-		return "ALL"
-	}
-
-	for i, race := range r {
-		str.WriteString(raceToShortString[race])
-		if i != len(r)-1 {
-			str.WriteString(" ")
-		}
-	}
-	return str.String()
-}
-
-func (r Races) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + r.String() + `"`), nil
-}
-
-func RacesFromBitmask(mask int32) Races {
-	var races Races
-	var i int32
-
-	for i = 1; i <= mask; i <<= 1 {
-		if i&mask != 0 {
-			races = append(races, Race(i))
-		}
-	}
-	return races
-}
-
-var AllRacesMap = map[int32]string{
+var AllRaceTypesMap = map[NPCRace]string{
 	0:   "Invalid",
 	1:   "Human",
 	2:   "Barbarian",
@@ -791,10 +685,6 @@ var AllRacesMap = map[int32]string{
 	679: "Wurm Mount",
 }
 
-func RaceStr(in int32) string {
-	if race, ok := AllRacesMap[in]; ok {
-		return race
-	}
-
-	return fmt.Sprintf("Unknown race %d", in)
+func (r NPCRace) String() string {
+	return AllRaceTypesMap[r]
 }

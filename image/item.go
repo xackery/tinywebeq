@@ -253,10 +253,10 @@ func (e *ItemPreview) render1Left() {
 
 	e.writeNoAlignLn("", item.TagStr())
 	if item.Classes > 0 {
-		e.writeNoAlignLn("Class:", item.ClassesStr())
+		e.writeNoAlignLn("Class:", item.Classes.String())
 	}
 	if item.Races > 0 {
-		e.writeNoAlignLn("Race:", item.RaceStr())
+		e.writeNoAlignLn("Race:", item.Races.String())
 	}
 	if item.Deity > 0 {
 		e.writeNoAlignLn("Deity:", item.DeityStr())

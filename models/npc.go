@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/eq/types"
 )
 
 type Npc struct {
@@ -18,7 +18,7 @@ type Npc struct {
 	Name                 string
 	Lastname             sql.NullString
 	Level                uint8
-	Race                 uint16
+	Race                 types.NPCRace
 	Class                uint8
 	Bodytype             int32
 	Hp                   int64
@@ -192,12 +192,8 @@ func (t *Npc) CleanName() string {
 	return out
 }
 
-func (t *Npc) RaceStr() string {
-	return library.RaceStr(int32(t.Race))
-}
-
 func (t *Npc) ClassStr() string {
-	return library.Class(t.Class).String()
+	return fmt.Sprintf("%d", t.Class)
 }
 
 func (t *Npc) NpcSpecialAttacksStr() string {

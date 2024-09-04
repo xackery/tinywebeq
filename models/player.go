@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/xackery/tinywebeq/library"
+	"github.com/xackery/tinywebeq/eq/types"
 )
 
 type Player struct {
@@ -140,7 +140,7 @@ func (t *Player) Expiration() int64 {
 }
 
 func (t *Player) ClassStr() string {
-	return library.Class(t.Class).String()
+	return types.Class(t.Class).String()
 }
 
 func (t *Player) RaceStr() string {
